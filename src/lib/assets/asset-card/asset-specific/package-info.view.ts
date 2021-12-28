@@ -1,6 +1,6 @@
 import { child$, VirtualDOM } from '@youwol/flux-view'
 import { Asset } from '../../..'
-import { AssetsGatewayClient } from '../../../assets-gateway-client'
+import { AssetsGatewayClient } from '../../../clients/assets-gateway'
 
 
 export function getActions(asset: Asset) {

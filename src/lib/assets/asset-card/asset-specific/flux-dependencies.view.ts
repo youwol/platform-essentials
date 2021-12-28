@@ -5,7 +5,7 @@ import {
     concatMap, distinctUntilChanged, filter, map, mergeMap,
     scan, share, takeUntil, tap
 } from 'rxjs/operators'
-import { Asset, AssetsGatewayClient } from '../../../assets-gateway-client'
+import { Asset, AssetsGatewayClient } from '../../../clients/assets-gateway'
 
 
 

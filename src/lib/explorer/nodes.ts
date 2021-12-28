@@ -2,7 +2,7 @@ import { uuidv4 } from '@youwol/flux-core';
 import { ImmutableTree } from "@youwol/fv-tree";
 import { BehaviorSubject, Observable, Subject } from "rxjs";
 import { delay, tap } from 'rxjs/operators';
-import { Origin } from '../assets-gateway-client';
+import { Origin } from '../clients/assets-gateway';
 import { debugDelay } from './requests-executor';
 
 

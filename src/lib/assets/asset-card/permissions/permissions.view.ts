@@ -4,7 +4,7 @@ import { filter, share } from 'rxjs/operators'
 import { child$, VirtualDOM } from '@youwol/flux-view'
 import { ExposedGroupState, ExposedGroupView } from './group-permissions.view'
 import { Asset } from '../../..'
-import { AssetsGatewayClient } from '../../../assets-gateway-client'
+import { AssetsGatewayClient } from '../../../clients/assets-gateway'
 
 
 export interface Access {

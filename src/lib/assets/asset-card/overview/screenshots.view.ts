@@ -1,7 +1,7 @@
 import { child$, VirtualDOM } from "@youwol/flux-view";
 import { BehaviorSubject, ReplaySubject } from "rxjs";
 import { Asset } from "../../..";
-import { AssetsGatewayClient } from "../../../assets-gateway-client";
+import { AssetsGatewayClient } from "../../../clients/assets-gateway";
 
 
 export class ImagesCarouselView implements VirtualDOM {

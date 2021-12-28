@@ -33,8 +33,9 @@ export class UserSettingsClient {
     }
 
     /**
-     * Healthz of the service, return "{status:'assets-gateway ok'}" if everything's fine
-     * @param events$ optional request's followers
+     * 
+     * @param applicationId id of the application
+     * @param options request options
      * @returns response
      */
     querySettings(applicationId: string, options: RequestOptions = {}): Observable<unknown> {

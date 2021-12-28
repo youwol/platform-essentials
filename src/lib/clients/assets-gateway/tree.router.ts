@@ -1,7 +1,7 @@
 import { Observable } from "rxjs"
 import { DeletedEntityResponse } from "."
 import { ChildrenFolderResponse, DefaultDriveResponse, DriveResponse, DrivesResponse, FolderResponse } from "./interfaces/tree"
-import { send, RequestOptions } from "./utils"
+import { send, RequestOptions } from "../utils"
 
 
 

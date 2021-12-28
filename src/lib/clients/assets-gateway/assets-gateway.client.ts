@@ -3,7 +3,7 @@ import { Observable, of, Subject } from 'rxjs';
 import { map, mergeMap, tap } from 'rxjs/operators';
 import { Interfaces } from '@youwol/flux-files'
 import { DeletedEntityResponse, GroupsResponse, HealthzResponse } from './interfaces';
-import { RequestOptions, resolveRequest } from './utils';
+import { RequestOptions, resolveRequest } from '../utils';
 import { TreeRouter } from './tree.router';
 import { DefaultDriveResponse, DriveId, DriveResponse, DrivesResponse, FolderId, FolderResponse, ItemId, ItemResponse } from './interfaces/tree';
 

@@ -1,6 +1,6 @@
 import { child$, childrenAppendOnly$, VirtualDOM } from "@youwol/flux-view"
 import { Observable, ReplaySubject } from "rxjs"
-import { Asset } from "../assets-gateway-client"
+import { Asset } from "../clients/assets-gateway"
 import { ywSpinnerView } from "../misc-views/youwol-spinner.view"
 import { AssetSnippetView, AssetPresenterTrait } from "./asset-snippet.view"
 

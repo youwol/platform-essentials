@@ -7,7 +7,7 @@ import { AssetScreenShotsView } from "./screenshots.view"
 import { sectionTitleView } from "../misc.view"
 import { Asset } from "../../.."
 import { mergeMap, scan, shareReplay } from "rxjs/operators"
-import { AssetsGatewayClient } from "../../../assets-gateway-client"
+import { AssetsGatewayClient } from "../../../clients/assets-gateway"
 import { uuidv4 } from "@youwol/flux-core"
 
 

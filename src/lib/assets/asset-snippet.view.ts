@@ -1,6 +1,6 @@
 import { attr$, VirtualDOM } from "@youwol/flux-view"
 import { Observable } from "rxjs"
-import { Asset } from "../assets-gateway-client"
+import { Asset } from "../clients/assets-gateway"
 
 export interface AssetPresenterTrait {
     selectAsset: (assetId: string) => void
