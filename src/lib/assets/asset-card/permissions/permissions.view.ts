@@ -30,7 +30,7 @@ export interface AccessInfo {
 export class AssetPermissionsView implements VirtualDOM {
 
     static ClassSelector = "asset-permissions-view"
-    public readonly class = `${AssetPermissionsView.ClassSelector} w-100 d-flex justify-content-center`
+    public readonly class = `${AssetPermissionsView.ClassSelector} w-100 h-100 overflow-auto d-flex justify-content-center`
     public readonly children: VirtualDOM[]
 
     public readonly asset: Asset

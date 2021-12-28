@@ -35,7 +35,7 @@ export class ExhibitionHallLink extends MenuItem {
     static ClassSelector = "exhibition-hall-link"
 
     tag = "a"
-    href = "/ui/exhibition-hall"
+    href = "/applications/@youwol/exhibition-hall"
     children = [
         {
             class: "col-sm",
@@ -56,7 +56,7 @@ export class WorkspaceLink extends MenuItem {
     static ClassSelector = "workspace-link"
 
     tag = "a"
-    href = "/ui/workspace-explorer"
+    href = "/applications/@youwol/workspace-explorer"
     children = [
         {
             class: "col-sm",
@@ -124,7 +124,7 @@ export class SignOut extends MenuItem {
     children = [
         {
             tag: 'a',
-            href: 'https://gc.auth.youwol.com/auth/realms/youwol/protocol/openid-connect/logout?redirect=https://gc.platform.youwol.com/ui/dashboard-user/v3',
+            href: 'https://gc.auth.youwol.com/auth/realms/youwol/protocol/openid-connect/logout?redirect=https://gc.platform.youwol.com/applications/@youwol/dashboard-user/v3',
             class: "col-sm",
             innerText: "Sign-out"
         }

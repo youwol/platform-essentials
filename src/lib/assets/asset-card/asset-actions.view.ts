@@ -1,5 +1,5 @@
 import { attr$, children$, VirtualDOM } from "@youwol/flux-view"
-import { Asset, AssetsGatewayClient, DefaultDriveResponse, getSettings$ } from "../.."
+import { Asset, AssetsGatewayClient, DefaultDriveResponse, getSettings$, PlatformState } from "../.."
 import { BehaviorSubject } from "rxjs"
 import { map, mergeMap, take } from "rxjs/operators"
 import { ButtonView } from "./misc.view"
@@ -12,7 +12,7 @@ export function runApplication(instance: {
     URL: string
 }) {
 
-    let youwolOS = parent.window['@youwol/os'] || window['@youwol/os']
+    let youwolOS = PlatformState.getInstance()
 
     if (youwolOS) {
         let app = youwolOS.createInstance({
@@ -174,8 +174,7 @@ class DownloadView implements VirtualDOM {
 
     optionView(option: { icon: string, name: string, download$ }) {
 
-        let youwolOS = parent.window['@youwol/os'] || window['@youwol/os']
-
+        let youwolOS = PlatformState.getInstance()
         let btn = new ButtonView({
             name: option.name,
             icon: option.icon,

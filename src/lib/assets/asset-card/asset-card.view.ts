@@ -28,8 +28,11 @@ class AssetTab extends Tabs.TabData {
 export class AssetCardView implements VirtualDOM {
 
     static ClassSelector = "asset-card-view"
-    public readonly class = `${AssetCardView.ClassSelector} p-3 rounded fv-color-focus fv-bg-background w-100 h-50 fv-text-primary`
-    public readonly style = { maxWidth: '1000px' }
+    public readonly class = `${AssetCardView.ClassSelector} p-3 rounded fv-color-focus fv-bg-background w-100 fv-text-primary`
+    public readonly style = {
+        maxWidth: '1000px',
+        height: '75vh'
+    }
     public readonly children: VirtualDOM[]
     public readonly asset$: Observable<Asset>
     public readonly actionsFactory: (asset: Asset) => VirtualDOM
@@ -76,10 +79,7 @@ export class AssetCardView implements VirtualDOM {
             actionsFactory: this.actionsFactory,
             assetOutput$: this.assetOutput$,
             forceReadonly: this.forceReadonly,
-            class: 'overflow-auto p-3',
-            style: {
-                maxHeight: '75vh',
-            }
+            class: 'overflow-auto h-100 p-3',
         } as any)
 
         if (Object.keys(this.withTabs).length == 0)
@@ -98,7 +98,8 @@ export class AssetCardView implements VirtualDOM {
             headerView: (_, tabData) => ({
                 class: `px-2 rounded border ${(tabData.id == overViewUid) ? 'overview' : 'default-app'}`,
                 innerText: tabData.name
-            })
+            }),
+            class: "d-flex flex-column h-100"
         } as any)
         return view
     }

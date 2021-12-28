@@ -25,6 +25,6 @@ The modules included in the pack can easily be used in your typescript/javascrip
 Provide examples on how to use this package in regular applications.
 
 
-[fluxExample0]:</ui/flux-ui-builder/?uri=>
+[fluxExample0]:</applications/@youwol/flux-ui-builder/?uri=>
 
 

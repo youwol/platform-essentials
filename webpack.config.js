@@ -52,5 +52,19 @@ module.exports = {
             }
         ],
     },
-    devtool: 'source-map'
+    devtool: 'source-map',
+    devServer: {
+        static: {
+            directory: path.join(__dirname, './src'),
+        },
+        compress: true,
+        port: 9000,
+    },
+    /*contentBase: path.resolve(__dirname, './src'),
+    historyApiFallback: true,
+    inline: true,
+    open: false,
+    port: 4005,
+    */
+
 };

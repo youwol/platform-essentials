@@ -1,15 +1,15 @@
 {
     "name": "@youwol/platform-essentials",
-    "version": "0.0.2",
+    "version": "0.0.2-next",
     "description": "The essentials of YouWol platform in a npm library",
     "author": "greinisch@youwol.com",
     "keywords": [
         "youwol",
         "flux"
     ],
-    "license": "MIT", 
+    "license": "MIT",
     "main": "dist/@youwol/platform-essentials.js",
-    "types": "src/index.ts", 
+    "types": "src/index.ts",
     "scripts": {
         "autogen": "node scripts/auto-gen.js",
         "doc": "typedoc src/ --exclude src/index.ts --exclude src/tests --out dist/docs --theme default",
@@ -18,6 +18,7 @@
         "build:prod": "yarn autogen && webpack --mode production",
         "test": "jest -c ./jest.config.js --rootDir . -i",
         "test-coverage": "jest -c ./jest.config.js --rootDir . -i --collect-coverage --collectCoverageFrom=./src/lib/**/*.ts ",
+        "start": "webpack serve",
         "publish-npm-public": "yarn build:prod && yarn test-coverage && yarn publish --access public",
         "upgrade-youwol": "yarn upgrade @youwol/cdn-client @youwol/flux-core  @youwol/flux-files @youwol/flux-view @youwol/fv-button @youwol/fv-group @youwol/fv-tree"
     },
@@ -29,10 +30,10 @@
         "@youwol/flux-view": "^0.0.11",
         "@youwol/fv-button": "^0.0.3",
         "@youwol/fv-group": "^0.0.4",
-        "@youwol/fv-tree": "^0.0.4",
+        "@youwol/fv-input": "^0.0.5",
         "@youwol/fv-tabs": "^0.0.2",
-        "@youwol/fv-widgets":"^0.0.4",
-        "@youwol/fv-input":"^0.0.5",
+        "@youwol/fv-tree": "^0.0.4",
+        "@youwol/fv-widgets": "^0.0.4",
         "lodash": "4.x",
         "reflect-metadata": "0.x",
         "rxjs": "6.x"
@@ -46,16 +47,18 @@
         "@youwol/flux-view": "^0.0.11",
         "@youwol/fv-button": "^0.0.3",
         "@youwol/fv-group": "^0.0.4",
-        "@youwol/fv-tree": "^0.0.4",
+        "@youwol/fv-input": "^0.0.5",
         "@youwol/fv-tabs": "^0.0.2",
-        "@youwol/fv-widgets":"^0.0.4",
-        "@youwol/fv-input":"^0.0.5",
+        "@youwol/fv-tree": "^0.0.4",
+        "@youwol/fv-widgets": "^0.0.4",
         "eslint": "7.23.0",
         "eslint-webpack-plugin": "2.5.3",
         "jest": "26.6.3",
         "jest-junit": "12.0.0",
         "lodash": "4.17.15",
         "reflect-metadata": "0.1.13",
+        "request": "2.88.2",
+        "request-promise": "4.2.6",
         "rxjs": "6.5.5",
         "ts-jest": "26.5.4",
         "ts-lib": "0.0.5",
@@ -63,10 +66,11 @@
         "typedoc": "0.20.34",
         "typescript": "4.2.3",
         "webpack": "5.28.0",
-        "webpack-cli": "4.6.0"
+        "webpack-bundle-analyzer": "^4.4.0",
+        "webpack-cli": "4.6.0",
+        "webpack-dev-server": "3.11.2"
     },
     "youwol": {
-        "type": "flux-pack",
         "pipeline": {
             "name": "yw_pipeline_webpack_ts",
             "version": "0.0.0"
@@ -80,7 +84,7 @@
             "@youwol/fv-group": "^0.0.4",
             "@youwol/fv-tree": "^0.0.4",
             "@youwol/fv-tabs": "^0.0.2",
-            "@youwol/fv-input":"^0.0.5"
+            "@youwol/fv-input": "^0.0.5"
         }
     }
 }
