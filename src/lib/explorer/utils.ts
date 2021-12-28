@@ -4,22 +4,6 @@ import { TreeGroup } from "./explorer.state";
 import { RequestsExecutor } from "./requests-executor";
 import { AnyFolderNode, AnyItemNode, DriveNode, FolderNode, FutureNode, GroupNode, ItemNode, RegularFolderNode } from "./nodes";
 
-export function fetchCodeMirror$(): Observable<any> {
-
-    return from(
-        install({
-            modules: ['codemirror'],
-            scripts: [
-                "codemirror#5.52.0~mode/javascript.min.js"
-            ],
-            css: [
-                "codemirror#5.52.0~codemirror.min.css",
-                "codemirror#5.52.0~theme/blackboard.min.css"
-            ]
-        })
-    )
-}
-
 
 export function isLocalYouwol() {
     return window.location.hostname == "localhost"

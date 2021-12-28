@@ -23,7 +23,7 @@ export interface ApplicationAssociation {
 
     name: string
     canOpen: ImplementationFunction | ((asset: Asset) => boolean)
-    applicationUrl: ImplementationFunction | ((asset: Asset) => string)
+    applicationURL: ImplementationFunction | ((asset: Asset) => string)
 }
 
 export interface Applications {

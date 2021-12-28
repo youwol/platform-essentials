@@ -12,7 +12,7 @@ import {
     AnyFolderNode, AnyItemNode, BrowserNode, DownloadNode, DriveNode, FolderNode,
     FutureNode, GroupNode, HomeNode, ItemNode, RegularFolderNode, serialize, TrashNode
 } from './nodes'
-import { createTreeGroup, fetchCodeMirror$, isLocalYouwol, processBorrowItem, processMoveFolder, processMoveItem } from './utils'
+import { createTreeGroup, isLocalYouwol, processBorrowItem, processMoveFolder, processMoveItem } from './utils'
 import { YouwolBannerState } from '..'
 import { DisplayMode } from '.'
 
@@ -64,7 +64,7 @@ export class ExplorerState {
     public story: StoryState
     public data: DataState
 
-    public readonly topBannerState = new YouwolBannerState({ cmEditorModule$: fetchCodeMirror$() })
+    public readonly topBannerState = new YouwolBannerState()
 
     public readonly selectedItem$ = new ReplaySubject<BrowserNode>(1)
 

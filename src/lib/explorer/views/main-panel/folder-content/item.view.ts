@@ -1,14 +1,15 @@
 import { attr$, child$, Stream$, VirtualDOM } from "@youwol/flux-view";
 import {
-    getSettings$, popupAssetModalView, ywSpinnerView, AssetActionsView,
+    popupAssetModalView, ywSpinnerView, AssetActionsView,
     PackageInfoView, AssetPermissionsView, FluxDependenciesView, PlatformState
 } from "../../../..";
 
 import { Observable, of } from "rxjs";
-import { distinct, map, mergeMap, take } from "rxjs/operators";
+import { distinct, filter, map, mergeMap, take } from "rxjs/operators";
 import { ExplorerState } from "../../../explorer.state";
 import { RequestsExecutor } from "../../../requests-executor";
 import { BrowserNode, FolderNode, ItemNode } from "../../../nodes";
+import { PlatformSettingsStore } from "../../../../platform-settings";
 
 
 export class ItemView {
@@ -86,20 +87,16 @@ export class ItemView {
             return
 
         this.ondblclick = () => {
-            getSettings$().pipe(
-                take(1)
-            ).subscribe((settings) => {
+            PlatformSettingsStore.getOpeningApps$(this.item as any).pipe(
+                take(1),
+                filter(apps => apps.length > 0)
+            ).subscribe((apps) => {
 
-                let app = settings.defaultApplications
-                    .find((preview) => preview.canOpen(this.item))
-                if (!app || !(this.item instanceof ItemNode))
-                    return
-
-                let asset = { name: this.item.name, assetId: this.item.assetId, rawId: this.item.rawId }
+                let app = apps[0]
                 let instance = this.platformState.createInstance({
                     icon: 'fas fa-play',
                     title: app.name + "#" + this.item.name,
-                    appURL: app.applicationURL(asset)
+                    appURL: app.url
                 })
                 this.platformState.focus(instance)
             })

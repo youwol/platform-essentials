@@ -1,5 +1,5 @@
 import { attr$, children$, VirtualDOM } from "@youwol/flux-view"
-import { Asset, AssetsGatewayClient, DefaultDriveResponse, getSettings$, PlatformState } from "../.."
+import { Asset, AssetsGatewayClient, DefaultDriveResponse, PlatformSettingsStore, PlatformState } from "../.."
 import { BehaviorSubject } from "rxjs"
 import { map, mergeMap, take } from "rxjs/operators"
 import { ButtonView } from "./misc.view"
@@ -45,18 +45,14 @@ export class OpenWithView implements VirtualDOM {
 
         Object.assign(this, params)
 
-        let options$ = getSettings$().pipe(
-            map((settings) => {
-
-                let compatibles = settings.defaultApplications
-                    .filter((preview) => preview.canOpen(this.asset))
-
-                return compatibles.map((app: { name, canOpen, applicationURL }) => {
+        let options$ = PlatformSettingsStore.getOpeningApps$(this.asset).pipe(
+            map((apps) => {
+                return apps.map((app) => {
                     return {
                         icon: "fas fa-play",
                         appName: app.name,
                         instanceName: `${app.name}#${this.asset.name}`,
-                        URL: app.applicationURL(this.asset)
+                        URL: app.url
                     }
                 })
             })

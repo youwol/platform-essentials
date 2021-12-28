@@ -4,7 +4,7 @@ import { of } from 'rxjs'
 import { map, mergeMap } from 'rxjs/operators'
 import { ExplorerState } from '../../explorer.state'
 import { Action, GENERIC_ACTIONS, getActions$ } from '../../actions.factory'
-import { getSettings$, PlatformState } from '../../..'
+import { PlatformSettingsStore, PlatformState } from '../../..'
 import { AnyItemNode } from '../../nodes'
 
 
@@ -60,26 +60,18 @@ export class ActionsView implements VirtualDOM {
             mergeMap((item: AnyItemNode) => {
                 if (!item)
                     return of([])
-                return getSettings$().pipe(
-                    map((settings) => {
-
-                        if (!this.platformState)
-                            return []
-
-                        let compatibles = settings.defaultApplications
-                            .filter((preview) => preview.canOpen(item))
-
-                        return compatibles.map((app: { name, canOpen, applicationURL }) => {
+                return PlatformSettingsStore.getOpeningApps$(item as any).pipe(
+                    map((apps) => {
+                        return apps.map((app) => {
                             return {
                                 icon: "fas fa-play",
                                 name: app.name,
                                 enable: true,
                                 exe: () => {
-                                    let asset = { name: item.name, assetId: item.assetId, rawId: item.rawId }
                                     let instance = this.platformState.createInstance({
                                         icon: 'fas fa-play',
                                         title: app.name + "#" + item.name,
-                                        appURL: app.applicationURL(asset)
+                                        appURL: app.url
                                     })
                                     this.platformState.focus(instance)
                                 },

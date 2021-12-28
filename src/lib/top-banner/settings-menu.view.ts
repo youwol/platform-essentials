@@ -1,10 +1,12 @@
 import { child$, HTMLElement$, render } from "@youwol/flux-view"
 import { Modal } from "@youwol/fv-group"
-import { combineLatest, from, merge, Observable } from "rxjs"
+import { combineLatest, from, merge } from "rxjs"
 import { ywSpinnerView } from "../misc-views/youwol-spinner.view"
 import { install } from '@youwol/cdn-client'
 import { MenuItem } from "./menu.view"
 import { YouwolBannerState } from "./top-banner.view"
+import { PlatformSettingsStore } from "../platform-settings"
+import js_beautify from 'js-beautify'
 
 /**
  * Preferences burger item
@@ -32,6 +34,25 @@ export class SettingsMenuItem extends MenuItem {
     }
 }
 
+function fetchCDN$() {
+    const urls = [
+        'codemirror#5.52.0~mode/javascript.min.js',
+        'js-beautify#1.14.0~lang/html.min.js',
+    ]
+    return from(
+        install(
+            {
+                modules: ['codemirror', 'js-beautify'], scripts: urls,
+                css: [
+                    "codemirror#5.52.0~codemirror.min.css",
+                    "codemirror#5.52.0~theme/blackboard.min.css"
+                ]
+            },
+            window,
+        ),
+    )
+}
+
 
 export function modalView(state: YouwolBannerState) {
 
@@ -53,13 +74,15 @@ export function modalView(state: YouwolBannerState) {
                 style: { width: '75vw', height: '50vh' },
                 children: [
                     child$(
-                        combineLatest([state.settings$, state.cmEditorModule$]),
+                        combineLatest([PlatformSettingsStore.settings$, fetchCDN$()]),
                         ([settings]) => ({
                             class: 'h-100 w-100',
                             connectedCallback: (elem: HTMLDivElement & HTMLElement$) => {
+
+                                let value = js_beautify(JSON.stringify(settings))
                                 let config = {
                                     configurationCodeMirror,
-                                    value: settings.text
+                                    value
                                 }
                                 let editor = window['CodeMirror'](elem, config)
                                 let sub = merge(...[modalState.cancel$, modalState.ok$]).subscribe(() => {

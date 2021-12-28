@@ -1,18 +1,13 @@
 import { child$, VirtualDOM } from "@youwol/flux-view"
-import { combineLatest, Observable, Subject } from "rxjs"
+import { Observable, Subject } from "rxjs"
 import { uuidv4 } from "@youwol/flux-core"
 
 import { Tabs } from '@youwol/fv-tabs'
 
 import { AssetOverview } from "./overview/overview.view"
-import { Asset, getSettings$, Settings, ywSpinnerView } from "../.."
+import { Asset, PlatformSettingsStore, ywSpinnerView } from "../.."
+import { mergeMap } from "rxjs/operators"
 
-
-type AssetPreviewApp = {
-    name: string,
-    canOpen: (Asset) => boolean,
-    applicationURL: (Asset) => string
-}
 
 class AssetTab extends Tabs.TabData {
 
@@ -42,7 +37,6 @@ export class AssetCardView implements VirtualDOM {
 
     public readonly assetOutput$: Subject<Asset>
 
-
     constructor(params: {
         asset$: Observable<Asset>,
         actionsFactory: (asset: Asset) => VirtualDOM,
@@ -55,10 +49,12 @@ export class AssetCardView implements VirtualDOM {
 
         this.children = [
             child$(
-                combineLatest([this.asset$, getSettings$()]),
-                ([asset, settings]: [Asset, Settings]) => this.presentationView({
+                this.asset$.pipe(
+                    mergeMap((asset) => PlatformSettingsStore.getOpeningApps$(asset))
+                ),
+                ([asset, apps]: [Asset, { name, url }[]]) => this.presentationView({
                     asset,
-                    defaultApplications: settings.defaultApplications
+                    defaultApplications: apps
                 }),
                 {
                     untilFirst: ywSpinnerView({ classes: 'mx-auto', size: '50px', duration: 1.5 }) as any
@@ -69,7 +65,7 @@ export class AssetCardView implements VirtualDOM {
 
     presentationView(parameters: {
         asset: Asset,
-        defaultApplications: AssetPreviewApp[]
+        defaultApplications: { name, url }[]
     }): VirtualDOM {
 
         let { asset } = parameters
