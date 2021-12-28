@@ -24,6 +24,7 @@
     },
     "dependencies": {},
     "peerDependencies": {
+        "@youwol/logging": "^0.0.2",
         "@youwol/cdn-client": "^0.0.10",
         "@youwol/flux-core": "^0.0.21",
         "@youwol/flux-files": "^0.0.5",
@@ -41,6 +42,7 @@
     "devDependencies": {
         "@types/jest": "26.0.22",
         "@types/node": "14.14.37",
+        "@youwol/logging": "^0.0.2",
         "@youwol/cdn-client": "^0.0.10",
         "@youwol/flux-core": "^0.0.21",
         "@youwol/flux-files": "^0.0.5",
@@ -51,6 +53,7 @@
         "@youwol/fv-tabs": "^0.0.2",
         "@youwol/fv-tree": "^0.0.4",
         "@youwol/fv-widgets": "^0.0.4",
+        "js-beautify": "^1.14.0",
         "eslint": "7.23.0",
         "eslint-webpack-plugin": "2.5.3",
         "jest": "26.6.3",
