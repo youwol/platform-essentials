@@ -93,6 +93,12 @@ export class PlatformState {
         this.runningApplication$.next(undefined)
     }
 
+    expand(app: RunningApp) {
+        app.appURL$.subscribe((url) => {
+            window.open(url, '_blank')
+        })
+    }
+
     minimize(preview: RunningApp) {
 
         this.runningApplication$.next(undefined)

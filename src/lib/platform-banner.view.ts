@@ -1,6 +1,6 @@
 import { child$, children$, VirtualDOM } from '@youwol/flux-view'
-import { RunningApp } from '../../running-app.view'
-import { defaultUserMenu, defaultYouWolMenu, PlatformState, YouwolBannerView } from '../..'
+import { RunningApp } from './running-app.view'
+import { defaultUserMenu, defaultYouWolMenu, PlatformState, YouwolBannerView } from '..'
 
 
 class RunningAppView implements VirtualDOM {
@@ -27,7 +27,7 @@ class RunningAppView implements VirtualDOM {
 /**
  * Regular top banner of the application (no application running)
  */
-export class RegularBannerView extends YouwolBannerView {
+class RegularBannerView extends YouwolBannerView {
 
     constructor(state: PlatformState) {
         super({
@@ -56,7 +56,7 @@ export class RegularBannerView extends YouwolBannerView {
 /**
  * Top banner when an application is running
  */
-export class RunningAppBannerView extends YouwolBannerView {
+class RunningAppBannerView extends YouwolBannerView {
 
     constructor(state: PlatformState, app: RunningApp) {
 
@@ -67,10 +67,10 @@ export class RunningAppBannerView extends YouwolBannerView {
                 class: 'my-auto d-flex justify-content-between w-100',
                 children: [
                     {
-                        class: 'd-flex align-items-center',
+                        class: 'd-flex align-items-center mx-3',
                         children: [
                             {
-                                class: 'border-bottom px-2 mx-3 fv-text-focus',
+                                class: 'border-bottom px-1 fv-text-focus',
                                 style: {
                                     fontFamily: 'serif',
                                     fontSize: 'x-large'
@@ -78,15 +78,24 @@ export class RunningAppBannerView extends YouwolBannerView {
                                 innerText: app.title
                             },
                             {
-                                class: 'd-flex flex-column align-items-center',
+                                class: 'd-flex align-items-center',
                                 children: [
                                     {
-                                        class: `${baseClass} fa-times`,
-                                        onclick: () => state.close(app),
+                                        class: `${baseClass} fa-external-link-alt`,
+                                        onclick: () => state.expand(app),
                                     },
                                     {
-                                        class: `${baseClass} fa-window-minimize`,
-                                        onclick: () => state.minimize(app),
+                                        class: 'd-flex flex-column align-items-center',
+                                        children: [
+                                            {
+                                                class: `${baseClass} fa-times`,
+                                                onclick: () => state.close(app),
+                                            },
+                                            {
+                                                class: `${baseClass} fa-minus-square`,
+                                                onclick: () => state.minimize(app),
+                                            }
+                                        ]
                                     }
                                 ]
                             }]
