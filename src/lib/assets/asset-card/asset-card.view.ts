@@ -6,7 +6,7 @@ import { Tabs } from '@youwol/fv-tabs'
 
 import { AssetOverview } from "./overview/overview.view"
 import { Asset, PlatformSettingsStore, ywSpinnerView } from "../.."
-import { mergeMap } from "rxjs/operators"
+import { map, mergeMap } from "rxjs/operators"
 
 
 class AssetTab extends Tabs.TabData {
@@ -50,7 +50,8 @@ export class AssetCardView implements VirtualDOM {
         this.children = [
             child$(
                 this.asset$.pipe(
-                    mergeMap((asset) => PlatformSettingsStore.getOpeningApps$(asset))
+                    mergeMap((asset) =>
+                        PlatformSettingsStore.getOpeningApps$(asset).pipe(map((apps) => [asset, apps])))
                 ),
                 ([asset, apps]: [Asset, { name, url }[]]) => this.presentationView({
                     asset,
