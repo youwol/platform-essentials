@@ -1,7 +1,9 @@
 import { child$, VirtualDOM } from "@youwol/flux-view"
 import { BehaviorSubject } from "rxjs"
+import { PlatformSettings } from "../clients"
+import { PlatformSettingsStore } from "../platform-settings"
 import { ExpandableMenu } from "./menu.view"
-import { Settings, YouwolBannerState } from "./top-banner.view"
+import { YouwolBannerState } from "./top-banner.view"
 
 
 
@@ -50,8 +52,8 @@ export class UserMenuView implements VirtualDOM {
                 class: 'd-flex align-items-center fv-pointer',
                 children: [
                     child$(
-                        this.state.settings$,
-                        (settings: { parsed: Settings }) => settings.parsed.you.avatar
+                        PlatformSettingsStore.settings$,
+                        (settings: PlatformSettings) => settings.you.avatar
                     ),
                     {
                         class: 'd-flex flex-column h-100 px-1 fv-text-secondary',

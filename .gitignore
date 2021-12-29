@@ -4,3 +4,5 @@ dist/
 coverage/
 junit.xml
 src/auto_generated.ts
+cdn.zip
+src/tests/databases

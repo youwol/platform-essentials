@@ -2,7 +2,7 @@ import { HTMLElement$, render, VirtualDOM } from "@youwol/flux-view"
 import { Modal } from "@youwol/fv-group"
 import { merge, Observable, ReplaySubject } from "rxjs"
 import { take } from "rxjs/operators"
-import { Asset } from "../assets-gateway-client"
+import { Asset } from "../clients/assets-gateway"
 import { AssetCardView } from "./asset-card/asset-card.view"
 
 

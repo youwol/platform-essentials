@@ -1,92 +1,29 @@
-import { install } from "@youwol/cdn-client";
 import { child$, VirtualDOM } from "@youwol/flux-view";
 import { Button } from "@youwol/fv-button";
-import { BehaviorSubject, from, Observable, of, ReplaySubject } from "rxjs";
-import { mergeMap, tap } from "rxjs/operators";
-import { ExpandableMenu, UserSettings } from "./menu.view";
+import { from } from "rxjs";
+import { map } from "rxjs/operators";
+import { PlatformSettingsStore } from "../platform-settings";
+import { PlatformState } from "../platform.state";
 import { UserMenuView } from "./user-menu.view";
 import { YouwolMenuView } from "./youwol-menu.view";
 
 
-
-
-
-export interface Settings {
-
-    you: { avatar: string },
-    appearance: { theme: string },
-    defaultApplications: { name: string, canOpen: (asset) => boolean, applicationURL: (asset) => string }[]
-}
-
-
 export class YouwolBannerState {
 
-    static defaultSettings = `
-    return () => ({
-        you:{
-            "avatar": {
-                class: 'rounded-circle fv-color-secondary fv-bg-primary text-center fv-text-on-primary d-flex flex-column',
-                style: {
-                    width: '35px',
-                    height: '35px',
-                    userSelect: 'none'
-                },
-                children: [
-                    {
-                        class: "m-auto",
-                        innerText:'🦎'
-                    }
-                ]
-            }
-        },
-        appearance:{
-            "theme":'@youwol/fv-widgets#latest~assets/styles/style.youwol.css'
-        },
-        defaultApplications: [
-        ]
-    })
-    `
+    static signedIn$ = from(fetch(new Request("/api/assets-gateway/healthz"))).pipe(
+        map(resp => resp.status == 200)
+    )
 
-    cmEditorModule$: Observable<any>
-
-    /*
-    {
-        name: "Visualization 3D",
-        canOpen: (asset) => asset.kind == "data" && asset.name.endsWith('.ts'),
-        applicationURL: (asset) => {
-            let encoded = encodeURI(JSON.stringify(asset))
-            return \`/ui/flux-runner/?id=81cfdf74-56ec-4202-bd23-d2049d6d96ab&asset=\${encoded}\`
-        }
-    }
-    */
-    static getSettingsFromLocalStorage() {
-        if (!localStorage.getItem("settings")) {
-            localStorage.setItem("settings", YouwolBannerState.defaultSettings)
-        }
-        let saved = localStorage.getItem("settings")
-        let settings = new Function(saved)()()
-        return { parsed: settings, text: localStorage.getItem("settings") }
-    }
-    settings$ = new BehaviorSubject<{ parsed: Settings, text: string }>(YouwolBannerState.getSettingsFromLocalStorage())
-
-    constructor(params: { cmEditorModule$: Observable<any> }) {
+    constructor(params = {}) {
         Object.assign(this, params)
     }
 
     setSettings(settingsTxt: string) {
-        localStorage.setItem("settings", settingsTxt)
-        getSettings$().pipe(
-            tap((settings: Settings) => install({ css: [settings.appearance.theme] }).then())
-        )
-            .subscribe((settings) => this.settings$.next({ parsed: settings, text: settingsTxt }))
+        let settings = JSON.parse(settingsTxt)
+        PlatformSettingsStore.save(settings)
     }
 }
 
-export function getSettings$(): Observable<Settings> {
-
-    let settings = new Function(localStorage.getItem("settings"))()()
-    return of(settings)
-}
 
 /**
  * The YouWol top banner
@@ -109,7 +46,7 @@ export class YouwolBannerView implements VirtualDOM {
     public readonly children: Array<VirtualDOM>
 
     public readonly badgesView?: VirtualDOM
-    public readonly customActionsView?: VirtualDOM
+    public readonly customActionsView: VirtualDOM = {}
     public readonly userMenuView?: VirtualDOM
     public readonly youwolMenuView?: VirtualDOM
 
@@ -125,19 +62,21 @@ export class YouwolBannerView implements VirtualDOM {
     constructor(params: {
         state: YouwolBannerState,
         badgesView?: VirtualDOM,
-        customActionsView: VirtualDOM,
+        customActionsView?: VirtualDOM,
         userMenuView?: VirtualDOM,
-        youwolMenuView?: VirtualDOM,
-        signedIn$: Observable<boolean>
+        youwolMenuView?: VirtualDOM
     }) {
         Object.assign(this, params)
         let instanceId = new URLSearchParams(window.location.search).get("instance-id")
-        if (parent.window['@youwol/os'] && instanceId) {
-            parent.window['@youwol/os'].setTopBannerViews(
+        let youwolOS = PlatformState.getInstance()
+        if (youwolOS && instanceId) {
+            youwolOS.setTopBannerViews(
                 instanceId,
                 {
                     actionsView: this.customActionsView,
-                    badgesView: this.badgesView
+                    badgesView: this.badgesView,
+                    youwolMenuView: this.youwolMenuView,
+                    userMenuView: this.userMenuView
                 }
             )
             this.class += " d-none"
@@ -149,7 +88,7 @@ export class YouwolBannerView implements VirtualDOM {
             this.customActionsView,
             this.userMenuView
                 ? child$(
-                    params.signedIn$,
+                    YouwolBannerState.signedIn$,
                     (result) => {
                         return result
                             ? new UserMenuView({ state: this.state, contentView: this.userMenuView })

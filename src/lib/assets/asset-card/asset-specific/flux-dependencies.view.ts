@@ -5,7 +5,7 @@ import {
     concatMap, distinctUntilChanged, filter, map, mergeMap,
     scan, share, takeUntil, tap
 } from 'rxjs/operators'
-import { Asset, AssetsGatewayClient } from '../../../assets-gateway-client'
+import { Asset, AssetsGatewayClient } from '../../../clients/assets-gateway'
 
 
 
@@ -17,21 +17,21 @@ export function getActions(asset: Asset) {
         state: runBttnState, class: classes,
         contentView: () => ({ innerText: 'run' })
     } as any)
-    runBttnState.click$.subscribe(() => window.location.href = `/ui/flux-runner/?id=${asset.rawId}`)
+    runBttnState.click$.subscribe(() => window.location.href = `/applications/@youwol/flux-runner/?id=${asset.rawId}`)
 
     let constructBttnState = new Button.State()
     let constructBttn = new Button.View({
         state: constructBttnState, class: classes,
         contentView: () => ({ innerText: 'construct' })
     } as any)
-    constructBttnState.click$.subscribe(() => window.location.href = `/ui/flux-builder/?id=${asset.rawId}`)
+    constructBttnState.click$.subscribe(() => window.location.href = `/applications/@youwol/flux-builder/?id=${asset.rawId}`)
 
     let editBttnState = new Button.State()
     let editBttn = new Button.View({
         state: editBttnState, class: classes,
         contentView: () => ({ innerText: 'edit' })
     } as any)
-    editBttnState.click$.subscribe(() => window.location.href = `/ui/assets-publish-ui?kind=flux-project&related_id=${asset.rawId}`)
+    editBttnState.click$.subscribe(() => window.location.href = `/applications/@youwol/assets-publish-ui?kind=flux-project&related_id=${asset.rawId}`)
 
     return {
         class: "w-100 d-flex flex-wrap",

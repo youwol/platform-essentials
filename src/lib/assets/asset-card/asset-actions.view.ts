@@ -1,5 +1,5 @@
 import { attr$, children$, VirtualDOM } from "@youwol/flux-view"
-import { Asset, AssetsGatewayClient, DefaultDriveResponse, getSettings$ } from "../.."
+import { Asset, AssetsGatewayClient, DefaultDriveResponse, PlatformSettingsStore, PlatformState } from "../.."
 import { BehaviorSubject } from "rxjs"
 import { map, mergeMap, take } from "rxjs/operators"
 import { ButtonView } from "./misc.view"
@@ -12,7 +12,7 @@ export function runApplication(instance: {
     URL: string
 }) {
 
-    let youwolOS = parent.window['@youwol/os'] || window['@youwol/os']
+    let youwolOS = PlatformState.getInstance()
 
     if (youwolOS) {
         let app = youwolOS.createInstance({
@@ -45,18 +45,14 @@ export class OpenWithView implements VirtualDOM {
 
         Object.assign(this, params)
 
-        let options$ = getSettings$().pipe(
-            map((settings) => {
-
-                let compatibles = settings.defaultApplications
-                    .filter((preview) => preview.canOpen(this.asset))
-
-                return compatibles.map((app: { name, canOpen, applicationURL }) => {
+        let options$ = PlatformSettingsStore.getOpeningApps$(this.asset).pipe(
+            map((apps) => {
+                return apps.map((app) => {
                     return {
                         icon: "fas fa-play",
                         appName: app.name,
                         instanceName: `${app.name}#${this.asset.name}`,
-                        URL: app.applicationURL(this.asset)
+                        URL: app.url
                     }
                 })
             })
@@ -174,8 +170,7 @@ class DownloadView implements VirtualDOM {
 
     optionView(option: { icon: string, name: string, download$ }) {
 
-        let youwolOS = parent.window['@youwol/os'] || window['@youwol/os']
-
+        let youwolOS = PlatformState.getInstance()
         let btn = new ButtonView({
             name: option.name,
             icon: option.icon,

@@ -4,7 +4,7 @@ import { filter, share } from 'rxjs/operators'
 import { child$, VirtualDOM } from '@youwol/flux-view'
 import { ExposedGroupState, ExposedGroupView } from './group-permissions.view'
 import { Asset } from '../../..'
-import { AssetsGatewayClient } from '../../../assets-gateway-client'
+import { AssetsGatewayClient } from '../../../clients/assets-gateway'
 
 
 export interface Access {
@@ -30,7 +30,7 @@ export interface AccessInfo {
 export class AssetPermissionsView implements VirtualDOM {
 
     static ClassSelector = "asset-permissions-view"
-    public readonly class = `${AssetPermissionsView.ClassSelector} w-100 d-flex justify-content-center`
+    public readonly class = `${AssetPermissionsView.ClassSelector} w-100 h-100 overflow-auto d-flex justify-content-center`
     public readonly children: VirtualDOM[]
 
     public readonly asset: Asset

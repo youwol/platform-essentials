@@ -2,7 +2,7 @@ import { attr$, child$, HTMLElement$, VirtualDOM } from "@youwol/flux-view"
 import { Select } from "@youwol/fv-input"
 import { BehaviorSubject, combineLatest, Subject } from "rxjs"
 import { distinct, map, skip } from "rxjs/operators"
-import { AccessPolicyBody, AssetsGatewayClient } from "../../../assets-gateway-client"
+import { AccessPolicyBody, AssetsGatewayClient } from "../../../clients/assets-gateway"
 
 import { Access, ExposingGroupAccess } from "./permissions.view"
 
