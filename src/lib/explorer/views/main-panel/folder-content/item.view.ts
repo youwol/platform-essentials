@@ -93,12 +93,13 @@ export class ItemView {
             ).subscribe((apps) => {
 
                 let app = apps[0]
-                let instance = this.platformState.createInstance({
+                /*let instance = this.platformState.createInstance({
                     icon: 'fas fa-play',
                     title: app.name + "#" + this.item.name,
                     appURL: app.url
                 })
                 this.platformState.focus(instance)
+                */
             })
         }
     }

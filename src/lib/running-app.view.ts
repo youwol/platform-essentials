@@ -1,15 +1,24 @@
+import { uuidv4 } from "@youwol/flux-core";
 import { attr$, HTMLElement$, VirtualDOM } from "@youwol/flux-view";
-import { Observable, ReplaySubject } from "rxjs";
+import { ReplaySubject } from "rxjs";
+import { Executable } from ".";
 import { PlatformState } from "./platform.state"
 
 
-export class RunningApp {
+export class RunningApp implements Executable {
 
     public readonly state: PlatformState
+
+    public readonly cdnPackage: string
+    public readonly version: string
+    public readonly name: string
+    public readonly icon: VirtualDOM
+    public readonly url: string
+    public readonly parameters: { [key: string]: string }
+
     public readonly instanceId: string
     public readonly title: string
-    public readonly icon: string
-    public readonly appURL$: Observable<string>
+
     public readonly topBannerActions$ = new ReplaySubject<VirtualDOM>(1)
     public readonly topBannerUserMenu$ = new ReplaySubject<VirtualDOM>(1)
     public readonly topBannerYouwolMenu$ = new ReplaySubject<VirtualDOM>(1)
@@ -18,18 +27,27 @@ export class RunningApp {
     public readonly view: VirtualDOM
 
     htmlElement: HTMLElement
+
     constructor(params: {
         state: PlatformState,
-        instanceId: string,
-        title: string,
-        icon: string,
-        appURL$: Observable<string>
+        cdnPackage: string,
+        name: string,
+        icon: VirtualDOM,
+        title?: string,
+        parameters?: { [key: string]: string },
+        instanceId?: string,
+        version?: string
     }) {
         Object.assign(this, params)
+        this.title = this.title || this.name
+        this.version = this.version || 'latest'
+        this.instanceId = this.instanceId || uuidv4()
+        this.parameters = this.parameters || {}
+        let queryParams = Object.entries(this.parameters)
+            .reduce((acc, [k, v]) => `${acc}&${k}=${v}`, "")
+        this.url = `/applications/${this.cdnPackage}/${this.version}?instance-id=${this.instanceId}&${queryParams}`
+
         this.view = {
-            style: {
-                border: 'thick double'
-            },
             class: attr$(
                 this.state.runningApplication$,
                 (app) => app && app.instanceId == this.instanceId
@@ -41,10 +59,7 @@ export class RunningApp {
                     tag: 'iframe',
                     width: '100%',
                     height: '100%',
-                    src: attr$(
-                        this.appURL$,
-                        (url) => url
-                    ),
+                    src: this.url,
                     connectedCallback: (elem: HTMLElement$ & HTMLIFrameElement) => {
                         this.iframe$.next(elem)
                     }

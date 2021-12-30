@@ -3,6 +3,8 @@ import { BehaviorSubject, of } from "rxjs"
 import { RunningApp } from './running-app.view'
 import { VirtualDOM } from '@youwol/flux-view'
 import { YouwolBannerState } from './top-banner'
+import { PlatformSettingsStore } from './platform-settings'
+import { tap } from 'rxjs/operators'
 
 
 
@@ -25,43 +27,23 @@ export class PlatformState {
     constructor() {
 
         PlatformState.setInstance(this)
-        this.createInstance({
-            icon: "fas fa-shopping-cart",
-            title: "Exhibition halls",
-            appURL: `/applications/@youwol/exhibition-halls/latest?`
-        })
-        this.createInstance({
-            icon: "fas fa-file-code",
-            title: "Dev. portal",
-            appURL: `/applications/@youwol/developer-portal/latest?`
-        })
-
-        this.createInstance({
-            icon: "fas fa-folder",
-            title: "Explorer",
-            appURL: `/applications/@youwol/explorer/latest?`
-        })
     }
 
 
-    createInstance(appData: {
-        icon: string,
-        title: string,
-        appURL: string
-    }) {
-        let instanceId = uuidv4()
-        let url = appData.appURL.endsWith('/')
-            ? appData.appURL + "?instance-id=" + instanceId
-            : appData.appURL + "&instance-id=" + instanceId
-        let app = new RunningApp({
-            state: this,
-            instanceId,
-            icon: appData.icon,
-            title: appData.title,
-            appURL$: of(url)
-        })
-        this.runningApplications$.next([...this.runningApplications$.getValue(), app])
-        return app
+    createInstance$({ cdnPackage, focus }: { cdnPackage: string, focus: boolean }) {
+
+        return PlatformSettingsStore.queryMetadata$(cdnPackage).pipe(
+            tap((metadata) => {
+                let app = new RunningApp({
+                    ...metadata,
+                    state: this,
+                    cdnPackage,
+                    icon: JSON.parse(metadata.icon)
+                })
+                this.runningApplications$.next([...this.runningApplications$.getValue(), app])
+                focus && this.focus(app)
+            })
+        )
     }
 
 
@@ -94,9 +76,7 @@ export class PlatformState {
     }
 
     expand(app: RunningApp) {
-        app.appURL$.subscribe((url) => {
-            window.open(url, '_blank')
-        })
+        window.open(app.url, '_blank')
     }
 
     minimize(preview: RunningApp) {

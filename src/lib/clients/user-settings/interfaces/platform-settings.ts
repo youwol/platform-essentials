@@ -19,11 +19,22 @@ export interface Appearance {
     desktopImage: string
 }
 
-export interface ApplicationAssociation {
 
-    name: string
+export interface ApplicationStandalone {
+
+    cdnPackage: string
+    version: string
+}
+
+export interface ApplicationAssociation extends ApplicationStandalone {
+
     canOpen: ImplementationFunction | ((asset: Asset) => boolean)
-    applicationURL: ImplementationFunction | ((asset: Asset) => string)
+    parameters: ImplementationFunction | ((asset: Asset) => string)
+}
+
+export interface DockerBar {
+
+    applications: ApplicationStandalone[]
 }
 
 export interface Applications {
@@ -37,4 +48,5 @@ export interface PlatformSettings {
     you: You
     appearance: Appearance
     applications: Applications
+    dockerBar: DockerBar
 }

@@ -1,7 +1,17 @@
-import { Observable } from "rxjs"
-import { map } from "rxjs/operators"
+import { VirtualDOM } from "@youwol/flux-view"
+import { forkJoin, Observable, of } from "rxjs"
+import { map, mergeMap } from "rxjs/operators"
 import { AUTO_GENERATED } from "../auto_generated"
-import { ApplicationAssociation, Asset, PlatformSettings, UserSettingsClient } from "./clients"
+import { ApplicationAssociation, ApplicationStandalone, Asset, PlatformSettings, UserSettingsClient } from "./clients"
+
+
+export interface Executable {
+
+    name: string
+    cdnPackage: string
+    url: string
+    icon: VirtualDOM
+}
 
 
 export class PlatformSettingsStore {
@@ -32,22 +42,41 @@ export class PlatformSettingsStore {
         applications: {
             associations: [
                 {
-                    name: "Flux-runner",
+                    cdnPackage: "@youwol/flux-runner",
+                    version: "latest",
                     canOpen: "return (asset) => asset.kind == 'flux-project'",
-                    applicationURL: "return (asset) => \`/applications/@youwol/flux-runner/latest?id=\${asset.rawId}\`"
+                    parameters: "return (asset) => ({ 'id':asset.rawId })"
                 },
                 {
-                    name: "Flux-builder",
+                    cdnPackage: "@youwol/flux-builder",
+                    version: "latest",
                     canOpen: "return (asset) => asset.kind == 'flux-project'",
-                    applicationURL: "return (asset) => \`/applications/@youwol/flux-builder/latest?id=\${asset.rawId}\`"
+                    parameters: "return (asset) => ({ 'id':asset.rawId })"
                 },
                 {
-                    name: "Story",
+                    cdnPackage: "@youwol/story",
+                    version: "latest",
                     canOpen: "return (asset) => asset.kind == 'story'",
-                    applicationURL: "return (asset) => \`/applications/@youwol/stories/latest?id=\${asset.rawId}\`"
+                    parameters: "return (asset) => ({ 'id':asset.rawId })"
                 }
             ]
-        }
+        },
+        dockerBar: {
+            applications: [
+                {
+                    cdnPackage: "@youwol/explorer",
+                    version: "latest"
+                },
+                {
+                    cdnPackage: "@youwol/exhibition-halls",
+                    version: "latest"
+                },
+                {
+                    cdnPackage: "@youwol/developer-portal",
+                    version: "latest"
+                }
+            ]
+        },
     }
 
     static userSettingsClient = new UserSettingsClient()
@@ -62,6 +91,50 @@ export class PlatformSettingsStore {
         map((s: PlatformSettings) => s.appearance.desktopImage.replace(/#/g, '%23'))
     )
 
+    /** Mock implementation until expected metadata are published with cdn package 
+     * 
+    */
+    static queryMetadata$(cdnPackage: string): Observable<{ name: string, icon: string }> {
+
+        let metadata = {
+            "@youwol/explorer": {
+                name: 'Explorer',
+                icon: '{ "class": "fas fa-folder"}'
+            },
+            "@youwol/exhibition-halls": {
+                name: 'Discover',
+                icon: '{ "class": "fas fa-shopping-cart"}'
+            },
+            "@youwol/developer-portal": {
+                name: 'Dev. Portal',
+                icon: '{ "class": "fas fa-code"}'
+            }
+        }
+        return of(metadata[cdnPackage])
+    }
+
+
+    static getDockerBarApps$(): Observable<Executable[]> {
+
+        return this.settings$.pipe(
+            mergeMap((s: PlatformSettings) =>
+                forkJoin(s.dockerBar.applications.map(app => {
+
+                    return this.queryMetadata$(app.cdnPackage).pipe(
+                        map((metadata) => ({
+                            ...app,
+                            ...metadata,
+                            url: `/applications/${app.cdnPackage}/${app.version}`,
+                            icon: JSON.parse(metadata.icon)
+                        }))
+                    )
+                })
+                )
+            )
+        )
+    }
+
+
     static getOpeningApps$(asset: Asset): Observable<{ name: string, url: string }[]> {
 
         let evalFct = (code: string | ((asset: Asset) => string | boolean)) => {
@@ -71,14 +144,18 @@ export class PlatformSettingsStore {
         }
         return this.settings$.pipe(
             map((s: PlatformSettings) => s.applications.associations),
-            map((apps: ApplicationAssociation[]) => {
+            mergeMap((apps: ApplicationAssociation[]) => {
 
-                return apps
-                    .filter((app) => evalFct(app.canOpen))
-                    .map((app) => ({
-                        name: app.name,
-                        url: evalFct(app.applicationURL)
-                    }))
+                let openingApps = apps.filter((app) => evalFct(app.canOpen))
+                return forkJoin(openingApps.map(app => {
+
+                    return this.queryMetadata$(app.cdnPackage).pipe(
+                        map((metadata) => ({
+                            ...metadata,
+                            url: `/applications/${app.cdnPackage}/${app.version}/${evalFct(app.parameters)}`
+                        }))
+                    )
+                }))
             })
         )
     }
