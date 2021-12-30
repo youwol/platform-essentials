@@ -1,6 +1,7 @@
 import { child$, children$, VirtualDOM } from '@youwol/flux-view'
 import { RunningApp } from './running-app.view'
 import { defaultUserMenu, defaultYouWolMenu, PlatformState, YouwolBannerView } from '..'
+import { AppsDockerView } from './platform-docker-bar.view'
 
 
 class RunningAppView implements VirtualDOM {
@@ -32,26 +33,58 @@ class RegularBannerView extends YouwolBannerView {
     constructor(state: PlatformState) {
         super({
             state: state.topBannerState,
-            customActionsView: {
-                class: 'd-flex flex-wrap',
-                children: children$(
-                    state.runningApplications$,
-                    (applications) => {
-                        return applications.map((application) => {
-                            return {
-                                class: 'd-flex flex-column justify-content-center mx-2',
-                                children: [new RunningAppView(application, state)]
-                            }
-                        })
-                    }
-                )
-            },
+            customActionsView: {},
             userMenuView: defaultUserMenu(state.topBannerState),
-            youwolMenuView: defaultYouWolMenu(state.topBannerState)
+            //youwolMenuView: defaultYouWolMenu(state.topBannerState)
+            youwolMenuView: new AppsDockerView({ state })
         })
     }
 }
 
+
+class RunningAppTitleView implements VirtualDOM {
+
+    public readonly class = 'd-flex align-items-center mx-3'
+
+    public readonly children: VirtualDOM[]
+
+    constructor(state: PlatformState, app: RunningApp) {
+
+        let baseClass = 'fas my-auto fv-pointer fv-hover-text-secondary mx-2'
+
+        this.children = [
+            {
+                class: 'border-bottom px-1 fv-text-focus',
+                style: {
+                    fontFamily: 'serif',
+                    fontSize: 'x-large'
+                },
+                innerText: app.title
+            },
+            {
+                class: 'd-flex align-items-center',
+                children: [
+                    {
+                        class: `${baseClass} fa-external-link-alt`,
+                        onclick: () => state.expand(app),
+                    },
+                    {
+                        class: 'd-flex flex-column align-items-center',
+                        children: [
+                            {
+                                class: `${baseClass} fa-times`,
+                                onclick: () => state.close(app),
+                            },
+                            {
+                                class: `${baseClass} fa-minus-square`,
+                                onclick: () => state.minimize(app),
+                            }
+                        ]
+                    }
+                ]
+            }]
+    }
+}
 
 /**
  * Top banner when an application is running
@@ -60,48 +93,16 @@ class RunningAppBannerView extends YouwolBannerView {
 
     constructor(state: PlatformState, app: RunningApp) {
 
-        let baseClass = 'fas my-auto fv-pointer fv-hover-text-secondary mx-2'
         super({
             state: state.topBannerState,
             customActionsView: {
-                class: 'my-auto d-flex justify-content-between w-100',
+                class: 'my-auto d-flex justify-content-between flex-grow-1',
+                style: { minWidth: '0px' },
                 children: [
-                    {
-                        class: 'd-flex align-items-center mx-3',
-                        children: [
-                            {
-                                class: 'border-bottom px-1 fv-text-focus',
-                                style: {
-                                    fontFamily: 'serif',
-                                    fontSize: 'x-large'
-                                },
-                                innerText: app.title
-                            },
-                            {
-                                class: 'd-flex align-items-center',
-                                children: [
-                                    {
-                                        class: `${baseClass} fa-external-link-alt`,
-                                        onclick: () => state.expand(app),
-                                    },
-                                    {
-                                        class: 'd-flex flex-column align-items-center',
-                                        children: [
-                                            {
-                                                class: `${baseClass} fa-times`,
-                                                onclick: () => state.close(app),
-                                            },
-                                            {
-                                                class: `${baseClass} fa-minus-square`,
-                                                onclick: () => state.minimize(app),
-                                            }
-                                        ]
-                                    }
-                                ]
-                            }]
-                    },
+                    new RunningAppTitleView(state, app),
                     {
                         class: 'flex-grow-1 my-auto',
+                        style: { minWidth: '0px' },
                         children: [
                             child$(
                                 app.topBannerActions$,
@@ -119,12 +120,14 @@ class RunningAppBannerView extends YouwolBannerView {
                     return vDOM
                 }
             ),
+            youwolMenuView: new AppsDockerView({ state })
+            /*
             youwolMenuView: child$(
                 app.topBannerYouwolMenu$,
                 (vDOM) => {
                     return vDOM
                 }
-            )
+            )*/
         })
     }
 }
