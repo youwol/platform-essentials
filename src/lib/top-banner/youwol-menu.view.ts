@@ -31,7 +31,7 @@ export class YouwolMenuView implements VirtualDOM {
         youwolMenuView: VirtualDOM
     }) {
         Object.assign(this, parameters)
-        let expandableMenu = new ExpandableMenu({ contentView: this.youwolMenuView })
+        let expandableMenu = new ExpandableMenu({ contentView: this.youwolMenuView, style: { 'opacity': '0.9' } })
         this.onclick = () => expandableMenu.showMenu$.next(!expandableMenu.showMenu$.getValue())
         this.onmouseleave = () => expandableMenu.showMenu$.next(false)
         this.children = [
