@@ -109,6 +109,18 @@ export class PlatformSettingsStore {
             "@youwol/developer-portal": {
                 name: 'Dev. Portal',
                 icon: '{ "class": "fas fa-code"}'
+            },
+            "@youwol/flux-runner": {
+                name: 'Flux runner',
+                icon: '{ "class":"d-flex align-items-center", "children":[{"class": "fas fa-project-diagram"},{"class": "ml-1 fas fa-play"}]}'
+            },
+            "@youwol/flux-builder": {
+                name: 'Flux builder',
+                icon: '{ "class":"d-flex align-items-center", "children":[{"class": "fas fa-project-diagram"},{"class": "ml-1 fas fa-tools"}]}'
+            },
+            "@youwol/stories": {
+                name: 'Story',
+                icon: '{ "class": "fas fa-book-open"}'
             }
         }
         return of(metadata[cdnPackage])
