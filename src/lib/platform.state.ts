@@ -1,4 +1,3 @@
-import { uuidv4 } from '@youwol/flux-core'
 import { BehaviorSubject, of } from "rxjs"
 import { RunningApp } from './running-app.view'
 import { VirtualDOM } from '@youwol/flux-view'
@@ -30,13 +29,18 @@ export class PlatformState {
     }
 
 
-    createInstance$({ cdnPackage, focus }: { cdnPackage: string, focus: boolean }) {
-
+    createInstance$({ cdnPackage, parameters, focus }: {
+        cdnPackage: string,
+        parameters?: { [key: string]: string },
+        focus: boolean
+    }) {
         return PlatformSettingsStore.queryMetadata$(cdnPackage).pipe(
             tap((metadata) => {
+
                 let app = new RunningApp({
                     ...metadata,
                     state: this,
+                    parameters,
                     cdnPackage,
                     icon: JSON.parse(metadata.icon)
                 })

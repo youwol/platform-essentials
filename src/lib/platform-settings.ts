@@ -2,7 +2,7 @@ import { VirtualDOM } from "@youwol/flux-view"
 import { forkJoin, Observable, of } from "rxjs"
 import { map, mergeMap } from "rxjs/operators"
 import { AUTO_GENERATED } from "../auto_generated"
-import { ApplicationAssociation, ApplicationStandalone, Asset, PlatformSettings, UserSettingsClient } from "./clients"
+import { ApplicationAssociation, Asset, PlatformSettings, UserSettingsClient } from "./clients"
 
 
 export interface Executable {
@@ -10,6 +10,7 @@ export interface Executable {
     name: string
     cdnPackage: string
     url: string
+    parameters: { [key: string]: string }
     icon: VirtualDOM
 }
 
@@ -125,7 +126,8 @@ export class PlatformSettingsStore {
                             ...app,
                             ...metadata,
                             url: `/applications/${app.cdnPackage}/${app.version}`,
-                            icon: JSON.parse(metadata.icon)
+                            icon: JSON.parse(metadata.icon),
+                            parameters: {}
                         }))
                     )
                 })

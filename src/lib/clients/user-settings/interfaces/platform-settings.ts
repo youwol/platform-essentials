@@ -29,7 +29,7 @@ export interface ApplicationStandalone {
 export interface ApplicationAssociation extends ApplicationStandalone {
 
     canOpen: ImplementationFunction | ((asset: Asset) => boolean)
-    parameters: ImplementationFunction | ((asset: Asset) => string)
+    parameters: ImplementationFunction | ((asset: Asset) => { [key: string]: string })
 }
 
 export interface DockerBar {
