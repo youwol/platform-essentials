@@ -55,7 +55,7 @@ export class PlatformSettingsStore {
                     parameters: "return (asset) => ({ 'id':asset.rawId })"
                 },
                 {
-                    cdnPackage: "@youwol/story",
+                    cdnPackage: "@youwol/stories",
                     version: "latest",
                     canOpen: "return (asset) => asset.kind == 'story'",
                     parameters: "return (asset) => ({ 'id':asset.rawId })"
