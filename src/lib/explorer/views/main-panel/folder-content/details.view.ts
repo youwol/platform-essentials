@@ -19,7 +19,7 @@ export class DetailsContentView {
     constructor(params: { state: ExplorerState, items: BrowserNode[] }) {
 
         Object.assign(this, params)
-        console.log("DetailsContentView")
+
         let hoveredRow$ = new BehaviorSubject<BrowserNode>(undefined)
         this.children = [
             {
