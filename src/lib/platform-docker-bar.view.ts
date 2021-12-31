@@ -210,8 +210,11 @@ export class AppsDockerView implements VirtualDOM {
                 PlatformSettingsStore.getDockerBarApps$()
             ]),
             ([runningApps, dockerBarApps]: [RunningApp[], Executable[]]) => {
-                console.log(runningApps, dockerBarApps)
-                return dockerBarApps.map((executable: Executable) => new DockerItemView({
+
+                let executables: { [key: string]: Executable } = [...runningApps, ...dockerBarApps]
+                    .reduce((acc, e) => ({ ...acc, [e.cdnPackage]: e }), {})
+
+                return Object.values(executables).map((executable: Executable) => new DockerItemView({
                     executable,
                     instances: runningApps.filter((app) => app.cdnPackage == executable.cdnPackage),
                     expanded$,
