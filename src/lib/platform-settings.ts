@@ -135,9 +135,9 @@ export class PlatformSettingsStore {
     }
 
 
-    static getOpeningApps$(asset: Asset): Observable<{ name: string, url: string }[]> {
+    static getOpeningApps$(asset: Asset): Observable<Executable[]> {
 
-        let evalFct = (code: string | ((asset: Asset) => string | boolean)) => {
+        let evalFct = (code: string | ((asset: Asset) => { [key: string]: string } | boolean)) => {
             return typeof (code) == 'string'
                 ? new Function(code)()(asset)
                 : code(asset)
@@ -152,7 +152,10 @@ export class PlatformSettingsStore {
                     return this.queryMetadata$(app.cdnPackage).pipe(
                         map((metadata) => ({
                             ...metadata,
-                            url: `/applications/${app.cdnPackage}/${app.version}/${evalFct(app.parameters)}`
+                            ...app,
+                            icon: JSON.parse(metadata.icon),
+                            url: `/applications/${app.cdnPackage}/${app.version}`,
+                            parameters: evalFct(app.parameters)
                         }))
                     )
                 }))

@@ -89,18 +89,16 @@ export class ItemView {
         this.ondblclick = () => {
             PlatformSettingsStore.getOpeningApps$(this.item as any).pipe(
                 take(1),
-                filter(apps => apps.length > 0)
-            ).subscribe((apps) => {
-
-                let app = apps[0]
-                /*let instance = this.platformState.createInstance({
-                    icon: 'fas fa-play',
-                    title: app.name + "#" + this.item.name,
-                    appURL: app.url
+                filter(apps => apps.length > 0),
+                map(apps => apps[0]),
+                mergeMap((app) => {
+                    return this.platformState.createInstance$({
+                        cdnPackage: app.cdnPackage,
+                        parameters: app.parameters,
+                        focus: true
+                    })
                 })
-                this.platformState.focus(instance)
-                */
-            })
+            ).subscribe(() => { })
         }
     }
 

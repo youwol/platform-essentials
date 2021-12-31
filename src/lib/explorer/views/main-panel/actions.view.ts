@@ -68,12 +68,11 @@ export class ActionsView implements VirtualDOM {
                                 name: app.name,
                                 enable: true,
                                 exe: () => {
-                                    /*let instance = this.platformState.createInstance({
-                                        icon: 'fas fa-play',
-                                        title: app.name + "#" + item.name,
-                                        appURL: app.url
-                                    })
-                                    this.platformState.focus(instance)*/
+                                    this.platformState.createInstance$({
+                                        cdnPackage: app.cdnPackage,
+                                        parameters: app.parameters,
+                                        focus: true
+                                    }).subscribe()
                                 },
                                 applicable: () => true
                             }
