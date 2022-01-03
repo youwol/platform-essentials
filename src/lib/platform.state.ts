@@ -6,6 +6,33 @@ import { PlatformSettingsStore } from './platform-settings'
 import { tap } from 'rxjs/operators'
 
 
+export class ChildApplicationAPI {
+
+    static getAppInstanceId() {
+        return new URLSearchParams(window.location.search).get("instance-id")
+    }
+
+
+    static getOsInstance(): PlatformState {
+        return parent['@youwol/platform-essentials']?.PlatformState.instance || PlatformState.instance
+    }
+
+    static setProperties({ snippet }:
+        { snippet: VirtualDOM }) {
+
+        let os = ChildApplicationAPI.getOsInstance()
+        if (!os)
+            return
+        let appInstanceId = ChildApplicationAPI.getAppInstanceId()
+        os.runningApplications$.pipe(
+            map(apps => apps.find(app => app.instanceId == appInstanceId)),
+            filter(app => app != undefined),
+            take(1)
+        ).subscribe((app) => {
+            app.setSnippet(snippet)
+        })
+    }
+}
 
 export class PlatformState {
 
@@ -90,6 +117,10 @@ export class PlatformState {
             return
         this.runningApplications$.next([...this.runningApplications$.getValue(), preview])
     }
+
+
+    static childAppAPI: ChildApplicationAPI
+
 }
 
 

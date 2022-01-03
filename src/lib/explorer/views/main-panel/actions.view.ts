@@ -6,6 +6,7 @@ import { ExplorerState } from '../../explorer.state'
 import { Action, GENERIC_ACTIONS, getActions$ } from '../../actions.factory'
 import { PlatformSettingsStore, PlatformState } from '../../..'
 import { AnyItemNode } from '../../nodes'
+import { ChildApplicationAPI } from '../../../platform.state'
 
 
 export class ButtonView extends Button.View {
@@ -45,7 +46,7 @@ export class ActionsView implements VirtualDOM {
     constructor(params: { state: ExplorerState }) {
         Object.assign(this, params)
 
-        this.platformState = PlatformState.getInstance()
+        this.platformState = ChildApplicationAPI.getOsInstance()
 
         let actionsParentFolder$ = this.state.currentFolder$.pipe(
             mergeMap(({ folder }) => getActions$(this.state, { node: folder, selection: 'indirect' }, Object.values(GENERIC_ACTIONS)))

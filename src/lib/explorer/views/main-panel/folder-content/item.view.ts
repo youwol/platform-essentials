@@ -10,6 +10,7 @@ import { ExplorerState } from "../../../explorer.state";
 import { RequestsExecutor } from "../../../requests-executor";
 import { BrowserNode, FolderNode, ItemNode } from "../../../nodes";
 import { PlatformSettingsStore } from "../../../../platform-settings";
+import { ChildApplicationAPI } from "../../../../platform.state";
 
 
 export class ItemView {
@@ -33,7 +34,7 @@ export class ItemView {
         hovered$?: Observable<BrowserNode>
     }) {
         Object.assign(this, params)
-        this.platformState = PlatformState.getInstance()
+        this.platformState = ChildApplicationAPI.getOsInstance()
 
         this.hovered$ = this.hovered$ || this.state.selectedItem$
         let baseClass = 'd-flex align-items-center p-1 rounded m-2 fv-pointer'
