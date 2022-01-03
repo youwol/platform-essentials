@@ -1,34 +1,30 @@
 import { attr$, children$, VirtualDOM } from "@youwol/flux-view"
-import { Asset, AssetsGatewayClient, DefaultDriveResponse, PlatformSettingsStore, PlatformState } from "../.."
+import { Asset, AssetsGatewayClient, DefaultDriveResponse, Executable, PlatformSettingsStore } from "../.."
 import { BehaviorSubject } from "rxjs"
 import { map, mergeMap, take } from "rxjs/operators"
 import { ButtonView } from "./misc.view"
+import { FileAddedEvent } from "../../platform.events"
+import { ChildApplicationAPI } from "../../platform.state"
 
 
-export function runApplication(instance: {
-    icon: string
-    appName: string
-    instanceName: string
-    URL: string
-}) {
+export function runApplication(instance: Executable, title) {
 
-    let youwolOS = PlatformState.getInstance()
+    let youwolOS = ChildApplicationAPI.getOsInstance()
 
     if (youwolOS) {
-        let app = youwolOS.createInstance({
-            title: instance.instanceName,
-            icon: 'fas fa-play',
-            appURL: instance.URL
-        })
-        youwolOS.focus(app)
+        youwolOS.createInstance$({
+            ...instance,
+            title,
+            focus: true
+        }).subscribe()
         return
     }
-    window.location.href = instance.URL
+    window.location.href = instance.url
 }
 
 
-let btnClasses = 'd-flex align-items-center py-1 mr-5 fv-border-primary position-relative fv-pointer rounded fv-bg-secondary px-2 fv-hover-x-lighter'
-let deployedMenuClasses = 'd-flex flex-column pt-1 px-1 rounded border fv-bg-background-alt fv-xx-lighter'
+let btnClasses = 'd-flex align-items-center py-1 mb-1 fv-border-primary position-relative fv-pointer rounded fv-bg-secondary px-2 fv-hover-x-lighter'
+let deployedMenuClasses = 'd-flex flex-column pt-1 px-1 rounded border fv-bg-background-alt'
 
 export class OpenWithView implements VirtualDOM {
 
@@ -78,9 +74,9 @@ export class OpenWithView implements VirtualDOM {
                             whiteSpace: 'nowrap'
                         },
                         children: children$(
-                            options$,
-                            (options) => options.length > 0
-                                ? options.map((option) => this.optionView(option))
+                            PlatformSettingsStore.getOpeningApps$(this.asset),
+                            (openWithOptions) => openWithOptions.length > 0
+                                ? openWithOptions.map((option) => this.openWithView(option, this.asset.name))
                                 : [{}]
                         )
                     }
@@ -93,20 +89,19 @@ export class OpenWithView implements VirtualDOM {
 
     }
 
-    optionView(option: {
-        icon: string
-        appName: string
-        instanceName: string
-        URL: string
-    }) {
-        let btn = new ButtonView({
-            name: option.appName,
-            icon: option.icon,
-            withClass: 'mb-1 fv-border-primary',
-            enabled: true
-        })
-        btn.state.click$.subscribe(() => runApplication(option))
-        return btn
+    openWithView(executable: Executable, title: string) {
+
+        return {
+            class: btnClasses,
+            children: [
+                executable.icon,
+                {
+                    class: 'ml-1',
+                    innerText: executable.name
+                }
+            ],
+            onclick: () => runApplication(executable, title)
+        }
     }
 }
 
@@ -170,7 +165,7 @@ class DownloadView implements VirtualDOM {
 
     optionView(option: { icon: string, name: string, download$ }) {
 
-        let youwolOS = PlatformState.getInstance()
+        let youwolOS = ChildApplicationAPI.getOsInstance()
         let btn = new ButtonView({
             name: option.name,
             icon: option.icon,
@@ -187,19 +182,16 @@ class DownloadView implements VirtualDOM {
             })
         ).subscribe(([item, drive]: [any, DefaultDriveResponse]) => {
             if (youwolOS) {
-                let tree = youwolOS.groupsTree[item.groupId]
-                let node = new youwolOS.Nodes.ItemNode({
-                    id: item.treeId, groupId: item.groupId, driveId: item.driveId, name: item.name,
-                    assetId: item.assetId, rawId: item.rawId, borrowed: true,
-                    icon: 'fas fa-play'
-                })
-                try {
-                    tree.addChild(drive.downloadFolderId, node)
-                }
-                catch (e) {
-                    console.log("Home's download node not already resolved", e)
-                }
-                tree.getNode(drive.downloadFolderId).events$.next({ type: 'item-added' })
+                youwolOS.broadcastEvent(
+                    new FileAddedEvent({
+                        treeId: item.treeId,
+                        groupId: item.groupId,
+                        driveId: item.driveId,
+                        folderId: drive.downloadFolderId
+                    }, {
+                        originId: ChildApplicationAPI.getAppInstanceId()
+                    })
+                )
             }
         })
         return btn
