@@ -194,6 +194,10 @@ export class RequestsExecutor {
         return RequestsExecutor.assetsGtwClient.deleteItem(node.driveId, node.treeId)
     }
 
+    static getItem(itemId: string) {
+        return RequestsExecutor.assetsGtwClient.treeRouter.queryItem(itemId)
+    }
+
     static deleteFolder(node: RegularFolderNode) {
         return RequestsExecutor.assetsGtwClient.deleteFolder(node.folderId)
     }
@@ -219,12 +223,10 @@ export class RequestsExecutor {
         return RequestsExecutor.assetsGtwClient.newFolder(node.id, body)
     }
 
-
     static move(target: AnyItemNode | RegularFolderNode, folder: AnyFolderNode | DriveNode) {
 
         return RequestsExecutor.assetsGtwClient.move(target.id, folder.id)
     }
-
 
     static borrow(target: AnyItemNode | AnyFolderNode, folder: AnyFolderNode | DriveNode) {
 

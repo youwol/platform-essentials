@@ -136,6 +136,32 @@ export class ExplorerState {
                 })
             })
         )
+        let os = ChildApplicationAPI.getOsInstance()
+        if (os) {
+            this.subscriptions.push(
+                os.broadcastedEvents$.pipe(
+                    filter((event: PlatformEvent) => FileAddedEvent.isInstance(event)),
+                    mergeMap((event: FileAddedEvent) => {
+                        return RequestsExecutor.getItem(event.treeId)
+                    }),
+                ).subscribe((response: ItemResponse) => {
+                    let tree = this.groupsTree[response.groupId]
+                    console.log("broadcastedEvents", response)
+                    let node = new ItemNode({
+                        ...response,
+                        kind: 'flux-project'
+                    })
+                    try {
+                        tree.addChild(response.folderId, node)
+                    }
+                    catch (e) {
+                        console.log("FileAddedEvent => Folder node not already resolved", { response })
+                        return
+                    }
+                    tree.getNode(response.folderId).events$.next({ type: 'item-added' })
+                })
+            )
+        }
     }
 
     openFolder(folder: FolderNode<any> | DriveNode) {
