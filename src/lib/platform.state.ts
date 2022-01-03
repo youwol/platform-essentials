@@ -59,8 +59,9 @@ export class PlatformState {
         return this.runningApplications$.getValue().find(app => app.instanceId === appId)
     }
 
-    createInstance$({ cdnPackage, parameters, focus }: {
+    createInstance$({ cdnPackage, parameters, focus, title }: {
         cdnPackage: string,
+        title?: string,
         parameters?: { [key: string]: string },
         focus: boolean
     }) {
@@ -71,6 +72,7 @@ export class PlatformState {
                     ...metadata,
                     state: this,
                     parameters,
+                    title: title,
                     cdnPackage,
                     icon: JSON.parse(metadata.icon)
                 })

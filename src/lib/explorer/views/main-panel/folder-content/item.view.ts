@@ -96,6 +96,7 @@ export class ItemView {
                     return this.platformState.createInstance$({
                         cdnPackage: app.cdnPackage,
                         parameters: app.parameters,
+                        title: this.item.name,
                         focus: true
                     })
                 })
