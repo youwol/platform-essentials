@@ -1,4 +1,4 @@
-import { attr$, children$, VirtualDOM } from "@youwol/flux-view"
+import { attr$, child$, children$, VirtualDOM } from "@youwol/flux-view"
 import { BehaviorSubject, combineLatest, Observable } from "rxjs"
 import { Executable, PlatformSettingsStore, PlatformState, RunningApp } from "."
 

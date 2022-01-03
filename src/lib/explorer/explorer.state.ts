@@ -1,20 +1,21 @@
 import { uuidv4 } from '@youwol/flux-core'
-import { BehaviorSubject, combineLatest, from, Observable, of, ReplaySubject } from "rxjs"
-import { delay, distinctUntilChanged, map, mergeMap, share, shareReplay } from 'rxjs/operators'
+import { BehaviorSubject, combineLatest, from, Observable, ReplaySubject, Subscription } from "rxjs"
+import { distinctUntilChanged, filter, map, mergeMap, share, shareReplay } from 'rxjs/operators'
 import { RequestsExecutor } from './requests-executor'
 import { ImmutableTree } from '@youwol/fv-tree'
 import { FluxState } from './specific-assets/flux/flux.state'
-import { RunningApp } from '../running-app.view'
 import { StoryState } from './specific-assets/story/story.state'
 import { DataState } from './specific-assets/data/data.state'
-import { VirtualDOM } from '@youwol/flux-view'
 import {
     AnyFolderNode, AnyItemNode, BrowserNode, DownloadNode, DriveNode, FolderNode,
     FutureNode, GroupNode, HomeNode, ItemNode, RegularFolderNode, serialize, TrashNode
 } from './nodes'
-import { createTreeGroup, isLocalYouwol, processBorrowItem, processMoveFolder, processMoveItem } from './utils'
+import { createTreeGroup, processBorrowItem, processMoveFolder, processMoveItem } from './utils'
 import { YouwolBannerState } from '..'
 import { DisplayMode } from '.'
+import { ChildApplicationAPI } from '../platform.state'
+import { FileAddedEvent, PlatformEvent } from '../platform.events'
+import { ItemResponse } from '../clients'
 
 /**
  * Ideally this concept should not exist.
