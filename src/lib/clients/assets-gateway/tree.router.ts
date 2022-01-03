@@ -1,6 +1,6 @@
 import { Observable } from "rxjs"
 import { DeletedEntityResponse } from "."
-import { ChildrenFolderResponse, DefaultDriveResponse, DriveResponse, DrivesResponse, FolderResponse } from "./interfaces/tree"
+import { ChildrenFolderResponse, DefaultDriveResponse, DriveResponse, DrivesResponse, FolderResponse, ItemResponse } from "./interfaces/tree"
 import { send, RequestOptions } from "../utils"
 
 
@@ -196,6 +196,24 @@ export class TreeRouter {
             'delete',
             `${this.basePath}/folders/${folderId}`,
             { method: 'DELETE', headers: this.getHeaders(options.headers) },
+            options
+        )
+    }
+
+    //-------------------------------------------------------
+    // Items
+    //-------------------------------------------------------
+
+
+    queryItem(
+        itemId: string,
+        options: RequestOptions = {}
+    ): Observable<ItemResponse> {
+
+        return send(
+            'query',
+            `${this.basePath}/items/${itemId}`,
+            { method: 'GET', headers: this.getHeaders(options.headers) },
             options
         )
     }
