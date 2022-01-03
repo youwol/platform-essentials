@@ -19,12 +19,16 @@ export class RunningApp implements Executable {
     public readonly instanceId: string
     public readonly title: string
 
-    public readonly topBannerActions$ = new ReplaySubject<VirtualDOM>(1)
-    public readonly topBannerUserMenu$ = new ReplaySubject<VirtualDOM>(1)
-    public readonly topBannerYouwolMenu$ = new ReplaySubject<VirtualDOM>(1)
     public readonly iframe$ = new ReplaySubject<HTMLIFrameElement>()
 
     public readonly view: VirtualDOM
+
+
+    public readonly topBannerActions$ = new ReplaySubject<VirtualDOM>(1)
+    public readonly topBannerUserMenu$ = new ReplaySubject<VirtualDOM>(1)
+    public readonly topBannerYouwolMenu$ = new ReplaySubject<VirtualDOM>(1)
+
+    public readonly snippet$ = new ReplaySubject<VirtualDOM>(1)
 
     htmlElement: HTMLElement
 
@@ -40,6 +44,9 @@ export class RunningApp implements Executable {
     }) {
         Object.assign(this, params)
         this.title = this.title || this.name
+        this.snippet$.next({
+            innerText: this.title
+        })
         this.version = this.version || 'latest'
         this.instanceId = this.instanceId || uuidv4()
         this.parameters = this.parameters || {}
@@ -69,6 +76,10 @@ export class RunningApp implements Executable {
                 this.htmlElement = elem
             }
         }
+    }
+
+    setSnippet(snippet: VirtualDOM) {
+        this.snippet$.next(snippet)
     }
 
     terminateInstance() {

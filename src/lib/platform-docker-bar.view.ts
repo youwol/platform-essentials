@@ -65,7 +65,12 @@ class DockerItemDetailsView implements VirtualDOM {
                                         : 'fv-text-primary'
                                 }
                             ),
-                            innerText: `-${i}-`
+                            children: [
+                                child$(
+                                    app.snippet$,
+                                    (snippet) => snippet
+                                )
+                            ],
                         },
                         {
                             class: 'fv-text-error fv-hover-xx-lighter fas fa-times-circle',
