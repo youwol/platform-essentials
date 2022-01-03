@@ -161,18 +161,20 @@ export class PlatformSettingsStore {
             mergeMap((apps: ApplicationAssociation[]) => {
 
                 let openingApps = apps.filter((app) => evalFct(app.canOpen))
-                return forkJoin(openingApps.map(app => {
+                return openingApps.length == 0
+                    ? of([])
+                    : forkJoin(openingApps.map(app => {
 
-                    return this.queryMetadata$(app.cdnPackage).pipe(
-                        map((metadata) => ({
-                            ...metadata,
-                            ...app,
-                            icon: JSON.parse(metadata.icon),
-                            url: `/applications/${app.cdnPackage}/${app.version}`,
-                            parameters: evalFct(app.parameters)
-                        }))
-                    )
-                }))
+                        return this.queryMetadata$(app.cdnPackage).pipe(
+                            map((metadata) => ({
+                                ...metadata,
+                                ...app,
+                                icon: JSON.parse(metadata.icon),
+                                url: `/applications/${app.cdnPackage}/${app.version}`,
+                                parameters: evalFct(app.parameters)
+                            }))
+                        )
+                    }))
             })
         )
     }
