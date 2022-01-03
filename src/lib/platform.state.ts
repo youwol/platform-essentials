@@ -4,6 +4,7 @@ import { VirtualDOM } from '@youwol/flux-view'
 import { YouwolBannerState } from './top-banner'
 import { PlatformSettingsStore } from './platform-settings'
 import { tap } from 'rxjs/operators'
+import { PlatformEvent } from "./platform.events"
 
 
 export class ChildApplicationAPI {
@@ -41,6 +42,7 @@ export class PlatformState {
     public readonly runningApplication$ = new BehaviorSubject<RunningApp>(undefined)
     public readonly runningApplications$ = new BehaviorSubject<RunningApp[]>([])
 
+    public readonly broadcastedEvents$ = new Subject<PlatformEvent>()
     static instance: PlatformState
     static setInstance(instance: PlatformState) {
         PlatformState.instance = instance
