@@ -1,9 +1,9 @@
-import { BehaviorSubject, of } from "rxjs"
+import { BehaviorSubject, Subject } from "rxjs"
 import { RunningApp } from './running-app.view'
 import { VirtualDOM } from '@youwol/flux-view'
 import { YouwolBannerState } from './top-banner'
 import { PlatformSettingsStore } from './platform-settings'
-import { tap } from 'rxjs/operators'
+import { filter, map, take, tap } from 'rxjs/operators'
 import { PlatformEvent } from "./platform.events"
 
 
@@ -44,17 +44,15 @@ export class PlatformState {
 
     public readonly broadcastedEvents$ = new Subject<PlatformEvent>()
     static instance: PlatformState
-    static setInstance(instance: PlatformState) {
-        PlatformState.instance = instance
-    }
 
-    static getInstance() {
-        return parent['@youwol/platform-essentials']?.PlatformState.instance || PlatformState.instance
+
+    static setOsInstance(instance: PlatformState) {
+        PlatformState.instance = instance
     }
 
     constructor() {
 
-        PlatformState.setInstance(this)
+        PlatformState.setOsInstance(this)
     }
 
     getRunningApp(appId: string): RunningApp {
