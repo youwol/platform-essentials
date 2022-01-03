@@ -63,6 +63,9 @@ class DockerItemDetailsView implements VirtualDOM {
                                     return selected && selected.instanceId == app.instanceId
                                         ? 'fv-text-focus'
                                         : 'fv-text-primary'
+                                },
+                                {
+                                    wrapper: (d) => `${d} px-1`
                                 }
                             ),
                             children: [
@@ -92,7 +95,7 @@ export class DockerItemView implements VirtualDOM {
     public readonly children: VirtualDOM[]
     public readonly executable: Executable
     public readonly style = {
-        width: '200px',
+        minWidth: '200px',
     }
     public readonly instances: RunningApp[]
     public readonly state: PlatformState
