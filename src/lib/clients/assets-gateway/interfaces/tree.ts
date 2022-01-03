@@ -57,6 +57,7 @@ export interface ItemResponse {
     rawId: string
     assetId: string
     groupId: string
+    driveId: string
     kind: string
     folderId: string
     borrowed: boolean
