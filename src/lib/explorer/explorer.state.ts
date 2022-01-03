@@ -115,23 +115,27 @@ export class ExplorerState {
         node: ItemNode<any> | FolderNode<any>
     }
 
+    public readonly subscriptions: Subscription[] = []
+
     constructor() {
 
-        combineLatest([
-            this.userDrives$,
-            this.defaultUserDrive$
-        ]).subscribe(([respUserDrives, respDefaultDrive]: [any, any]) => {
+        this.subscriptions.push(
+            combineLatest([
+                this.userDrives$,
+                this.defaultUserDrive$
+            ]).subscribe(([respUserDrives, respDefaultDrive]: [any, any]) => {
 
-            let tree = createTreeGroup('You', respUserDrives, respDefaultDrive)
-            this.groupsTree[respDefaultDrive.groupId] = tree
-            this.flux = new FluxState(tree)
-            this.story = new StoryState(tree)
-            this.data = new DataState(tree)
-            this.openFolder(tree.getHomeNode())
-            tree.directUpdates$.subscribe((updates) => {
-                updates.forEach(update => RequestsExecutor.execute(update))
+                let tree = createTreeGroup('You', respUserDrives, respDefaultDrive)
+                this.groupsTree[respDefaultDrive.groupId] = tree
+                this.flux = new FluxState(tree)
+                this.story = new StoryState(tree)
+                this.data = new DataState(tree)
+                this.openFolder(tree.getHomeNode())
+                tree.directUpdates$.subscribe((updates) => {
+                    updates.forEach(update => RequestsExecutor.execute(update))
+                })
             })
-        })
+        )
     }
 
     openFolder(folder: FolderNode<any> | DriveNode) {
