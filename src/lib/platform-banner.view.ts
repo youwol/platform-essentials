@@ -21,7 +21,7 @@ class RunningAppView implements VirtualDOM {
                 innerText: app.title
             }
         ]
-        this.onclick = () => state.focus(app)
+        this.onclick = () => state.focus(app.instanceId)
     }
 }
 
@@ -66,18 +66,18 @@ class RunningAppTitleView implements VirtualDOM {
                 children: [
                     {
                         class: `${baseClass} fa-external-link-alt`,
-                        onclick: () => state.expand(app),
+                        onclick: () => state.expand(app.instanceId),
                     },
                     {
                         class: 'd-flex flex-column align-items-center',
                         children: [
                             {
                                 class: `${baseClass} fa-times`,
-                                onclick: () => state.close(app),
+                                onclick: () => state.close(app.instanceId),
                             },
                             {
                                 class: `${baseClass} fa-minus-square`,
-                                onclick: () => state.minimize(app),
+                                onclick: () => state.minimize(app.instanceId),
                             }
                         ]
                     }

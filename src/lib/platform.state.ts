@@ -55,6 +55,9 @@ export class PlatformState {
         PlatformState.setInstance(this)
     }
 
+    getRunningApp(appId: string): RunningApp {
+        return this.runningApplications$.getValue().find(app => app.instanceId === appId)
+    }
 
     createInstance$({ cdnPackage, parameters, focus }: {
         cdnPackage: string,
@@ -72,18 +75,22 @@ export class PlatformState {
                     icon: JSON.parse(metadata.icon)
                 })
                 this.runningApplications$.next([...this.runningApplications$.getValue(), app])
-                focus && this.focus(app)
+                focus && this.focus(app.instanceId)
             })
         )
     }
 
 
-    focus(app: RunningApp) {
+    focus(instanceId: string) {
+        let app = this.getRunningApp(instanceId)
         this.runningApplication$.next(app)
     }
 
     toggleNavigationMode() {
         this.runningApplication$.next(undefined)
+
+    broadcastEvent(event: PlatformEvent) {
+        this.broadcastedEvents$.next(event)
     }
 
     setTopBannerViews(
@@ -100,22 +107,24 @@ export class PlatformState {
         app.topBannerYouwolMenu$.next(youwolMenuView)
     }
 
-    close(app: RunningApp) {
+    close(instanceId: string) {
+        let app = this.getRunningApp(instanceId)
         app.terminateInstance()
         this.runningApplications$.next(this.runningApplications$.getValue().filter(d => d != app))
         this.runningApplication$.next(undefined)
     }
 
-    expand(app: RunningApp) {
+    expand(instanceId: string) {
+        let app = this.getRunningApp(instanceId)
         window.open(app.url, '_blank')
     }
 
-    minimize(preview: RunningApp) {
-
+    minimize(instanceId: string) {
+        let app = this.getRunningApp(instanceId)
         this.runningApplication$.next(undefined)
-        if (this.runningApplications$.getValue().includes(preview))
+        if (this.runningApplications$.getValue().includes(app))
             return
-        this.runningApplications$.next([...this.runningApplications$.getValue(), preview])
+        this.runningApplications$.next([...this.runningApplications$.getValue(), app])
     }
 
 

@@ -53,7 +53,7 @@ class DockerItemDetailsView implements VirtualDOM {
 
                 return {
                     class: 'fv-pointer px-1 my-1 border rounded fv-hover-bg-background-alt d-flex align-items-center justify-content-between',
-                    onclick: () => this.state.focus(app),
+                    onclick: () => this.state.focus(app.instanceId),
                     children: [
                         {
                             class: attr$(
@@ -71,7 +71,7 @@ class DockerItemDetailsView implements VirtualDOM {
                             class: 'fv-text-error fv-hover-xx-lighter fas fa-times-circle',
                             onclick: (ev) => {
                                 ev.stopPropagation()
-                                this.state.close(app)
+                                this.state.close(app.instanceId)
                             },
                         }]
                 }
