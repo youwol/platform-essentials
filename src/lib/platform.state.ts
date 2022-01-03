@@ -88,8 +88,6 @@ export class PlatformState {
         this.runningApplication$.next(app)
     }
 
-    toggleNavigationMode() {
-        this.runningApplication$.next(undefined)
 
     broadcastEvent(event: PlatformEvent) {
         this.broadcastedEvents$.next(event)
