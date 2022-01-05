@@ -15,10 +15,6 @@ export class AssetsGatewayClient extends Router {
     public readonly assets: AssetsRouter
     public readonly raw: RawRouter
 
-
-    dynamicBasePath: string
-    headers = {}
-
     constructor({ basePath, headers }:
         {
             basePath?: string,
