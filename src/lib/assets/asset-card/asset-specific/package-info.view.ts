@@ -23,7 +23,7 @@ export class PackageInfoView {
 
         this.children = [
             child$(
-                new AssetsGatewayClient().getPackageMetadata$(this.asset.rawId),
+                new AssetsGatewayClient().raw.package.queryMetadata$(this.asset.rawId),
                 (metadata: any) => {
 
                     return {

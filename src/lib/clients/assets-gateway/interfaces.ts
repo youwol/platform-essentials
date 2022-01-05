@@ -3,13 +3,19 @@
 
 
 export type Json = any
-
+export type RawId = string
 
 export interface HealthzResponse {
 
-    status: string
+    status: 'assets-gateway ok'
 }
 
+export interface UserInfoResponse {
+
+    name: string
+    groups: GroupResponse[]
+
+}
 
 export interface GroupResponse {
 

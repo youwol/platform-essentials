@@ -60,7 +60,7 @@ let databaseActionsFactory = {
             let node = update.addedNodes[0] as AnyItemNode
             let uid = uuidv4()
             node.addStatus({ type: 'request-pending', id: uid })
-            RequestsExecutor.renameItem(node.id, node.name).pipe(
+            RequestsExecutor.renameAsset(node.id, node.name).pipe(
                 delay(debugDelay)
             )
                 .subscribe(() => {
@@ -172,7 +172,7 @@ let databaseActionsFactory = {
 
 export class RequestsExecutor {
 
-    static assetsGtwClient = new AssetsGatewayClient()
+    static assetsGtwClient = new AssetsGatewayClient({ headers: { "tutu": 'tata' } })
 
     static execute(update: ImmutableTree.Updates<BrowserNode>) {
 
@@ -183,27 +183,27 @@ export class RequestsExecutor {
     }
 
     static renameFolder(folderId: string, newName: string) {
-        return RequestsExecutor.assetsGtwClient.renameFolder(folderId, newName)
+        return RequestsExecutor.assetsGtwClient.explorer.folders.rename$(folderId, { name: newName })
     }
 
-    static renameItem(itemId: string, newName: string) {
-        return RequestsExecutor.assetsGtwClient.renameItem(itemId, newName)
+    static renameAsset(itemId: string, newName: string) {
+        return RequestsExecutor.assetsGtwClient.assets.update$(itemId, { name: newName })
     }
 
     static deleteItem(node: AnyItemNode) {
-        return RequestsExecutor.assetsGtwClient.deleteItem(node.driveId, node.treeId)
+        return RequestsExecutor.assetsGtwClient.explorer.items.delete$(node.treeId)
     }
 
     static getItem(itemId: string) {
-        return RequestsExecutor.assetsGtwClient.treeRouter.queryItem(itemId)
+        return RequestsExecutor.assetsGtwClient.explorer.items.get$(itemId)
     }
 
     static deleteFolder(node: RegularFolderNode) {
-        return RequestsExecutor.assetsGtwClient.deleteFolder(node.folderId)
+        return RequestsExecutor.assetsGtwClient.explorer.folders.delete$(node.folderId)
     }
 
     static deleteDrive(node: DriveNode) {
-        return RequestsExecutor.assetsGtwClient.treeRouter.deleteDrive(node.driveId)
+        return RequestsExecutor.assetsGtwClient.explorer.drives.delete$(node.driveId)
     }
 
     static getUserInfo() {
@@ -211,31 +211,28 @@ export class RequestsExecutor {
     }
 
     static getDefaultDrive(groupId: string) {
-        return RequestsExecutor.assetsGtwClient.getDefaultDrive(groupId)
+        return RequestsExecutor.assetsGtwClient.explorer.groups.getDefaultDrive$(groupId)
     }
 
     static purgeDrive(driveId: string) {
-        return RequestsExecutor.assetsGtwClient.purgeDrive(driveId)
+        return RequestsExecutor.assetsGtwClient.explorer.drives.purge$(driveId)
     }
 
-    static newFolder(node: DriveNode | AnyFolderNode, body: { name: string, folderId: string }) {
-
-        return RequestsExecutor.assetsGtwClient.newFolder(node.id, body)
+    static createFolder(node: DriveNode | AnyFolderNode, body: { name: string, folderId: string }) {
+        return RequestsExecutor.assetsGtwClient.explorer.folders.create$(node.id, body)
     }
 
     static move(target: AnyItemNode | RegularFolderNode, folder: AnyFolderNode | DriveNode) {
-
-        return RequestsExecutor.assetsGtwClient.move(target.id, folder.id)
+        return RequestsExecutor.assetsGtwClient.explorer.move$(target.id, { destinationFolderId: folder.id })
     }
 
     static borrow(target: AnyItemNode | AnyFolderNode, folder: AnyFolderNode | DriveNode) {
-
-        return RequestsExecutor.assetsGtwClient.borrowItem(target.id, folder.id)
+        return RequestsExecutor.assetsGtwClient.explorer.borrowItem$(target.id, { destinationFolderId: folder.id })
     }
 
-    static getDeletedChildren(groupId: string, driveId: string) {
+    static getDeletedItems(driveId: string) {
 
-        return RequestsExecutor.assetsGtwClient.getDeletedChildren(groupId, driveId).pipe(
+        return RequestsExecutor.assetsGtwClient.explorer.drives.queryDeletedItems$(driveId).pipe(
             map(({ items, folders }: { items: Array<any>, folders: Array<any> }) => {
 
                 return [
@@ -248,7 +245,7 @@ export class RequestsExecutor {
 
     static getFolderChildren(groupId: string, driveId: string, folderId: string) {
 
-        return RequestsExecutor.assetsGtwClient.getFolderChildren(groupId, driveId, folderId).pipe(
+        return RequestsExecutor.assetsGtwClient.explorer.folders.queryChildren$(folderId).pipe(
             map(({ items, folders }: { items: Array<any>, folders: Array<any> }) => {
                 return [
                     ...folders.map((folder: FolderResponse) => {
@@ -276,7 +273,7 @@ export class RequestsExecutor {
                                 kind: 'trash',
                                 name: 'Trash',
                                 folderId: 'trash',
-                                children: RequestsExecutor.getDeletedChildren(groupId, driveId)
+                                children: RequestsExecutor.getDeletedItems(driveId)
                             })]
                         : []
                 ]
@@ -286,7 +283,7 @@ export class RequestsExecutor {
 
     static getDrivesChildren(groupId: string) {
 
-        return RequestsExecutor.assetsGtwClient.getDrives(groupId).pipe(
+        return RequestsExecutor.assetsGtwClient.explorer.groups.queryDrives$(groupId).pipe(
             map(({ drives }) => {
                 return drives.map((drive: DriveResponse) => {
                     return new DriveNode({
@@ -299,7 +296,7 @@ export class RequestsExecutor {
     }
 
     static getAsset(assetId: string): Observable<Asset> {
-        return RequestsExecutor.assetsGtwClient.getAsset(assetId)
+        return RequestsExecutor.assetsGtwClient.assets.get$(assetId)
     }
 
     static executeCommand(commandName: string, body: any, node?: BrowserNode) {

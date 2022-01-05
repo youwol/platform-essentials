@@ -1,5 +1,5 @@
 import { Observable, of, ReplaySubject } from 'rxjs';
-import { Json, RequestOptions, resolveRequest } from '../utils';
+import { Json, RequestMonitoring, resolveRequest } from '../utils';
 import { cloneDeep, mergeWith } from 'lodash'
 
 
@@ -56,7 +56,7 @@ export class UserSettingsClient {
      * @param options request options
      * @returns response
      */
-    querySettings<T>(applicationId: string, defaultSettings: T, options: RequestOptions = {}): Observable<T> {
+    querySettings<T>(applicationId: string, defaultSettings: T, options: RequestMonitoring = {}): Observable<T> {
 
         this.defaultSettings[applicationId] = defaultSettings as unknown as Json
 
@@ -71,7 +71,7 @@ export class UserSettingsClient {
      * @param options request options
      * @returns response
      */
-    updateSettings<T>(applicationId: string, settingsUpdate: T, options: RequestOptions = {}): Observable<T> {
+    updateSettings<T>(applicationId: string, settingsUpdate: T, options: RequestMonitoring = {}): Observable<T> {
 
         let data = UserSettingsClient.getData()
         data[applicationId] = settingsUpdate

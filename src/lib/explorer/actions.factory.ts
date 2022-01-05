@@ -194,7 +194,7 @@ export function getActions$(
         ? item.node.driveId
         : item.node.id
 
-    return new AssetsGatewayClient().permissions$(id)
+    return new AssetsGatewayClient().explorer.getPermissions$(id)
         .pipe(
             map(permissions => ({ state, item: item, permissions })),
             map(({ state, item, permissions }) => {

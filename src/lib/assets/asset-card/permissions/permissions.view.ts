@@ -4,27 +4,7 @@ import { filter, share } from 'rxjs/operators'
 import { child$, VirtualDOM } from '@youwol/flux-view'
 import { ExposedGroupState, ExposedGroupView } from './group-permissions.view'
 import { Asset } from '../../..'
-import { AssetsGatewayClient } from '../../../clients/assets-gateway'
-
-
-export interface Access {
-    read: string
-    share: string
-    parameters: { [key: string]: any }
-    expiration: number | null
-}
-
-export interface ExposingGroupAccess {
-    name: string
-    groupId: string
-    access: Access
-}
-
-export interface AccessInfo {
-    owningGroup: { name: string },
-    consumerInfo: { permissions: { read: boolean, write: boolean, expiration: number | null } },
-    ownerInfo: null | { exposingGroups: Array<ExposingGroupAccess>, defaultAccess: Access }
-}
+import { AccessInfo, AssetsGatewayClient, GroupAccess } from '../../../clients/assets-gateway'
 
 
 export class AssetPermissionsView implements VirtualDOM {
@@ -41,7 +21,7 @@ export class AssetPermissionsView implements VirtualDOM {
 
     constructor(params: { asset: Asset }) {
         Object.assign(this, params)
-        let accessInfo$ = new AssetsGatewayClient().accessInfo$(this.asset.assetId).pipe(share())
+        let accessInfo$ = new AssetsGatewayClient().assets.getAccess$(this.asset.assetId).pipe(share())
         this.children = [
             child$(
                 accessInfo$,

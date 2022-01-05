@@ -1,50 +1,41 @@
 import { createObservableFromFetch } from '@youwol/flux-core';
-import { Observable, of, Subject } from 'rxjs';
-import { mergeMap, tap } from 'rxjs/operators';
+import { Observable, of, ReplaySubject, Subject } from 'rxjs';
+import { map, mergeMap, tap } from 'rxjs/operators';
+
+
+export type BodyContentType = 'text/plain' | 'application/json'
 
 
 export interface JsonMap { [member: string]: string | number | boolean | null | JsonArray | JsonMap };
 export interface JsonArray extends Array<string | number | boolean | null | JsonArray | JsonMap> { }
 export type Json = JsonMap | JsonArray | string | number | boolean | null;
 
-/** 
-  ## Abstract 
-     
-     This namespace encapsulates base classes allowing browsing,
-     reading, and writing like a filesystem on a local computer.
-
-     Usually, it is a thin layer that connects to a remote client who expose resources like a tree 
-     (e.g. github, google drive). It may altought not always be the case, like the 
-     [[LocalDrive]] shows.
-
-     When deriving a new drive, the central task is implementing a new type of [[Interfaces.Drive]].
-     One can also inherits from [[Interfaces.File]] and [[Interfaces.Folder]] to eventually add missing required features.
-
- */
-
 
 export type RequestStep = 'started' | 'transferring' | 'processing' | 'finished'
-export type RequestMethod = 'upload' | 'download' | 'delete' | 'query'
+
+
+export type CommandType = 'upload' | 'download' | 'create' | 'update' | 'delete' | 'query'
+
 
 export class RequestFollower {
 
     public readonly targetId: string
     public readonly channels$: Array<Subject<RequestEvent>>
     public readonly requestId: string
-    public readonly method: RequestMethod
+    public readonly commandType: CommandType
 
     totalCount: number
     transferredCount: number
 
-    constructor({ targetId, channels$, method }:
+    constructor({ targetId, channels$, commandType }:
         {
             targetId: string,
             channels$: Subject<RequestEvent> | Array<Subject<RequestEvent>>,
-            method: RequestMethod
+            commandType: CommandType
         }) {
         this.targetId = targetId
         this.channels$ = Array.isArray(channels$) ? channels$ : [channels$]
-        this.method = method
+        this.commandType = commandType
         this.requestId = `${Math.floor(Math.random() * 10000)}`
     }
 
@@ -57,7 +48,7 @@ export class RequestFollower {
                 step: 'started',
                 transferredCount: 0,
                 totalCount: this.totalCount,
-                method: this.method
+                commandType: this.commandType
             }))
     }
 
@@ -73,7 +64,7 @@ export class RequestFollower {
                     : 'transferring',
                 transferredCount: this.transferredCount,
                 totalCount: this.totalCount,
-                method: this.method
+                commandType: this.commandType
             }))
     }
 
@@ -86,7 +77,7 @@ export class RequestFollower {
                 step: 'finished',
                 transferredCount: this.transferredCount,
                 totalCount: this.totalCount,
-                method: this.method
+                commandType: this.commandType
             }))
     }
 
@@ -96,23 +87,18 @@ export interface RequestEvent {
 
     readonly requestId: string
     readonly targetId: string
-    readonly method: RequestMethod
+    readonly commandType: CommandType
     readonly step: RequestStep
     readonly totalCount: number
     readonly transferredCount: number
 }
 
 
-export interface RequestOptions {
+export interface RequestMonitoring {
     /**
      * Request followers
      */
     channels$?: Subject<RequestEvent> | Array<Subject<RequestEvent>>,
-
-    /**
-     * Headers provided with the request, attributes are merged with the ones provided at client's construction
-     */
-    headers?: Json
 
     /**
      * request label used in the events emitted in events$
@@ -121,7 +107,7 @@ export interface RequestOptions {
 }
 
 
-export function resolveRequest<T = unknown>(request: Request, method: RequestMethod, options: RequestOptions): Observable<T> {
+export function resolveRequest<T = unknown>(request: Request, commandType: CommandType, options: RequestMonitoring): Observable<T> {
 
     let { requestId, channels$ } = options
 
@@ -132,7 +118,49 @@ export function resolveRequest<T = unknown>(request: Request, method: RequestMet
     let follower = new RequestFollower({
         targetId: requestId,
         channels$,
-        method
+        commandType
+    })
+
+    return of({}).pipe(
+        tap(() => follower.start(1)),
+        mergeMap(() => createObservableFromFetch(request)),
+        tap(() => follower.end())
+    ) as Observable<T>
+}
+
+export interface NativeRequestOptions extends RequestInit {
+
+    json?: any
+}
+
+export function send$<T>(
+    commandType: CommandType,
+    path: string,
+    nativeOptions?: NativeRequestOptions,
+    monitoring?: RequestMonitoring
+): Observable<T> {
+
+    let { requestId, channels$ } = monitoring
+
+    if (nativeOptions.json) {
+        nativeOptions.body = JSON.stringify(nativeOptions.json)
+        nativeOptions.headers = nativeOptions.headers
+            ? { ...nativeOptions.headers, 'content-type': 'application/json' }
+            : { 'content-type': 'application/json' }
+    }
+    let request = new Request(
+        path,
+        nativeOptions
+    );
+
+    if (!channels$) {
+        return createObservableFromFetch(request)
+    }
+
+    let follower = new RequestFollower({
+        targetId: requestId || path,
+        channels$,
+        commandType
     })
 
     return of({}).pipe(
@@ -143,28 +171,99 @@ export function resolveRequest<T = unknown>(request: Request, method: RequestMet
 }
 
 
-export function send(method: RequestMethod, path: string, optionsNative?, optionsExtra?: RequestOptions) {
 
-    let { requestId, channels$ } = optionsExtra
+export function downloadBlob(
+    url: string,
+    fileId: string,
+    headers: Object,
+    options: RequestMonitoring,
+    total?: number,
+    useCache = true
+): Observable<Blob> {
 
-    let request = new Request(
-        path,
-        optionsNative
-    );
-
-    if (!channels$) {
-        return createObservableFromFetch(request)
-    }
+    let { requestId, channels$ } = options
 
     let follower = new RequestFollower({
-        targetId: requestId || path,
+        targetId: requestId || fileId,
         channels$,
-        method
+        commandType: 'download'
     })
 
-    return of({}).pipe(
-        tap(() => follower.start(1)),
-        mergeMap(() => createObservableFromFetch(request)),
-        tap(() => follower.end())
-    ) as any
+    let response$ = new ReplaySubject<Blob>(1)
+    const xhr = new XMLHttpRequest()
+    if (!useCache)
+        url = url + '?_=' + new Date().getTime()
+
+    xhr.open('GET', url)
+    Object.entries(headers).forEach(([key, val]: [string, string]) => {
+        xhr.setRequestHeader(key, val)
+    })
+
+    xhr.responseType = 'blob'
+
+    xhr.onloadstart = (event) => follower.start(total || event.total)
+
+    xhr.onprogress = (event) => follower.progressTo(event.loaded)
+
+    xhr.onload = (e) => {
+        follower.end()
+        response$.next(xhr.response)
+    }
+    xhr.send()
+    return response$
 }
+
+export function uploadBlob(
+    url: string,
+    fileName: string,
+    blob: Blob,
+    headers,
+    options: RequestMonitoring,
+    fileId?: string
+): Observable<any | Error> {
+
+    let { requestId, channels$ } = options
+
+    let follower = new RequestFollower({
+        targetId: fileId,
+        channels$,
+        commandType: 'upload'
+    })
+
+    let file = new File([blob], fileName, { type: blob.type })
+    let formData = new FormData();
+    formData.append("file", file);
+
+    var xhr = new XMLHttpRequest();
+    let response = new ReplaySubject<any>(1)
+
+    xhr.open("POST", url, true);
+    Object.entries(headers).forEach(([key, val]: [string, string]) => {
+        xhr.setRequestHeader(key, val)
+    })
+
+    channels$ && (xhr.onloadstart = (event) => follower.start(event.total))
+
+    channels$ && (xhr.upload.onprogress = (event) => follower.progressTo(event.loaded))
+
+    xhr.onload = (event) => {
+        if (xhr.readyState === 4) {
+            if (xhr.status === 200) {
+                channels$ && follower.end()
+                response.next(JSON.parse(xhr.responseText))
+            }
+            else {
+                response.next(new Error(xhr.statusText))
+            }
+        }
+    };
+    xhr.send(formData);
+    return response.pipe(
+        map(resp => {
+            if (resp instanceof Error)
+                throw resp
+            return resp
+        })
+    )
+}
+

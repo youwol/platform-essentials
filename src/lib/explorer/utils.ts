@@ -34,7 +34,7 @@ export function createTreeGroup(groupName: string, respUserDrives, respDefaultDr
         name: 'Trash',
         folderId: 'trash',
         parentFolderId: respDefaultDrive.driveId,
-        children: RequestsExecutor.getDeletedChildren(respDefaultDrive.groupId, respDefaultDrive.driveId)
+        children: RequestsExecutor.getDeletedItems(respDefaultDrive.driveId)
     })
     let systemFolderNode = new FolderNode<'system'>({
         ...respDefaultDrive,

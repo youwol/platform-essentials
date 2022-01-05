@@ -5,7 +5,7 @@ import {
     concatMap, distinctUntilChanged, filter, map, mergeMap,
     scan, share, takeUntil, tap
 } from 'rxjs/operators'
-import { Asset, AssetsGatewayClient } from '../../../clients/assets-gateway'
+import { Asset, AssetsGatewayClient, Requirements } from '../../../clients/assets-gateway'
 
 
 
@@ -44,7 +44,7 @@ export function getActions(asset: Asset) {
         ]
     }
 }
-
+/*
 class LoadingGraph {
 
     type: string
@@ -59,6 +59,7 @@ class Requirements {
     libraries: { [key: string]: string }
     loadingGraph: LoadingGraph
 }
+*/
 class Lib {
     id: string
     name: string
@@ -66,7 +67,7 @@ class Lib {
 }
 export class FluxDependenciesState {
 
-    accessInfo$ = new AssetsGatewayClient().accessInfo$(this.asset.assetId).pipe(share())
+    accessInfo$ = new AssetsGatewayClient().assets.getAccess$(this.asset.assetId).pipe(share())
 
     userPicks = {}
     libsVersionsCache = {}
@@ -106,11 +107,11 @@ export class FluxDependenciesState {
         this.userPicks = {}
         this.libsVersionsCache = {}
 
-        this.assetsGtwClient.getFluxProject$(asset.rawId)
+        this.assetsGtwClient.raw.fluxProject.queryProject$(asset.rawId)
             .subscribe((project) => {
                 this.requirements$.next(project.requirements)
                 this.selectedPacks$.next(project.requirements.fluxPacks)
-                this.selectedComponents$.next(project.requirements.fluxComponents)
+                //this.selectedComponents$.next(project.requirements.fluxComponents)
             })
 
         //  versions$: Versions of the libs available for each dependencies
@@ -118,7 +119,7 @@ export class FluxDependenciesState {
             if (lib.id) {
                 return this.libsVersionsCache[lib.id]
                     ? of(this.libsVersionsCache[lib.id])
-                    : this.assetsGtwClient.getPackageMetadata$(lib.id).pipe(
+                    : this.assetsGtwClient.raw.package.queryMetadata$(lib.id).pipe(
                         tap(library => this.libsVersionsCache[lib.id] = library)
                     )
 
@@ -241,13 +242,13 @@ export class FluxDependenciesState {
             libraries: librariesVersion
         }
 
-        this.assetsGtwClient.updateFluxProjectMetadata$(this.asset.rawId, body).pipe(
-            mergeMap(() => this.assetsGtwClient.getFluxProject$(this.asset.rawId))
+        this.assetsGtwClient.raw.fluxProject.updateMetadata$(this.asset.rawId, body).pipe(
+            mergeMap(() => this.assetsGtwClient.raw.fluxProject.queryProject$(this.asset.rawId))
         )
             .subscribe((project) => {
                 this.requirements$.next(project.requirements)
                 this.selectedPacks$.next(project.requirements.fluxPacks)
-                this.selectedComponents$.next(project.requirements.fluxComponents)
+                //this.selectedComponents$.next(project.requirements.fluxComponents)
             })
     }
 

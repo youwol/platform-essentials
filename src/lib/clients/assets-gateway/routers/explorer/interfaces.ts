@@ -63,3 +63,11 @@ export interface ItemResponse {
     borrowed: boolean
     origin?: Origin
 }
+
+export interface PermissionsResponse {
+
+    read: boolean
+    share: boolean
+    write: boolean
+    expiration?: Origin
+}

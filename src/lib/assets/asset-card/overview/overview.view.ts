@@ -55,7 +55,7 @@ export class AssetOverview implements VirtualDOM {
             this.description$
         ]).pipe(
             mergeMap(([name, tags, images, description]) => {
-                return this.assetsGtwClient.updateAsset$(this.asset.assetId, { name, tags, description })
+                return this.assetsGtwClient.assets.update$(this.asset.assetId, { name, tags, description })
             }),
             shareReplay(1)
         )
@@ -96,13 +96,13 @@ export class AssetOverview implements VirtualDOM {
                 screenShotsView.fileUploaded$.pipe(
                     mergeMap(({ file, src }) => {
                         let id = Math.floor(Math.random() * 1e5) + "." + file.name.split('.').slice(-1)
-                        return this.assetsGtwClient.addPicture$(this.asset.assetId, { id, file: file })
+                        return this.assetsGtwClient.assets.addPicture$(this.asset.assetId, { id, file: file })
                     })
                 ).subscribe((asset: Asset) => {
                     this.assetOutput$.next(asset)
                 }),
                 screenShotsView.fileRemoved$.pipe(
-                    mergeMap(({ imageId }) => this.assetsGtwClient.removePicture$(this.asset.assetId, imageId)
+                    mergeMap(({ imageId }) => this.assetsGtwClient.assets.removePicture$(this.asset.assetId, imageId)
                     )
                 ).subscribe((asset: Asset) => {
                     this.assetOutput$.next(asset)

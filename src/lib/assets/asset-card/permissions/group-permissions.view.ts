@@ -2,29 +2,27 @@ import { attr$, child$, HTMLElement$, VirtualDOM } from "@youwol/flux-view"
 import { Select } from "@youwol/fv-input"
 import { BehaviorSubject, combineLatest, Subject } from "rxjs"
 import { distinct, map, skip } from "rxjs/operators"
-import { AccessPolicyBody, AssetsGatewayClient } from "../../../clients/assets-gateway"
-
-import { Access, ExposingGroupAccess } from "./permissions.view"
+import { AccessPolicyBody, AssetsGatewayClient, ExposingGroup, GroupAccess } from "../../../clients/assets-gateway"
 
 export class ExposedGroupState {
 
     public readonly groupName: string
     public readonly groupId: string
-    public readonly groupAccess$: BehaviorSubject<ExposingGroupAccess>
+    public readonly groupAccess$: BehaviorSubject<ExposingGroup>
     public readonly loading$ = new BehaviorSubject<boolean>(false)
 
     constructor(
         public readonly assetId,
-        public readonly data: ExposingGroupAccess
+        public readonly data: ExposingGroup
     ) {
         this.groupId = data.groupId
         this.groupName = data.name
-        this.groupAccess$ = new BehaviorSubject<ExposingGroupAccess>(data)
+        this.groupAccess$ = new BehaviorSubject<ExposingGroup>(data)
     }
 
     update(body: AccessPolicyBody) {
         this.loading$.next(true)
-        new AssetsGatewayClient().updateAccess$(this.assetId, this.groupId, body)
+        new AssetsGatewayClient().assets.updateAccess$(this.assetId, this.groupId, body)
             .subscribe(groupAccess => {
                 //this.groupAccess$.next(groupAccess)
                 this.loading$.next(false)
@@ -33,14 +31,14 @@ export class ExposedGroupState {
 
     refresh() {
         this.loading$.next(true)
-        new AssetsGatewayClient().accessInfo$(this.assetId)
+        new AssetsGatewayClient().assets.getAccess$(this.assetId)
             .subscribe(info => {
 
                 let groupAccess = this.groupId == "*"
                     ? info.ownerInfo.defaultAccess
                     : info.ownerInfo.exposingGroups.find(g => g.groupId == this.groupId)
 
-                this.groupAccess$.next({ name: this.groupName, groupId: this.groupId, access: groupAccess })
+                this.groupAccess$.next({ name: this.groupName, groupId: this.groupId, access: groupAccess } as any)
                 this.loading$.next(false)
             })
     }
@@ -141,7 +139,7 @@ export class ExposedGroupView implements VirtualDOM {
 }
 
 
-function expirationDateAccessView(access: Access, parameters$: Subject<any>) {
+function expirationDateAccessView(access: GroupAccess, parameters$: Subject<any>) {
 
     let edition$ = new BehaviorSubject<boolean>(false)
     return {

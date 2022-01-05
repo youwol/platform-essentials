@@ -205,7 +205,7 @@ export class ExplorerState {
                 })
                 tree.replaceNode(childFolder.id, folderNode)
             },
-            request: RequestsExecutor.newFolder(parentNode, { name: 'new folder', folderId: uuidv4() })
+            request: RequestsExecutor.createFolder(parentNode, { name: 'new folder', folderId: uuidv4() })
         })
         tree.addChild(parentNode.id, childFolder)
     }
