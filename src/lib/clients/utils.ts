@@ -140,6 +140,9 @@ export function send$<T>(
     monitoring?: RequestMonitoring
 ): Observable<T> {
 
+    monitoring = monitoring || {}
+    nativeOptions = nativeOptions || {}
+
     let { requestId, channels$ } = monitoring
 
     if (nativeOptions.json) {
