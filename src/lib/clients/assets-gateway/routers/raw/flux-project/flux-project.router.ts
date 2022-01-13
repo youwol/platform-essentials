@@ -21,7 +21,7 @@ export class FluxProjectRouter extends Router {
 
         return this.send$({
             command: 'query',
-            path: `${this.basePath}/${rawId}`,
+            path: `/${rawId}`,
             monitoring
         })
     }
@@ -34,7 +34,7 @@ export class FluxProjectRouter extends Router {
 
         return this.send$({
             command: 'update',
-            path: `${this.basePath}/${rawId}/metadata`,
+            path: `/${rawId}/metadata`,
             requestOptions: { json: body },
             monitoring
         })

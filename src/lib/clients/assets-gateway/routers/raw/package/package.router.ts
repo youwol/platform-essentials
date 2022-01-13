@@ -17,7 +17,7 @@ export class PackageRouter extends Router {
     ) {
         return this.send$({
             command: 'query',
-            path: `${this.basePath}/metadata/${rawId}`,
+            path: `/metadata/${rawId}`,
             monitoring
         })
     }
