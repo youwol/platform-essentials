@@ -290,17 +290,7 @@ export class ExplorerState {
     }
 
     uploadAsset(node: AnyItemNode) {
-
-        let status = node.addStatus({ type: 'request-pending', id: uuidv4() })
-
-        RequestsExecutor.executeCommand(
-            "upload-asset",
-            {
-                assetId: node.assetId
-            }
-        ).subscribe(() => {
-            node.removeStatus(status)
-        })
+        RequestsExecutor.uploadLocalAsset(node.assetId, node).subscribe()
     }
 }
 

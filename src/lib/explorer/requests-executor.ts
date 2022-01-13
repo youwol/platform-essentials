@@ -8,7 +8,7 @@ import { uuidv4 } from '@youwol/flux-core';
 import { ImmutableTree } from "@youwol/fv-tree";
 import { Asset, AssetsGatewayClient, DriveResponse, FolderResponse, ItemResponse } from '..';
 import { Observable, of } from 'rxjs';
-import { resolveRequest } from '../clients/utils';
+import { resolveRequest, send$ } from '../clients/utils';
 import { isLocalYouwol } from './utils';
 
 export let debugDelay = 0
@@ -299,7 +299,7 @@ export class RequestsExecutor {
         return RequestsExecutor.assetsGtwClient.assets.get$(assetId)
     }
 
-    static executeCommand(commandName: string, body: any, node?: BrowserNode) {
+    static uploadLocalAsset(assetId: string, node?: BrowserNode) {
 
         if (!isLocalYouwol())
             return of(undefined)
@@ -307,11 +307,11 @@ export class RequestsExecutor {
         let uid = uuidv4()
         node && node.addStatus({ type: 'request-pending', id: uid })
 
-        let request = new Request(
-            `${window.location.origin}/admin/commands/${commandName}`,
-            { method: 'POST', body: JSON.stringify(body) }
-        );
-        return resolveRequest(request, 'query', { requestId: "groups" }).pipe(
+        return send$(
+            'upload',
+            `${window.location.origin}/admin/environment/upload/${assetId}`,
+            { method: 'POST' }
+        ).pipe(
             delay(debugDelay),
             tap(() => node && node.removeStatus({ type: 'request-pending', id: uid }))
         )
