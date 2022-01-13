@@ -3,7 +3,7 @@ import { Button } from "@youwol/fv-button";
 import { from } from "rxjs";
 import { map } from "rxjs/operators";
 import { PlatformSettingsStore } from "../platform-settings";
-import { ChildApplicationAPI, PlatformState } from "../platform.state";
+import { ChildApplicationAPI, isPlatformInstance, PlatformState } from "../platform.state";
 import { UserMenuView } from "./user-menu.view";
 import { YouwolMenuView } from "./youwol-menu.view";
 
@@ -69,7 +69,7 @@ export class YouwolBannerView implements VirtualDOM {
         Object.assign(this, params)
         let instanceId = ChildApplicationAPI.getAppInstanceId()
         let youwolOS = ChildApplicationAPI.getOsInstance()
-        if (youwolOS && instanceId) {
+        if (instanceId && isPlatformInstance(youwolOS)) {
             youwolOS.setTopBannerViews(
                 instanceId,
                 {

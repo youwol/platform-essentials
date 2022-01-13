@@ -1,4 +1,4 @@
-import { BehaviorSubject, Subject } from "rxjs"
+import { BehaviorSubject, Observable, Subject } from "rxjs"
 import { RunningApp } from './running-app.view'
 import { VirtualDOM } from '@youwol/flux-view'
 import { YouwolBannerState } from './top-banner'
@@ -7,15 +7,30 @@ import { filter, map, take, tap } from 'rxjs/operators'
 import { PlatformEvent } from "./platform.events"
 
 
+export interface IPlatformHandler {
+
+    runningApplications$: Observable<RunningApp[]>
+    broadcastedEvents$: Observable<PlatformEvent>
+
+    createInstance$({ cdnPackage, parameters, focus, title }: {
+        cdnPackage: string,
+        title?: string,
+        parameters?: { [key: string]: string },
+        focus: boolean
+    })
+
+    broadcastEvent(event: PlatformEvent)
+}
+
+
 export class ChildApplicationAPI {
 
     static getAppInstanceId() {
         return new URLSearchParams(window.location.search).get("instance-id")
     }
 
-
-    static getOsInstance(): PlatformState {
-        return parent['@youwol/platform-essentials']?.PlatformState.instance || PlatformState.instance
+    static getOsInstance(): IPlatformHandler {
+        return parent['@youwol/platform-essentials']?.PlatformState.instance || new NoPlatformHandler()
     }
 
     static setProperties({ snippet }:
@@ -35,7 +50,40 @@ export class ChildApplicationAPI {
     }
 }
 
-export class PlatformState {
+class NoPlatformHandler implements IPlatformHandler {
+
+    public readonly runningApplications$ = new Subject<RunningApp[]>()
+    public readonly broadcastedEvents$ = new Subject<PlatformEvent>()
+
+    createInstance$({ cdnPackage, parameters, focus, title }: {
+        cdnPackage: string,
+        title?: string,
+        parameters?: { [key: string]: string },
+        focus: boolean
+    }) {
+        return PlatformSettingsStore.queryMetadata$(cdnPackage).pipe(
+            tap((metadata) => {
+                let queryParams = Object.entries(parameters || {})
+                    .reduce((acc, [k, v]) => `${acc}&${k}=${v}`, "")
+                let url = `/applications/${cdnPackage}/latest?${queryParams}`
+                focus ? window.open(url, '_self') : window.open(url, '_blank')
+            })
+        )
+    }
+
+    broadcastEvent(event: PlatformEvent) {
+        this.broadcastedEvents$.next(event)
+    }
+}
+
+export function isPlatformInstance(p: IPlatformHandler): p is PlatformState {
+
+    return (p as PlatformState).type && (p as PlatformState).type == 'PlatformState'
+}
+
+export class PlatformState implements IPlatformHandler {
+
+    public readonly type = 'PlatformState'
 
     public readonly topBannerState = new YouwolBannerState()
 

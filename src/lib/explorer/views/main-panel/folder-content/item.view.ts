@@ -10,7 +10,7 @@ import { ExplorerState } from "../../../explorer.state";
 import { RequestsExecutor } from "../../../requests-executor";
 import { BrowserNode, FolderNode, ItemNode } from "../../../nodes";
 import { PlatformSettingsStore } from "../../../../platform-settings";
-import { ChildApplicationAPI } from "../../../../platform.state";
+import { ChildApplicationAPI, IPlatformHandler } from "../../../../platform.state";
 
 
 export class ItemView {
@@ -26,7 +26,7 @@ export class ItemView {
     public readonly hovered$: Observable<BrowserNode>
 
 
-    public readonly platformState: PlatformState
+    public readonly platformHandler: IPlatformHandler
 
     constructor(params: {
         state: ExplorerState,
@@ -34,7 +34,7 @@ export class ItemView {
         hovered$?: Observable<BrowserNode>
     }) {
         Object.assign(this, params)
-        this.platformState = ChildApplicationAPI.getOsInstance()
+        this.platformHandler = ChildApplicationAPI.getOsInstance()
 
         this.hovered$ = this.hovered$ || this.state.selectedItem$
         let baseClass = 'd-flex align-items-center p-1 rounded m-2 fv-pointer'
@@ -84,16 +84,13 @@ export class ItemView {
         ]
         this.onclick = () => this.state.selectItem(this.item)
 
-        if (!this.platformState)
-            return
-
         this.ondblclick = () => {
             PlatformSettingsStore.getOpeningApps$(this.item as any).pipe(
                 take(1),
                 filter(apps => apps.length > 0),
                 map(apps => apps[0]),
                 mergeMap((app) => {
-                    return this.platformState.createInstance$({
+                    return this.platformHandler.createInstance$({
                         cdnPackage: app.cdnPackage,
                         parameters: app.parameters,
                         title: this.item.name,
