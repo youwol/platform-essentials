@@ -6,3 +6,5 @@ junit.xml
 src/auto_generated.ts
 cdn.zip
 src/tests/databases
+.yw_test_env
+src/tests/yw_config/databases/**
