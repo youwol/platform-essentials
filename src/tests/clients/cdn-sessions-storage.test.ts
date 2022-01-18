@@ -7,7 +7,7 @@ import { Json } from '../..'
 import { send$ } from '../../lib/clients/utils'
 
 
-let pyYouwolBasePath = "http://localhost:2000"
+let pyYouwolBasePath = "http://localhost:2001"
 
 CdnSessionsStorageClient.staticBasePath = `${pyYouwolBasePath}/api/cdn-sessions-storage`
 
@@ -16,16 +16,6 @@ let storage = new CdnSessionsStorageClient()
 
 beforeAll(async (done) => {
 
-    /*fetch(new Request(
-        `${pyYouwolBasePath}/admin/environment/configuration/profile`,
-        {
-            method: "POST",
-            body: JSON.stringify({ profile: undefined }),
-            headers: { "content-type": "application/json" }
-        }
-    )).then((resp) => {
-        done()
-    })*/
     fetch(new Request(
         `${pyYouwolBasePath}/admin/custom-commands/reset-db`
     )).then(() => {
