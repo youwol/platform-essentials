@@ -16,6 +16,8 @@
         "build": "yarn build:dev",
         "build:dev": "yarn autogen && webpack --mode development",
         "build:prod": "yarn autogen && webpack --mode production",
+        "create-test-env": ". ./src/tests/yw_config/create-env.sh",
+        "start-test-env": "( . ./src/tests/yw_config/.yw_test_env/bin/activate && cd ./src/tests/yw_config/ && youwol --conf=yw_config.py)",
         "test": "jest -c ./jest.config.js --rootDir . -i",
         "test-coverage": "jest -c ./jest.config.js --rootDir . -i --collect-coverage --collectCoverageFrom=./src/lib/**/*.ts ",
         "start": "webpack serve",
