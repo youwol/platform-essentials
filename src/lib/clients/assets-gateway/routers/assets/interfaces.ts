@@ -5,6 +5,7 @@ export interface Asset {
 
     readonly assetId: string
     readonly rawId: string
+    readonly treeId: string
     readonly kind: string
     readonly name: string
     readonly groupId: string
