@@ -172,7 +172,7 @@ let databaseActionsFactory = {
 
 export class RequestsExecutor {
 
-    static assetsGtwClient = new AssetsGatewayClient({ headers: { "tutu": 'tata' } })
+    static assetsGtwClient = new AssetsGatewayClient()
 
     static execute(update: ImmutableTree.Updates<BrowserNode>) {
 
