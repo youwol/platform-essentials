@@ -1,11 +1,9 @@
-import { children$, VirtualDOM } from '@youwol/flux-view'
+import { child$, VirtualDOM } from '@youwol/flux-view'
 import { Button } from '@youwol/fv-button'
-import { of } from 'rxjs'
-import { map, mergeMap } from 'rxjs/operators'
+import { ReplaySubject } from 'rxjs'
 import { ExplorerState } from '../../explorer.state'
-import { Action, GENERIC_ACTIONS, getActions$ } from '../../actions.factory'
-import { PlatformSettingsStore, PlatformState } from '../../..'
-import { AnyItemNode } from '../../nodes'
+import { Action } from '../../actions.factory'
+import { AnyFolderNode, AnyItemNode } from '../../nodes'
 import { ChildApplicationAPI, IPlatformHandler } from '../../../platform.state'
 
 
@@ -31,6 +29,7 @@ export class ButtonView extends Button.View {
         this.class = `${this.class} ${withClass}`
     }
 }
+
 export class ActionsView implements VirtualDOM {
 
     static ClassSelector = "actions-view"
@@ -45,75 +44,48 @@ export class ActionsView implements VirtualDOM {
 
     public readonly platformHandler: IPlatformHandler
 
+    public readonly displayedActions$: ReplaySubject<{ item: AnyItemNode, folder: AnyFolderNode, actions: Action[] }>
+
     constructor(params: { state: ExplorerState }) {
         Object.assign(this, params)
 
         this.platformHandler = ChildApplicationAPI.getOsInstance()
-
-        let actionsParentFolder$ = this.state.currentFolder$.pipe(
-            mergeMap(({ folder }) => getActions$(this.state, { node: folder, selection: 'indirect' }, Object.values(GENERIC_ACTIONS)))
-        )
-        let actionSelectedItem$ = this.state.selectedItem$.pipe(
-            mergeMap((item) => item
-                ? getActions$(this.state, { node: item, selection: 'direct' }, Object.values(GENERIC_ACTIONS))
-                : of([]))
-        )
-
-        let actionSpecificItem$ = this.state.selectedItem$.pipe(
-            mergeMap((item: AnyItemNode) => {
-                if (!item)
-                    return of([])
-                return PlatformSettingsStore.getOpeningApps$(item as any).pipe(
-                    map((apps) => {
-                        return apps.map((app) => {
-                            return {
-                                icon: "fas fa-play",
-                                name: app.name,
-                                enable: true,
-                                exe: () => {
-                                    this.platformHandler.createInstance$({
-                                        cdnPackage: app.cdnPackage,
-                                        parameters: app.parameters,
-                                        focus: true
-                                    }).subscribe()
-                                },
-                                applicable: () => true
-                            }
-                        })
-                    })
-                )
-            })
-        )
-
+        this.displayedActions$ = new ReplaySubject<{ item: AnyItemNode, folder: AnyFolderNode, actions: Action[] }>(1)
+        let actions$ = this.state.actions$
         this.children = [
-            this.actionsList(actionSpecificItem$),
-            this.actionsList(actionSelectedItem$),
-            this.actionsList(actionsParentFolder$, false)
+            child$(
+                actions$,
+                ({ item, folder, actions }) => {
+                    return {
+                        class: 'w-100',
+                        children: actions.map(action => {
+                            return new ActionBtnView({ action })
+                        }),
+                        connectedCallback: () => {
+                            this.displayedActions$.next({ item, folder, actions })
+                        }
+                    }
+                }
+            )
         ]
     }
-    actionsList(actions$, withSeparator = true) {
-        let sep: any = withSeparator ? [{ tag: 'br' }] : []
-        return {
-            class: 'd-flex flex-column',
-            children: children$(
-                actions$,
-                (actions: Action[]) => actions.length > 0
-                    ? actions.map((action) => this.actionView(action)).concat(sep)
-                    : [{}]
-            )
-        }
-    }
+}
 
-    actionView(action: Action) {
-        let btn = new ButtonView({
-            name: action.name,
-            icon: action.icon,
-            withClass: 'my-1 fv-border-primary',
-            enabled: action.enable
+export class ActionBtnView extends ButtonView {
+
+    static ClassSelector = "action-btn-view"
+
+    public readonly action: Action
+
+    constructor(params: { action: Action }) {
+        super({
+            name: params.action.name,
+            icon: params.action.icon,
+            withClass: `${ActionBtnView.ClassSelector} my-1 fv-border-primary w-100`,
+            enabled: params.action.enable
         })
-        btn.state.click$.subscribe(() => action.exe())
-        return btn
+        Object.assign(this, params)
+        this.state.click$.subscribe(() => this.action.exe())
     }
-
 }
 
