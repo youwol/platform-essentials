@@ -4,12 +4,14 @@ import { Router } from "../../../router"
 import { RequestMonitoring } from "../../../utils"
 import { FluxProjectRouter } from "./flux-project/flux-project.router"
 import { AccessInfo, ExposingGroup, AccessPolicyBody, Asset, UpdateAssetBody } from "./interfaces"
+import { StoryRouter } from "./story/story.router"
 
 
 export class AssetsRouter extends Router {
 
 
     public readonly fluxProject: FluxProjectRouter
+    public readonly story: StoryRouter
 
 
     constructor(params: {
@@ -18,6 +20,7 @@ export class AssetsRouter extends Router {
     }) {
         super(params.headers, `${params.rootPath}/assets`)
         this.fluxProject = new FluxProjectRouter({ rootPath: this.basePath, headers: this.headers })
+        this.story = new StoryRouter({ rootPath: this.basePath, headers: this.headers })
     }
 
 
