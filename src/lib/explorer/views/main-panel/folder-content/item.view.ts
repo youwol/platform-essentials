@@ -1,14 +1,14 @@
 import { attr$, child$, Stream$, VirtualDOM } from "@youwol/flux-view";
 import {
     popupAssetModalView, ywSpinnerView, AssetActionsView,
-    PackageInfoView, AssetPermissionsView, FluxDependenciesView, PlatformState
+    PackageInfoView, AssetPermissionsView, FluxDependenciesView, PlatformState, Asset
 } from "../../../..";
 
-import { Observable, of } from "rxjs";
+import { BehaviorSubject, merge, Observable, of } from "rxjs";
 import { distinct, filter, map, mergeMap, take } from "rxjs/operators";
 import { ExplorerState } from "../../../explorer.state";
 import { RequestsExecutor } from "../../../requests-executor";
-import { BrowserNode, FolderNode, ItemNode } from "../../../nodes";
+import { AnyItemNode, BrowserNode, FolderNode, ItemNode } from "../../../nodes";
 import { PlatformSettingsStore } from "../../../../platform-settings";
 import { ChildApplicationAPI, IPlatformHandler } from "../../../../platform.state";
 
@@ -37,8 +37,10 @@ export class ItemView {
         Object.assign(this, params)
         this.platformHandler = ChildApplicationAPI.getOsInstance()
 
-        this.hovered$ = this.hovered$ || this.state.selectedItem$
-        let baseClass = 'd-flex align-items-center p-1 rounded m-2 fv-pointer'
+        this.hovered$ = params.hovered$
+            ? merge(params.hovered$, this.state.selectedItem$)
+            : this.state.selectedItem$
+
         this.class = attr$(
             this.state.selectedItem$,
             (node) => {
@@ -80,7 +82,9 @@ export class ItemView {
             ),
             child$(
                 this.hovered$,
-                (node) => this.infosView(node)
+                (node) => {
+                    return this.infosView(node)
+                }
             )
         ]
         this.onclick = () => this.state.selectItem(this.item)
@@ -128,41 +132,7 @@ export class ItemView {
         if (!(node instanceof ItemNode))
             return {}
 
-        let asset$ = of(node).pipe(
-            mergeMap(({ assetId }) => {
-                return RequestsExecutor.getAsset(assetId)
-            })
-        )
-        let infoView = {
-            tag: 'button',
-            class: 'fas fv-btn-secondary fa-info-circle fv-text-primary fv-pointer mx-4 rounded p-1',
-            onclick: () => {
-                let withTabs = {
-                    Permissions: new AssetPermissionsView({ asset: node as any })
-                }
-                if (node.kind == "flux-project") {
-                    withTabs['Dependencies'] = new FluxDependenciesView({ asset: node as any })
-                }
-                if (node.kind == "package") {
-                    withTabs['Package Info'] = new PackageInfoView({ asset: node as any })
-                }
-                let assetUpdate$ = popupAssetModalView({
-                    asset$,
-                    actionsFactory: (asset) => {
-                        return new AssetActionsView({ asset })
-                    },
-                    withTabs
-                })
-
-                assetUpdate$.pipe(
-                    map(asset => asset.name),
-                    distinct()
-                ).subscribe((name) => {
-                    this.state.rename(node, name, false)
-                })
-            }
-        }
-        return node.id == this.item.id ? infoView : {}
+        return node.id == this.item.id ? new InfoBtnView({ state: this.state, node: node }) : {}
     }
 
 
@@ -182,5 +152,62 @@ export class ItemView {
             }
         }
 
+    }
+}
+
+
+export class InfoBtnView implements VirtualDOM {
+
+    static ClassSelector = "info-btn-view"
+
+    public readonly tag = 'button'
+    public readonly class = `${InfoBtnView.ClassSelector} fas fv-btn-secondary fa-info-circle fv-text-primary fv-pointer mx-4 rounded p-1`
+
+    public readonly node: AnyItemNode
+    public readonly asset$: Observable<Asset>
+    public readonly state: ExplorerState
+
+    public readonly popupDisplayed$ = new BehaviorSubject<boolean>(false)
+
+    public readonly onclick = () => {
+
+        let withTabs = {
+            Permissions: new AssetPermissionsView({ asset: this.node as any })
+        }
+        if (this.node.kind == "flux-project") {
+            withTabs['Dependencies'] = new FluxDependenciesView({ asset: this.node as any })
+        }
+        if (this.node.kind == "package") {
+            withTabs['Package Info'] = new PackageInfoView({ asset: this.node as any })
+        }
+        this.asset$.pipe(
+            take(1)
+        ).subscribe(asset => {
+            let assetUpdate$ = popupAssetModalView({
+                asset,
+                actionsFactory: (asset) => {
+                    return new AssetActionsView({ asset })
+                },
+                withTabs
+            })
+            assetUpdate$.pipe(
+                map(asset => asset.name),
+                distinct()
+            ).subscribe((name) => {
+                this.state.rename(this.node, name, false)
+            })
+            this.popupDisplayed$.next(true)
+        })
+    }
+
+    constructor(params: { state: ExplorerState, node: AnyItemNode }) {
+
+        Object.assign(this, params)
+
+        this.asset$ = of(this.node).pipe(
+            mergeMap(({ assetId }) => {
+                return RequestsExecutor.getAsset(assetId)
+            })
+        )
     }
 }
