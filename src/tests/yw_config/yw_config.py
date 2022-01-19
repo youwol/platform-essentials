@@ -2,17 +2,19 @@ import shutil
 from pathlib import Path
 
 from youwol.configuration.config_from_module import IConfigurationFactory, Configuration
-from youwol.configuration.models_config import Redirection
 from youwol.environment.models import Events
+from youwol.environment.youwol_environment import YouwolEnvironment
 from youwol.routers.custom_commands.models import Command
 from youwol_utils.context import Context
 from youwol.main_args import MainArguments
 
 
-def clear_database(_ctx: Context):
-    shutil.rmtree("databases")
-    shutil.copytree(src="empty_databases",
-                    dst="databases")
+async def clear_database(ctx: Context):
+    env = await ctx.get('env', YouwolEnvironment)
+    parent_folder = env.pathsBook.config.parent
+    shutil.rmtree(parent_folder / "databases")
+    shutil.copytree(src=parent_folder / "empty_databases",
+                    dst=parent_folder / "databases")
 
 
 class ConfigurationFactory(IConfigurationFactory):
@@ -33,7 +35,7 @@ class ConfigurationFactory(IConfigurationFactory):
                 )
             ],
             events=Events(
-                onLoad=lambda config, ctx: clear_database(ctx)
+                onLoad=lambda _config, ctx: clear_database(ctx)
             ),
         )
        

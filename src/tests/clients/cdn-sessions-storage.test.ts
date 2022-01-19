@@ -2,36 +2,20 @@ import '../mock-requests'
 import {
     CdnSessionsStorageClient, HealthzResponse
 } from '../../lib/clients/cdn-sessions-storage'
-import { mergeMap, tap } from 'rxjs/operators'
+
 import { Json } from '../..'
-import { send$ } from '../../lib/clients/utils'
+import { getPyYouwolBasePath, resetPyYouwolDbs } from '../common'
 
-
-let pyYouwolBasePath = "http://localhost:2001"
-
-CdnSessionsStorageClient.staticBasePath = `${pyYouwolBasePath}/api/cdn-sessions-storage`
-
-let storage = new CdnSessionsStorageClient()
+let storage = new CdnSessionsStorageClient({
+    basePath: `${getPyYouwolBasePath()}/api/cdn-sessions-storage`
+})
 
 
 beforeAll(async (done) => {
-
-    fetch(new Request(
-        `${pyYouwolBasePath}/admin/custom-commands/reset-db`
-    )).then(() => {
+    resetPyYouwolDbs().then(() => {
         done()
     })
 })
-
-function expectAttributes(resp, attributes: Array<string | [string, any]>) {
-
-    attributes.forEach((att) => {
-        if (Array.isArray(att))
-            expect(resp[att[0]]).toEqual(att[1])
-        else
-            expect(resp[att]).toBeTruthy()
-    })
-}
 
 let testData = {
     content: 'some content'
@@ -78,4 +62,5 @@ test('get data', (done) => {
         done()
     })
 })
+
 

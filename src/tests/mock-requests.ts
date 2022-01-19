@@ -59,7 +59,7 @@ function mockFetch(req: MockRequest): Promise<any> {
                 request({
                     url: req.url,
                     method: req.options.method,
-                    body: JSON.parse(req.options.body),
+                    body: req.options.body ? JSON.parse(req.options.body) : {},
                     json: true
                 }, (err, response, body) => {
                     resolve(new RawResponse(body))
@@ -84,6 +84,9 @@ function mockFetch(req: MockRequest): Promise<any> {
 (window as any)["Request"] = MockRequest;
 
 (window as any)["fetch"] = mockFetch;
+
+(window as any)["@youwol/cdn-client"] = {};
+
 
 /*
             http.get(req.url, res => {
