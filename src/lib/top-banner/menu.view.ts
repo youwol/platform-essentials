@@ -10,22 +10,9 @@
 
 import { child$, VirtualDOM } from "@youwol/flux-view"
 import { BehaviorSubject } from "rxjs"
-import { SettingsMenuItem, YouwolBannerState } from "."
+import { SettingsMenuItem, MenuItem } from "./settings-menu.view"
+import { YouwolBannerState } from "./top-banner.view"
 
-/**
- * Base class of item in the menu
- */
-export class MenuItem implements VirtualDOM {
-
-    static ClassSelector = "menu-item"
-
-    public readonly class = `row align-items-center fv-pointer fv-hover-text-focus px-3 ${MenuItem.ClassSelector} `
-
-    constructor({ withClasses }: { withClasses: string }) {
-
-        this.class += withClasses
-    }
-}
 
 /**
  * YouWol's exhibition halls link

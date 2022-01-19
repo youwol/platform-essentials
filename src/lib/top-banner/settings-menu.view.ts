@@ -1,12 +1,27 @@
-import { child$, HTMLElement$, render } from "@youwol/flux-view"
+import { child$, HTMLElement$, render, VirtualDOM } from "@youwol/flux-view"
 import { Modal } from "@youwol/fv-group"
 import { combineLatest, from, merge } from "rxjs"
 import { ywSpinnerView } from "../misc-views/youwol-spinner.view"
 import { install } from '@youwol/cdn-client'
-import { MenuItem } from "./menu.view"
 import { YouwolBannerState } from "./top-banner.view"
 import { PlatformSettingsStore } from "../platform-settings"
 import js_beautify from 'js-beautify'
+
+/**
+ * Base class of item in the menu
+ */
+export class MenuItem implements VirtualDOM {
+
+    static ClassSelector = "menu-item"
+
+    public readonly class = `row align-items-center fv-pointer fv-hover-text-focus px-3 ${MenuItem.ClassSelector} `
+
+    constructor({ withClasses }: { withClasses: string }) {
+
+        this.class += withClasses
+    }
+}
+
 
 /**
  * Preferences burger item
