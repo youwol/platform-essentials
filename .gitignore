@@ -8,3 +8,4 @@ cdn.zip
 src/tests/databases
 .yw_test_env
 src/tests/yw_config/databases/**
+__pycache__
