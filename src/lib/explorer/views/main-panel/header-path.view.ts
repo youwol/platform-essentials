@@ -1,8 +1,8 @@
 import { attr$, child$, children$, VirtualDOM } from "@youwol/flux-view"
 import { ywSpinnerView } from "../../.."
-import { BehaviorSubject, merge, Subject } from "rxjs"
+import { BehaviorSubject, merge, Observable, Subject } from "rxjs"
 import { ExplorerState, TreeGroup } from "../../explorer.state"
-import { AnyFolderNode } from "../../nodes"
+import { AnyFolderNode, BrowserNode } from "../../nodes"
 import { ActionsView } from "./actions.view"
 import { DisplayMode } from "./main-panel.view"
 
@@ -55,6 +55,7 @@ export class HeaderPathView implements VirtualDOM {
     constructor(params: { state: ExplorerState }) {
 
         Object.assign(this, params)
+
         this.children = [
             {
                 class: 'd-flex flex-grow-1 overflow-auto mr-1',
@@ -70,76 +71,120 @@ export class HeaderPathView implements VirtualDOM {
                         let path = tree.reducePath(folder.id, (node) => {
                             return node
                         })
-                        let isLoading$ = merge(...path.map(n => n.status$))
-                        let items = path.map((node) => [this.pathElemView(node, folder), { class: "px-2 my-auto", innerText: '/' }])
-                        return items.flat().slice(0, -1).concat([this.loadingSpinner(isLoading$)])
+                        let items: VirtualDOM[] = path.map((node) => [
+                            new PathElementView({ state: this.state, node, selectedNode: folder }),
+                            { class: "px-2 my-auto", innerText: '/' }
+                        ])
+                        return items.flat().slice(0, -1).concat([
+                            new LoadingSpinnerView({ isLoading$: merge(...path.map(n => n.status$)) })
+                        ])
                     }
                 )
             },
-            this.actionsMenuView(),
+            new ActionsMenuView({ state: this.state }),
             new DisplayModesView({ displayMode$: this.state.displayMode$ })
         ]
     }
+}
 
-    actionsMenuView() {
-        let expanded$ = new BehaviorSubject(false)
-        return {
-            class: 'd-flex align-items-center mr-5 fv-border-primary position-relative fv-pointer rounded fv-bg-secondary-alt px-2 fv-hover-bg-secondary',
-            children: [
-                {
-                    innerText: 'Actions'
-                },
-                {
-                    class: 'fas fa-caret-down mx-1'
-                },
-                {
-                    class: attr$(
-                        expanded$,
-                        (expanded) => expanded ? 'position-absolute' : 'd-none'
-                    ),
-                    style: { top: '100%', right: '0%', zIndex: 100 },
-                    children: [
-                        new ActionsView({ state: this.state })
-                    ]
+export class LoadingSpinnerView implements VirtualDOM {
+
+    public readonly class = `${LoadingSpinnerView} h-100 d-flex flex-column justify-content-center px-2`
+    public readonly children: VirtualDOM[]
+
+    public readonly isLoading$: Observable<{ type: string, id: string }[]>
+
+    constructor(params: { isLoading$: Observable<{ type: string, id: string }[]> }) {
+
+        Object.assign(this, params)
+
+        this.children = [
+            child$(
+                this.isLoading$,
+                (status: { type: string, id: string }[]) => {
+                    return status.find(s => s.type == 'request-pending')
+                        ? ywSpinnerView({ classes: 'mx-auto', size: '20px', duration: 1.5 })
+                        : {}
                 }
-            ],
-            onclick: () => expanded$.next(!expanded$.getValue()),
-            onmouseleave: () => expanded$.next(false),
-        }
+            )
+        ]
     }
 
-    loadingSpinner(isLoading$/*selectedNode: Nodes.FolderNode*/) {
+}
 
-        return {
-            class: 'h-100 d-flex flex-column justify-content-center px-2',
-            children: [
-                child$(isLoading$,
-                    (status) => {
-                        return status.find(s => s.type == 'request-pending')
-                            ? ywSpinnerView({ classes: 'mx-auto', size: '20px', duration: 1.5 })
-                            : {}
-                    }
-                )
-            ]
-        }
+export class ActionsMenuView implements VirtualDOM {
+
+    static ClassSelector = "actions-menu-view"
+    public readonly class = `${ActionsMenuView.ClassSelector} d-flex align-items-center mr-5 fv-border-primary position-relative fv-pointer rounded fv-bg-secondary-alt px-2 fv-hover-bg-secondary`
+    public readonly expanded$ = new BehaviorSubject(false)
+
+    public readonly children: VirtualDOM[]
+    public readonly onclick = () => this.expanded$.next(!this.expanded$.getValue())
+    public readonly onmouseleave = () => this.expanded$.next(false)
+
+    public readonly state: ExplorerState
+
+    constructor(params: { state: ExplorerState }) {
+
+        Object.assign(this, params)
+
+        this.children = [
+            {
+                innerText: 'Actions'
+            },
+            {
+                class: 'fas fa-caret-down mx-1'
+            },
+            {
+                class: attr$(
+                    this.expanded$,
+                    (expanded) => expanded ? 'position-absolute' : 'd-none'
+                ),
+                style: { top: '100%', right: '0%', zIndex: 100 },
+                children: [
+                    new ActionsView({ state: this.state })
+                ]
+            }
+        ]
+    }
+}
+
+export class PathElementView implements VirtualDOM {
+
+    static ClassSelector = "path-elem-view"
+    public readonly baseClass = `${PathElementView.ClassSelector} p-1 rounded d-flex align-items-center fv-pointer fv-bg-background`
+
+    public readonly class: string
+    public readonly children: VirtualDOM[]
+    public readonly node: AnyFolderNode
+    public readonly selectedNode: BrowserNode
+
+    public readonly state: ExplorerState
+
+    public readonly onclick = () => {
+        this.state.openFolder(this.node)
     }
 
-    pathElemView(node: AnyFolderNode, selectedNode: AnyFolderNode): VirtualDOM {
-        let baseClass = 'p-1 rounded d-flex align-items-center fv-pointer fv-bg-background'
-        return {
-            class: node.id == selectedNode.id
-                ? `${baseClass} fv-border-focus fv-text-focus fv-hover-text-primary fv-hover-bg-secondary`
-                : `${baseClass} fv-border-primary fv-hover-text-primary fv-hover-bg-secondary`,
-            children: [
-                {
-                    class: node.icon
-                },
-                {
-                    class: "px-2",
-                    innerText: node.name
-                }
-            ],
-            onclick: () => this.state.openFolder(node)
-        }
+    constructor(params: {
+        state: ExplorerState,
+        node: AnyFolderNode,
+        selectedNode: BrowserNode
+    }) {
+        Object.assign(this, params)
+
+        this.class = this.node.id == this.selectedNode.id
+            ? `${this.baseClass} fv-border-focus fv-text-focus fv-hover-text-primary fv-hover-bg-secondary`
+            : `${this.baseClass} fv-border-primary fv-hover-text-primary fv-hover-bg-secondary`
+
+        this.children = [
+            {
+                class: this.node.icon
+            },
+            {
+                class: "px-2",
+                innerText: this.node.name
+            }
+        ]
     }
+
 }
