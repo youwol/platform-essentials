@@ -2,16 +2,22 @@ import { Observable } from "rxjs"
 import { } from "../.."
 import { Router } from "../../../router"
 import { RequestMonitoring } from "../../../utils"
+import { FluxProjectRouter } from "./flux-project/flux-project.router"
 import { AccessInfo, ExposingGroup, AccessPolicyBody, Asset, UpdateAssetBody } from "./interfaces"
 
 
 export class AssetsRouter extends Router {
+
+
+    public readonly fluxProject: FluxProjectRouter
+
 
     constructor(params: {
         rootPath: string,
         headers: { [key: string]: string }
     }) {
         super(params.headers, `${params.rootPath}/assets`)
+        this.fluxProject = new FluxProjectRouter({ rootPath: this.basePath, headers: this.headers })
     }
 
 
