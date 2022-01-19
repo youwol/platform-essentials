@@ -15,7 +15,8 @@ import { ChildApplicationAPI, IPlatformHandler } from "../../../../platform.stat
 
 export class ItemView {
 
-    baseClasses = 'd-flex align-items-center p-1 rounded m-3 fv-hover-bg-background-alt fv-pointer'
+    static ClassSelector = "item-view"
+    baseClasses = `${ItemView.ClassSelector} d-flex align-items-center p-1 rounded m-3 fv-hover-bg-background-alt fv-pointer`
     class: Stream$<BrowserNode, string>
     children: VirtualDOM[]
     public readonly style: Stream$<{ type: string, id: string }[], { [key: string]: string }>
@@ -42,10 +43,10 @@ export class ItemView {
             this.state.selectedItem$,
             (node) => {
                 return node && node.id == this.item.id ?
-                    `${baseClass} fv-text-focus` :
-                    `${baseClass}`
+                    `${this.baseClasses} fv-text-focus` :
+                    `${this.baseClasses}`
             },
-            { untilFirst: baseClass }
+            { untilFirst: this.baseClasses }
         )
 
         this.style = attr$(

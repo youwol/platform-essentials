@@ -45,7 +45,8 @@ class DisplayModesView implements VirtualDOM {
 
 export class HeaderPathView implements VirtualDOM {
 
-    public readonly class = "w-100 d-flex p-2 fv-bg-background-alt"
+    static ClassSelector = "header-path-view"
+    public readonly class = `${HeaderPathView.ClassSelector} w-100 d-flex p-2 fv-bg-background-alt`
     style = {
         height: '50px'
     }

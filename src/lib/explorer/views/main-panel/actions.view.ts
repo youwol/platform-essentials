@@ -33,7 +33,9 @@ export class ButtonView extends Button.View {
 }
 export class ActionsView implements VirtualDOM {
 
-    public readonly class = "d-flex flex-column p-2 fv-bg-background-alt border-top h-100"
+    static ClassSelector = "actions-view"
+
+    public readonly class = `${ActionsView.ClassSelector} d-flex flex-column p-2 fv-bg-background-alt border-top h-100`
     public readonly style = {
         minWidth: '200px'
     }

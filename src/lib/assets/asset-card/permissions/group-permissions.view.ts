@@ -47,7 +47,9 @@ export class ExposedGroupState {
 
 export class ExposedGroupView implements VirtualDOM {
 
-    public readonly class = "w-100 my-3"
+    static ClassSelector = "exposed-group-view"
+    public readonly class = `${ExposedGroupView.ClassSelector} w-100 my-3`
+
     public readonly children: VirtualDOM[]
     public readonly connectedCallback: (elem: HTMLElement$) => void
 

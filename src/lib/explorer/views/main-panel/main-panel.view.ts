@@ -7,7 +7,8 @@ export type DisplayMode = "cards" | "miniatures" | "details"
 
 export class MainPanelView implements VirtualDOM {
 
-    public readonly class = "w-100 h-100 flex-grow-1 d-flex flex-column"
+    static ClassSelector = "main-panel-view"
+    public readonly class = `${MainPanelView.ClassSelector} w-100 h-100 flex-grow-1 d-flex flex-column`
     public readonly style = {
         minHeight: '0px'
     }
