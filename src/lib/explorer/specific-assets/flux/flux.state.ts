@@ -1,4 +1,5 @@
 import { createObservableFromFetch, uuidv4 } from "@youwol/flux-core"
+import { AssetsGatewayClient } from "../../../clients/assets-gateway"
 import { TreeGroup } from "../../explorer.state"
 import { AnyFolderNode, FutureNode, ItemNode } from "../../nodes"
 
@@ -9,9 +10,8 @@ export class FluxState {
     }
     static newFluxProject$(node: AnyFolderNode) {
 
-        let url = `/api/assets-gateway/assets/flux-project/location/${node.id}`
-        let request = new Request(url, { method: 'PUT', headers: {} })
-        return createObservableFromFetch(request)
+        let assetsGtwClient = new AssetsGatewayClient()
+        return assetsGtwClient.assets.fluxProject.create$(node.id, { name: "new project", description: "" })
     }
 
     new(parentNode: AnyFolderNode) {
