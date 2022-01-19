@@ -1,5 +1,5 @@
 import { uuidv4 } from '@youwol/flux-core'
-import { BehaviorSubject, combineLatest, from, Observable, ReplaySubject, Subscription } from "rxjs"
+import { BehaviorSubject, combineLatest, from, Observable, of, ReplaySubject, Subscription } from "rxjs"
 import { distinctUntilChanged, filter, map, mergeMap, share, shareReplay } from 'rxjs/operators'
 import { RequestsExecutor } from './requests-executor'
 import { ImmutableTree } from '@youwol/fv-tree'
@@ -11,11 +11,12 @@ import {
     FutureNode, GroupNode, HomeNode, ItemNode, RegularFolderNode, serialize, TrashNode
 } from './nodes'
 import { createTreeGroup, processBorrowItem, processMoveFolder, processMoveItem } from './utils'
-import { YouwolBannerState } from '..'
+import { PlatformSettingsStore, YouwolBannerState } from '..'
 import { DisplayMode } from '.'
 import { ChildApplicationAPI } from '../platform.state'
 import { FileAddedEvent, PlatformEvent } from '../platform.events'
 import { ItemResponse } from '../clients'
+import { GENERIC_ACTIONS, getActions$, openWithActionFromExe, Action } from './actions.factory'
 
 /**
  * Ideally this concept should not exist.
@@ -87,6 +88,32 @@ export class ExplorerState {
         }),
         shareReplay(1)
     ) as Observable<{ tree: TreeGroup, folder: FolderNode<any> }>
+
+    actions$ = combineLatest([
+        this.selectedItem$,
+        this.currentFolder$
+    ]).pipe(
+        mergeMap(([item, { folder }]) => {
+            let a0 = getActions$(this, { node: folder, selection: 'indirect' }, Object.values(GENERIC_ACTIONS))
+            let a1 = item
+                ? getActions$(this, { node: item as any, selection: 'direct' }, Object.values(GENERIC_ACTIONS))
+                : of([])
+            let a2 = item
+                ? PlatformSettingsStore.getOpeningApps$(item as any).pipe(
+                    map((apps) => apps.map((app) => openWithActionFromExe(app)))
+                )
+                : of([])
+
+            return combineLatest([a0, a1, a2]).pipe(
+                map(([a0, a1, a2]) => {
+                    return {
+                        item: item,
+                        folder: folder,
+                        actions: [...a0, ...a1, ...a2] as Action[]
+                    }
+                }))
+        })
+    )
 
     public readonly displayMode$ = new BehaviorSubject<DisplayMode>('details')
 
