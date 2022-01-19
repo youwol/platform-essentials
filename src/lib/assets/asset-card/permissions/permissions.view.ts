@@ -1,6 +1,6 @@
 
 
-import { filter, share } from 'rxjs/operators'
+import { share } from 'rxjs/operators'
 import { child$, VirtualDOM } from '@youwol/flux-view'
 import { ExposedGroupState, ExposedGroupView } from './group-permissions.view'
 import { Asset } from '../../..'
@@ -16,10 +16,10 @@ export class AssetPermissionsView implements VirtualDOM {
 
     public readonly accessInfo$: Observable<AccessInfo>
     public readonly asset: Asset
-
     public readonly classSection = 'py-2'
     static readonly titleClass = "w-100 text-center"
     static readonly titleStyle = { 'font-family': 'fantasy', 'font-size': 'large' }
+
 
     constructor(params: { asset: Asset }) {
         Object.assign(this, params)
