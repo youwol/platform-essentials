@@ -23,12 +23,13 @@ export class FolderContentView implements VirtualDOM {
     public readonly children: VirtualDOM[]
 
     public readonly tree: TreeGroup
+    public readonly items$: any
 
     constructor(params: { state: ExplorerState, folderId: string, groupId: string }) {
 
         Object.assign(this, params)
         this.tree = this.state.groupsTree[this.groupId]
-        let items$ = this.tree.root$.pipe(
+        this.items$ = this.tree.root$.pipe(
             map((root) => {
                 return root.id == this.folderId
                     ? root
