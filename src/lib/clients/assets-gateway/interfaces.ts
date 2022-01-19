@@ -30,7 +30,7 @@ export interface GroupsResponse {
 }
 
 
-export class DeletedEntityResponse {
+export interface DeletedEntityResponse {
 
     type: string
     author: string
@@ -38,12 +38,5 @@ export class DeletedEntityResponse {
     entityId: string
     timestamp: string
 
-    constructor({ driveId, type, author, entityId, timestamp }:
-        { driveId: string, type: string, author: string, entityId: string, timestamp: string }) {
-        this.driveId = driveId
-        this.type = type
-        this.author = author
-        this.entityId = entityId
-        this.timestamp = timestamp
-    }
 }
+
