@@ -2,6 +2,7 @@ import { child$, VirtualDOM } from "@youwol/flux-view";
 import { Button } from "@youwol/fv-button";
 import { from } from "rxjs";
 import { map } from "rxjs/operators";
+import { AssetsGatewayClient } from "../clients/assets-gateway";
 import { PlatformSettingsStore } from "../platform-settings";
 import { ChildApplicationAPI, isPlatformInstance, PlatformState } from "../platform.state";
 import { UserMenuView } from "./user-menu.view";
@@ -10,8 +11,8 @@ import { YouwolMenuView } from "./youwol-menu.view";
 
 export class YouwolBannerState {
 
-    static signedIn$ = from(fetch(new Request("/api/assets-gateway/healthz"))).pipe(
-        map(resp => resp.status == 200)
+    static signedIn$ = new AssetsGatewayClient().getHealthz().pipe(
+        map(resp => resp.status == "assets-gateway ok")
     )
 
     constructor(params = {}) {
