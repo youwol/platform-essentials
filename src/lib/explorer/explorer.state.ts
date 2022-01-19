@@ -67,7 +67,7 @@ export class ExplorerState {
 
     public readonly topBannerState = new YouwolBannerState()
 
-    public readonly selectedItem$ = new ReplaySubject<BrowserNode>(1)
+    public readonly selectedItem$ = new BehaviorSubject<BrowserNode>(undefined)
 
     public readonly signedIn$ = from(
         fetch(new Request("/api/assets-gateway/healthz"))).pipe(
