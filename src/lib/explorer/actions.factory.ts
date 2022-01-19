@@ -1,15 +1,16 @@
 
 import { Observable, of } from 'rxjs'
 import { map } from 'rxjs/operators'
-import { AssetsGatewayClient } from '..'
+import { AssetsGatewayClient, ChildApplicationAPI, Executable } from '..'
 import { ExplorerState, SelectedItem } from './explorer.state'
 import {
-    AnyFolderNode, AnyItemNode, DataNode, DeletedNode, DriveNode, FolderNode, FutureNode,
+    AnyFolderNode, AnyItemNode, BrowserNode, DataNode, DeletedNode, DriveNode, FolderNode, FutureNode,
     GroupNode, ItemNode, ProgressNode, RegularFolderNode, TrashNode
 } from './nodes'
 import { isLocalYouwol } from './utils'
 
 export interface Action {
+    sourceEventNode: BrowserNode,
     icon: string
     name: string,
     enable: boolean,
@@ -21,6 +22,7 @@ export type ActionConstructor = (state: ExplorerState, { node, selection }: Sele
 
 export let GENERIC_ACTIONS = {
     rename: (state: ExplorerState, { node, selection }: SelectedItem, permissions) => ({
+        sourceEventNode: node,
         icon: 'fas fa-pen',
         name: 'rename',
         enable: true,
@@ -38,6 +40,7 @@ export let GENERIC_ACTIONS = {
         exe: () => { node.addStatus({ type: 'renaming' }) }
     }),
     newFolder: (state: ExplorerState, { node, selection }: SelectedItem, permissions) => ({
+        sourceEventNode: node,
         icon: 'fas fa-folder',
         name: 'new folder',
         enable: permissions.write,
@@ -47,6 +50,7 @@ export let GENERIC_ACTIONS = {
         exe: () => { state.newFolder(node as any) }
     }),
     download: (state: ExplorerState, { node, selection }: SelectedItem, permissions) => ({
+        sourceEventNode: node,
         icon: 'fas fa-download', name: 'download file',
         enable: true,
         applicable: () => node instanceof ItemNode && node.kind == 'data' && permissions.write,
@@ -60,6 +64,7 @@ export let GENERIC_ACTIONS = {
         }
     }),
     upload: (state: ExplorerState, { node, selection }: SelectedItem, permissions) => ({
+        sourceEventNode: node,
         icon: 'fas fa-upload', name: 'upload asset',
         enable: true,
         applicable: () => {
@@ -71,6 +76,7 @@ export let GENERIC_ACTIONS = {
         }
     }),
     deleteFolder: (state: ExplorerState, { node, selection }: SelectedItem, permissions) => ({
+        sourceEventNode: node,
         icon: 'fas fa-trash',
         name: 'delete',
         enable: true /*permissions.write*/,
@@ -78,6 +84,7 @@ export let GENERIC_ACTIONS = {
         exe: () => { state.deleteFolder(node as RegularFolderNode) }
     }),
     deleteDrive: (state: ExplorerState, { node, selection }: SelectedItem, permissions) => ({
+        sourceEventNode: node,
         icon: 'fas fa-trash',
         name: 'delete',
         enable: true /*permissions.write*/,
@@ -85,6 +92,7 @@ export let GENERIC_ACTIONS = {
         exe: () => { state.deleteDrive(node as DriveNode) }
     }),
     clearTrash: (state: ExplorerState, { node, selection }: SelectedItem, permissions) => ({
+        sourceEventNode: node,
         icon: 'fas fa-times',
         name: 'clear trash',
         enable: true /*permissions.write*/,
@@ -92,6 +100,7 @@ export let GENERIC_ACTIONS = {
         exe: () => { state.purgeDrive(node as TrashNode) }
     }),
     newFluxProject: (state: ExplorerState, { node, selection }: SelectedItem, permissions) => ({
+        sourceEventNode: node,
         icon: 'fas fa-sitemap',
         name: 'new app',
         enable: permissions.write,
@@ -99,6 +108,7 @@ export let GENERIC_ACTIONS = {
         exe: () => { state.flux.new(node as any) }
     }),
     newStory: (state: ExplorerState, { node, selection }: SelectedItem, permissions) => ({
+        sourceEventNode: node,
         icon: 'fas fa-book',
         name: 'new story',
         enable: permissions.write,
@@ -106,6 +116,7 @@ export let GENERIC_ACTIONS = {
         exe: () => { state.story.new(node as any) }
     }),
     paste: (state: ExplorerState, { node, selection }: SelectedItem, permissions) => ({
+        sourceEventNode: node,
         icon: 'fas fa-paste',
         name: 'paste',
         enable: permissions.write && state.itemCut != undefined,
@@ -113,6 +124,7 @@ export let GENERIC_ACTIONS = {
         exe: () => { state.pasteItem(node as AnyFolderNode) }
     }),
     cut: (state: ExplorerState, { node, selection }: SelectedItem, permissions) => ({
+        sourceEventNode: node,
         icon: 'fas fa-cut',
         name: 'cut',
         enable: true,
@@ -127,6 +139,7 @@ export let GENERIC_ACTIONS = {
         exe: () => { state.cutItem(node as (AnyItemNode | RegularFolderNode)) }
     }),
     borrowItem: (state: ExplorerState, { node, selection }: SelectedItem, permissions) => ({
+        sourceEventNode: node,
         icon: 'fas fa-link',
         name: 'borrow item',
         enable: permissions.share,
@@ -136,6 +149,7 @@ export let GENERIC_ACTIONS = {
         }
     }),
     importData: (state: ExplorerState, { node, selection }: SelectedItem, permissions) => ({
+        sourceEventNode: node,
         icon: 'fas fa-file-import',
         name: 'import data',
         enable: permissions.write,
@@ -152,6 +166,7 @@ export let GENERIC_ACTIONS = {
         }
     }),
     deleteItem: (state: ExplorerState, { node, selection }: SelectedItem, permissions) => ({
+        sourceEventNode: node,
         icon: 'fas fa-trash',
         name: 'delete',
         enable: permissions.write,
@@ -159,8 +174,9 @@ export let GENERIC_ACTIONS = {
         exe: () => { state.deleteItem(node as AnyItemNode) }
     }),
     refresh: (state: ExplorerState, { node, selection }: SelectedItem, permissions) => ({
+        sourceEventNode: node,
         icon: 'fas fa-sync-alt',
-        name: 'Refresh',
+        name: 'refresh',
         enable: permissions.read,
         applicable: () => node instanceof FolderNode,
         exe: () => { state.refresh(node as AnyFolderNode) }
@@ -205,4 +221,22 @@ export function getActions$(
                     .filter(a => a.applicable())
             })
         )
+}
+
+
+export function openWithActionFromExe(app: Executable) {
+
+    return {
+        icon: "fas fa-play",
+        name: app.name,
+        enable: true,
+        exe: () => {
+            ChildApplicationAPI.getOsInstance().createInstance$({
+                cdnPackage: app.cdnPackage,
+                parameters: app.parameters,
+                focus: true
+            }).subscribe()
+        },
+        applicable: () => true
+    }
 }
