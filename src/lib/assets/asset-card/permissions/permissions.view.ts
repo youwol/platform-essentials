@@ -41,7 +41,7 @@ export class AssetPermissionsView implements VirtualDOM {
     }
 }
 
-class UserPermissionsView implements VirtualDOM {
+export class UserPermissionsView implements VirtualDOM {
 
     static ClassSelector = "user-permissions-view"
     public readonly class = `${UserPermissionsView.ClassSelector} mx-auto my-5`
@@ -91,7 +91,7 @@ class UserPermissionsView implements VirtualDOM {
 
 
 
-class GroupsPermissionsView implements VirtualDOM {
+export class GroupsPermissionsView implements VirtualDOM {
 
     static ClassSelector = "groups-permissions-view"
     public readonly class = `${GroupsPermissionsView.ClassSelector} mx-auto my-5`
