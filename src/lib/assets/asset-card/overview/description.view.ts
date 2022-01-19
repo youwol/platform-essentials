@@ -1,5 +1,5 @@
 import { attr$, child$, HTMLElement$, VirtualDOM } from "@youwol/flux-view";
-import { BehaviorSubject, from, merge, Observable } from "rxjs";
+import { BehaviorSubject, from, merge, Observable, of } from "rxjs";
 
 import { IconButtonView } from "../misc.view";
 import { filter, mapTo, mergeMap } from "rxjs/operators";
@@ -91,7 +91,10 @@ class DescriptionEditableView implements VirtualDOM {
         this.children = [
             child$(
                 this.editionMode$.pipe(
-                    mergeMap((editionMode) => fetchCodeMirror$().pipe(mapTo(editionMode)))
+                    mergeMap((editionMode) => editionMode
+                        ? fetchCodeMirror$().pipe(mapTo(editionMode))
+                        : of(editionMode)
+                    )
                 ),
                 (editionMode) => {
                     return editionMode ? {
