@@ -1,11 +1,8 @@
 import '../mock-requests'
 import {
-    AssetsGatewayClient, DriveResponse, DrivesResponse, GroupsResponse, HealthzResponse,
-    ChildrenFolderResponse, DefaultDriveResponse, FolderResponse, Asset
+    AssetsGatewayClient, GroupsResponse, HealthzResponse, DefaultDriveResponse, Asset
 } from '../../lib/clients'
-import { mergeMap } from 'rxjs/operators'
 import { expectAttributes, getPyYouwolBasePath, resetPyYouwolDbs } from '../common'
-import { expectAttribute } from '@youwol/flux-core'
 
 
 let assetsGtw = new AssetsGatewayClient({

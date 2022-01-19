@@ -5,12 +5,12 @@ import { expectAttributes, getFromDocument, getPyYouwolBasePath, queryFromDocume
 
 AssetsGatewayClient.staticBasePath = `${getPyYouwolBasePath()}/api/assets-gateway`
 
-import { AssetCardView, ExplorerState, FolderContentView, HeaderPathView, MainPanelView } from '../../lib'
+import { ExplorerState, FolderContentView, HeaderPathView, MainPanelView } from '../../lib'
 import { render } from '@youwol/flux-view'
 import { combineLatest } from 'rxjs'
-import { InfoBtnView, ItemView } from '../../lib/explorer/views/main-panel/folder-content/item.view'
-import { DriveNode, FolderNode, FutureNode, GroupNode, HomeNode } from '../../lib/explorer/nodes'
-import { filter, mergeMap, skip, skipUntil, skipWhile, take } from 'rxjs/operators'
+import { ItemView } from '../../lib/explorer/views/main-panel/folder-content/item.view'
+import { DriveNode, FolderNode, FutureNode, GroupNode } from '../../lib/explorer/nodes'
+import { mergeMap, skip, skipWhile, take } from 'rxjs/operators'
 import { RowView } from '../../lib/explorer/views/main-panel/folder-content/details.view'
 import { ActionsMenuView, PathElementView } from '../../lib/explorer/views/main-panel/header-path.view'
 import { ActionBtnView, ActionsView } from '../../lib/explorer/views/main-panel/actions.view'
