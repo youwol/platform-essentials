@@ -4,7 +4,8 @@ import { filter, share } from 'rxjs/operators'
 import { child$, VirtualDOM } from '@youwol/flux-view'
 import { ExposedGroupState, ExposedGroupView } from './group-permissions.view'
 import { Asset } from '../../..'
-import { AccessInfo, AssetsGatewayClient, GroupAccess } from '../../../clients/assets-gateway'
+import { AccessInfo, AssetsGatewayClient } from '../../../clients/assets-gateway'
+import { Observable } from 'rxjs'
 
 
 export class AssetPermissionsView implements VirtualDOM {
@@ -13,6 +14,7 @@ export class AssetPermissionsView implements VirtualDOM {
     public readonly class = `${AssetPermissionsView.ClassSelector} w-100 h-100 overflow-auto d-flex justify-content-center`
     public readonly children: VirtualDOM[]
 
+    public readonly accessInfo$: Observable<AccessInfo>
     public readonly asset: Asset
 
     public readonly classSection = 'py-2'
@@ -21,10 +23,10 @@ export class AssetPermissionsView implements VirtualDOM {
 
     constructor(params: { asset: Asset }) {
         Object.assign(this, params)
-        let accessInfo$ = new AssetsGatewayClient().assets.getAccess$(this.asset.assetId).pipe(share())
+        this.accessInfo$ = new AssetsGatewayClient().assets.getAccess$(this.asset.assetId).pipe(share())
         this.children = [
             child$(
-                accessInfo$,
+                this.accessInfo$,
                 accessInfo => {
                     return {
                         class: "w-50 h-100 p-4 fv-text-primary mx-auto",
