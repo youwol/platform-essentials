@@ -1,11 +1,10 @@
 import { child$, VirtualDOM } from "@youwol/flux-view";
 import { combineLatest } from "rxjs";
-import { filter, map } from "rxjs/operators";
+import { filter, map, shareReplay } from "rxjs/operators";
 import { ExplorerState, TreeGroup } from "../../../explorer.state";
 import { BrowserNode } from "../../../nodes";
 import { DisplayMode } from "../main-panel.view";
 import { DetailsContentView } from "./details.view";
-import { MiniaturesContentView } from "./miniatures.view";
 
 function unreachable(mode: never) {
 
@@ -37,18 +36,15 @@ export class FolderContentView implements VirtualDOM {
             }),
             map(node => node.children),
             // When dble-clicking on side-bar this prevent error (an observable is actually reaching here)
-            filter(children => Array.isArray(children))
+            filter(children => Array.isArray(children)),
+            shareReplay(1)
         )
 
         this.children = [
             child$(
-                combineLatest([this.state.displayMode$, items$]),
+                combineLatest([this.state.displayMode$, this.items$]),
                 ([mode, items]: [DisplayMode, BrowserNode[]]) => {
                     switch (mode) {
-                        case 'cards':
-                            return this.cardsView(items)
-                        case 'miniatures':
-                            return new MiniaturesContentView({ state: this.state, items })
                         case 'details':
                             return new DetailsContentView({ state: this.state, items })
                         default:
@@ -57,13 +53,4 @@ export class FolderContentView implements VirtualDOM {
                 })
         ]
     }
-
-    cardsView(items: BrowserNode[]): VirtualDOM {
-        return {
-            children: items.map((child) => {
-                return { innerText: child.name }
-            })
-        }
-    }
-
 }

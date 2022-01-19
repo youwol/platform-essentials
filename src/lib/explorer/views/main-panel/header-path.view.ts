@@ -19,16 +19,14 @@ class DisplayModesView implements VirtualDOM {
         Object.assign(this, params)
 
         this.children = [
-            this.itemView('cards'),
-            this.itemView('miniatures'),
             this.itemView('details')
         ]
     }
 
     itemView(mode: DisplayMode) {
         let icons: Record<DisplayMode, string> = {
-            'cards': "fa-th-large",
-            'miniatures': "fa-th",
+            //'cards': "fa-th-large",
+            //'miniatures': "fa-th",
             'details': "fa-th-list",
         }
         let baseClass = `fv-pointer fv-hover-text-secondary fas ${icons[mode]} mx-2 p-1`
