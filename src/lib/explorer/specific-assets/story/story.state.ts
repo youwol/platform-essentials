@@ -40,8 +40,4 @@ export class StoryState {
         this.userTree.addChild(parentNode.id, node)
     }
 
-    read(node: DataNode) {
-        window.open(`/applications/@youwol/stories/?id=${node.rawId}`, '_blank').focus();
-    }
-
 }
