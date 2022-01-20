@@ -1,7 +1,7 @@
 import { render } from "@youwol/flux-view"
 import { combineLatest, Observable, of } from "rxjs"
 import { filter, map, mapTo, mergeMap, skip, skipWhile, take, tap } from "rxjs/operators"
-import { AssetCardView, ExplorerState, MainPanelView } from "../../lib"
+import { AssetCardView, ExplorerState, MainPanelView, SideBarView } from "../../lib"
 import { Action } from "../../lib/explorer/actions.factory"
 import { AnyFolderNode, AnyItemNode, BrowserNode, DriveNode, FolderNode, FutureNode, GroupNode } from "../../lib/explorer/nodes"
 import { ActionBtnView, ActionsView } from "../../lib/explorer/views/main-panel/actions.view"
@@ -9,20 +9,21 @@ import { RowView } from "../../lib/explorer/views/main-panel/folder-content/deta
 import { FolderContentView } from "../../lib/explorer/views/main-panel/folder-content/folder-content.view"
 import { InfoBtnView, ItemView } from "../../lib/explorer/views/main-panel/folder-content/item.view"
 import { ActionsMenuView, HeaderPathView, PathElementView } from "../../lib/explorer/views/main-panel/header-path.view"
+import { GroupsView, GroupView } from "../../lib/explorer/views/sidebar/sidebar.view"
 import { expectAttributes, getFromDocument, queryFromDocument } from "../common"
 
 
 export class Shell {
 
-    folder: AnyFolderNode
-    item: BrowserNode
+    folder: AnyFolderNode | DriveNode | GroupNode
+    item?: BrowserNode
     actions: Action[]
     explorerState: ExplorerState
     assetCardView?: AssetCardView
 
     constructor(params: {
-        folder: AnyFolderNode
-        item: BrowserNode
+        folder: AnyFolderNode | DriveNode | GroupNode
+        item?: BrowserNode
         actions: Action[]
         explorerState: ExplorerState,
         assetCardView?: AssetCardView
@@ -241,6 +242,7 @@ export function rm(itemName) {
                                         return false
                                     return true
                                 }),
+                                take(1),
                                 map(() => shell)
                             )
                     })
@@ -321,13 +323,15 @@ export function navigateStepBack() {
             take(1),
             mergeMap((shell: Shell) => {
                 let pathElements0 = queryFromDocument<PathElementView>(`.${PathElementView.ClassSelector}`)
+                let count0 = pathElements0.length
                 pathElements0.slice(-2)[0].dispatchEvent(new MouseEvent('click', { bubbles: true }))
 
                 return shell.explorerState.currentFolder$.pipe(
+                    take(1),
                     map(({ folder }) => {
                         let pathElements = queryFromDocument<PathElementView>(`.${PathElementView.ClassSelector}`)
                         let target = pathElements.slice(-1)[0].node
-                        expect(pathElements.length).toEqual(pathElements0.length - 1)
+                        expect(pathElements.length).toEqual(count0 - 1)
                         expect(target.id).toEqual(folder.id)
                         return folder
                     }),
@@ -338,11 +342,20 @@ export function navigateStepBack() {
                         )
                     }),
                     skipWhile(({ actions, targetFolder }) => {
-                        if (actions.folder instanceof FolderNode && actions.folder.name == targetFolder.name)
+                        /**
+                         * The next is a hack: when selecting a GroupNode => 
+                         * displayedActions$ never fire with actions.folder == groupNode.
+                         */
+                        if (targetFolder instanceof GroupNode)
+                            return false
+
+                        if (((actions.folder instanceof FolderNode) || (actions.folder instanceof DriveNode))
+                            && actions.folder.name == targetFolder.name)
                             return false
 
                         return true
                     }),
+                    take(1),
                     map(({ actions, targetFolder }) => {
                         return new Shell({ ...shell, folder: targetFolder })
                     })
@@ -371,6 +384,11 @@ export function cd(folderName: string) {
 
                 // Wait for actions menu view to be updated
                 return shell.explorerState.currentFolder$.pipe(
+                    skipWhile(({ folder }) => {
+                        if (folder instanceof FolderNode && folder.name == folderName)
+                            return false
+                        return true
+                    }),
                     take(1),
                     tap(({ folder }) => {
                         expect(folder.name).toEqual(folderName)
@@ -386,17 +404,16 @@ export function cd(folderName: string) {
                         return actionsContainer.displayedActions$
                     }),
                     skipWhile(({ folder }) => {
-                        if (folder instanceof FutureNode)
-                            return true
-                        if (folder.name != folderName)
-                            return true
-                        return false
+                        if (folder instanceof FolderNode && folder.name == folderName)
+                            return false
+                        return true
                     }),
+                    take(1),
                     map(({ item, folder, actions }) => {
-                        let actionBtnsView = queryFromDocument<ActionBtnView>(`.${ActionBtnView.ClassSelector}`)
+                        /*let actionBtnsView = queryFromDocument<ActionBtnView>(`.${ActionBtnView.ClassSelector}`)
                         actionBtnsView.forEach(node => {
                             expect(node.action.sourceEventNode.name).toEqual(folderName)
-                        })
+                        })*/
                         return new Shell({
                             explorerState: shell.explorerState,
                             item, folder, actions
@@ -477,6 +494,7 @@ export function selectItem(itemName: string) {
                                     return false
                                 return true
                             }),
+                            take(1),
                             map(() => {
                                 return new Shell({
                                     ...shell,
