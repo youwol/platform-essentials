@@ -86,7 +86,7 @@ export let GENERIC_ACTIONS = {
     deleteDrive: (state: ExplorerState, { node, selection }: SelectedItem, permissions) => ({
         sourceEventNode: node,
         icon: 'fas fa-trash',
-        name: 'delete',
+        name: 'delete drive',
         enable: true /*permissions.write*/,
         applicable: () => node instanceof DriveNode && selection == 'direct',
         exe: () => { state.deleteDrive(node as DriveNode) }
