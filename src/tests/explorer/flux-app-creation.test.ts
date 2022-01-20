@@ -8,7 +8,7 @@ AssetsGatewayClient.staticBasePath = `${getPyYouwolBasePath()}/api/assets-gatewa
 import { AssetCardView, ExplorerState, FolderContentView, HeaderPathView, MainPanelView } from '../../lib'
 import { render } from '@youwol/flux-view'
 import { InfoBtnView, ItemView } from '../../lib/explorer/views/main-panel/folder-content/item.view'
-import { FutureNode } from '../../lib/explorer/nodes'
+import { AnyItemNode, FluxProjectNode, FutureNode } from '../../lib/explorer/nodes'
 import { filter, skip, take } from 'rxjs/operators'
 import { RowView } from '../../lib/explorer/views/main-panel/folder-content/details.view'
 import { ActionBtnView, ActionsView } from '../../lib/explorer/views/main-panel/actions.view'
@@ -85,7 +85,7 @@ test('create flux app', (done) => {
     ).subscribe((items) => {
 
         expect(items.length).toEqual(1)
-        let fluxNode = items[0]
+        let fluxNode = items[0] as FluxProjectNode
         expect(fluxNode.kind).toEqual('flux-project')
         expect(fluxNode.name).toEqual('new project')
         done()

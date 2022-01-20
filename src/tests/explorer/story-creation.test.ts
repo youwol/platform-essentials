@@ -8,7 +8,7 @@ AssetsGatewayClient.staticBasePath = `${getPyYouwolBasePath()}/api/assets-gatewa
 import { AssetCardView, ExplorerState, FolderContentView, HeaderPathView, MainPanelView } from '../../lib'
 import { render } from '@youwol/flux-view'
 import { InfoBtnView, ItemView } from '../../lib/explorer/views/main-panel/folder-content/item.view'
-import { FutureNode } from '../../lib/explorer/nodes'
+import { FutureNode, StoryNode } from '../../lib/explorer/nodes'
 import { filter, skip, take } from 'rxjs/operators'
 import { RowView } from '../../lib/explorer/views/main-panel/folder-content/details.view'
 import { ActionBtnView, ActionsView } from '../../lib/explorer/views/main-panel/actions.view'
@@ -85,7 +85,7 @@ test('create story', (done) => {
     ).subscribe((items) => {
 
         expect(items.length).toEqual(1)
-        let storyNode = items[0]
+        let storyNode = items[0] as StoryNode
         expect(storyNode.kind).toEqual('story')
         expect(storyNode.name).toEqual('new story')
         done()
