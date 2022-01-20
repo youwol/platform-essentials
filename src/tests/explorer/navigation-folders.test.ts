@@ -9,11 +9,12 @@ import { ExplorerState, FolderContentView, HeaderPathView, MainPanelView } from 
 import { render } from '@youwol/flux-view'
 import { combineLatest } from 'rxjs'
 import { ItemView } from '../../lib/explorer/views/main-panel/folder-content/item.view'
-import { DriveNode, FolderNode, FutureNode, GroupNode } from '../../lib/explorer/nodes'
+import { BrowserNode, DriveNode, FolderNode, FutureNode, GroupNode } from '../../lib/explorer/nodes'
 import { mergeMap, skip, skipWhile, take } from 'rxjs/operators'
 import { RowView } from '../../lib/explorer/views/main-panel/folder-content/details.view'
 import { ActionsMenuView, PathElementView } from '../../lib/explorer/views/main-panel/header-path.view'
 import { ActionBtnView, ActionsView } from '../../lib/explorer/views/main-panel/actions.view'
+import { selectAndApply$ } from './common'
 
 
 beforeAll(async (done) => {
@@ -199,5 +200,31 @@ test('open folder', (done) => {
         })
         done()
     })
+})
+
+
+test('navigate back', (done) => {
+
+    let pathElements = queryFromDocument<PathElementView>(`.${PathElementView.ClassSelector}`)
+    expect(pathElements.length).toEqual(4)
+    expect(pathElements[3].node.name).toEqual("new folder")
+    pathElements[2].dispatchEvent(new MouseEvent('click', { bubbles: true }))
+
+    state.currentFolder$.subscribe(({ folder }) => {
+
+        let pathElements = queryFromDocument<PathElementView>(`.${PathElementView.ClassSelector}`)
+        expect(pathElements.length).toEqual(3)
+        done()
+    })
+})
+
+
+test('delete folder', (done) => {
+
+    selectAndApply$('new folder', 'delete')
+        .subscribe((items: BrowserNode[]) => {
+            expect(items.length).toEqual(0)
+            done()
+        })
 })
 
