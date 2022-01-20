@@ -3,7 +3,7 @@ import { Button } from '@youwol/fv-button'
 import { ReplaySubject } from 'rxjs'
 import { ExplorerState } from '../../explorer.state'
 import { Action } from '../../actions.factory'
-import { AnyFolderNode, AnyItemNode } from '../../nodes'
+import { AnyFolderNode, AnyItemNode, DriveNode, GroupNode } from '../../nodes'
 import { ChildApplicationAPI, IPlatformHandler } from '../../../platform.state'
 
 
@@ -44,7 +44,11 @@ export class ActionsView implements VirtualDOM {
 
     public readonly platformHandler: IPlatformHandler
 
-    public readonly displayedActions$: ReplaySubject<{ item: AnyItemNode, folder: AnyFolderNode, actions: Action[] }>
+    public readonly displayedActions$: ReplaySubject<{
+        item: AnyItemNode,
+        folder: AnyFolderNode | DriveNode | GroupNode,
+        actions: Action[]
+    }>
 
     constructor(params: { state: ExplorerState }) {
         Object.assign(this, params)
