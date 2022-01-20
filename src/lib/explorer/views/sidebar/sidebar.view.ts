@@ -111,15 +111,39 @@ function formatGroups(groups: GroupResponse[]) {
     return sorted
 }
 
+export class GroupView implements VirtualDOM {
+
+    static ClassSelector = 'group-view'
+
+    public readonly class = `${GroupView.ClassSelector} my-1 fv-pointer fv-hover-bg-secondary rounded`
+    public readonly innerText: string
+    public readonly style: { [key: string]: string }
+
+    public readonly group
+    public readonly state: ExplorerState
+
+    public readonly onclick = () => this.state.selectGroup(this.group)
+
+    constructor(params: { group: any, state: ExplorerState }) {
+        Object.assign(this, params)
+
+        this.innerText = this.group.name
+        this.style = { paddingLeft: `${this.group.level * 15}px` }
+    }
+}
+
+
 export class GroupsView implements VirtualDOM {
 
-    class = 'pl-2 w-100 my-4'
-    children: Array<VirtualDOM>
+    static ClassSelector = 'groups-view'
+    public readonly class = `${GroupsView.ClassSelector} pl-2 w-100 my-4`
 
-    groupsExpanded$ = new BehaviorSubject(false)
-    extended$: Observable<boolean>
-    groups: GroupResponse[]
-    state: ExplorerState
+    public readonly children: Array<VirtualDOM>
+
+    public readonly groupsExpanded$ = new BehaviorSubject(false)
+    public readonly extended$: Observable<boolean>
+    public readonly groups: GroupResponse[]
+    public readonly state: ExplorerState
 
     constructor(params: {
         state: ExplorerState,
@@ -149,14 +173,9 @@ export class GroupsView implements VirtualDOM {
 
         return {
             class: 'border-left ml-2',
-            children: formatGroups(this.groups).filter(({ name }) => name != 'private').map(group => {
-                return {
-                    class: 'my-1 fv-pointer fv-hover-bg-secondary rounded',
-                    style: { paddingLeft: `${group.level * 15}px` },
-                    innerText: group.name,
-                    onclick: (ev) => this.state.selectGroup(group)
-                }
-            })
+            children: formatGroups(this.groups)
+                .filter(({ name }) => name != 'private')
+                .map(group => new GroupView({ group, state: this.state }))
         }
     }
 
@@ -190,11 +209,16 @@ export class GroupsView implements VirtualDOM {
 
 export class SideBarView implements VirtualDOM {
 
-    public readonly class = "fv-bg-background  pt-1 px-2 border-right h-100"
+    static ClassSelector = "side-bar-view"
+    public readonly class = `${SideBarView.ClassSelector} fv-bg-background  pt-1 px-2 border-right h-100`
+
     public readonly style: any
     public readonly children: VirtualDOM[]
 
-    constructor(state: ExplorerState, extended$: BehaviorSubject<boolean>) {
+    constructor(
+        public readonly state: ExplorerState,
+        public readonly extended$: BehaviorSubject<boolean>
+    ) {
 
         this.style = attr$(
             extended$,
