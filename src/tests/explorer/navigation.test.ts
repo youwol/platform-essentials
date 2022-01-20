@@ -5,7 +5,7 @@ import { getPyYouwolBasePath, resetPyYouwolDbs } from '../common'
 
 AssetsGatewayClient.staticBasePath = `${getPyYouwolBasePath()}/api/assets-gateway`
 import { BrowserNode, FolderNode } from '../../lib/explorer/nodes'
-import { cd, expectSnapshot, mkDir, rm, selectItem, shell$ } from './shell'
+import { cd, cdGroup, expectSnapshot, mkDir, rm, selectItem, shell$ } from './shell'
 
 
 let FolderSelectedActions = [
@@ -70,7 +70,8 @@ test('navigation basics', (done) => {
             items: (items) => {
                 expect(items.length).toEqual(0)
             }
-        })
+        }),
+        cdGroup('youwol-users')
     ).subscribe(() => {
         done()
     })
