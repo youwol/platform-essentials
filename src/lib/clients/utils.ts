@@ -107,27 +107,6 @@ export interface RequestMonitoring {
 }
 
 
-export function resolveRequest<T = unknown>(request: Request, commandType: CommandType, options: RequestMonitoring): Observable<T> {
-
-    let { requestId, channels$ } = options
-
-    if (!channels$) {
-        return createObservableFromFetch(request)
-    }
-
-    let follower = new RequestFollower({
-        targetId: requestId,
-        channels$,
-        commandType
-    })
-
-    return of({}).pipe(
-        tap(() => follower.start(1)),
-        mergeMap(() => createObservableFromFetch(request)),
-        tap(() => follower.end())
-    ) as Observable<T>
-}
-
 export interface NativeRequestOptions extends RequestInit {
 
     json?: any
