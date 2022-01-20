@@ -1,5 +1,5 @@
 import { Observable, of, ReplaySubject } from 'rxjs';
-import { Json, RequestMonitoring, resolveRequest } from '../utils';
+import { Json, RequestMonitoring } from '../utils';
 import { cloneDeep, mergeWith } from 'lodash'
 
 

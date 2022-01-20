@@ -1,6 +1,5 @@
-import { Observable, of, ReplaySubject } from 'rxjs';
-import { Json, RequestMonitoring, resolveRequest } from '../utils';
-import { cloneDeep, mergeWith } from 'lodash'
+import { Observable } from 'rxjs';
+import { RequestMonitoring } from '../utils';
 import { Router } from '../router';
 import { HealthzResponse } from './interfaces';
 import { ApplicationsRouter } from './routers/applications';

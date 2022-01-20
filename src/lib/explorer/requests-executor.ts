@@ -8,7 +8,7 @@ import { uuidv4 } from '@youwol/flux-core';
 import { ImmutableTree } from "@youwol/fv-tree";
 import { Asset, AssetsGatewayClient, DriveResponse, FolderResponse, ItemResponse } from '..';
 import { Observable, of } from 'rxjs';
-import { resolveRequest, send$ } from '../clients/utils';
+import { send$ } from '../clients/utils';
 import { isLocalYouwol } from './utils';
 
 export let debugDelay = 0
