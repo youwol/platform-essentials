@@ -70,11 +70,6 @@ export class ExplorerState {
 
     public readonly selectedItem$ = new BehaviorSubject<BrowserNode>(undefined)
 
-    public readonly signedIn$ = from(
-        fetch(new Request("/api/assets-gateway/healthz"))).pipe(
-            map(resp => resp.status == 200),
-            shareReplay(1)
-        )
     public readonly openFolder$ = new ReplaySubject<{ tree: TreeGroup, folder: AnyFolderNode | DriveNode }>(1)
 
     public readonly currentFolder$ = this.openFolder$.pipe(
@@ -174,7 +169,7 @@ export class ExplorerState {
                     }),
                 ).subscribe((response: ItemResponse) => {
                     let tree = this.groupsTree[response.groupId]
-                    console.log("broadcastedEvents", response)
+
                     let node = new ItemNode({
                         ...response,
                         kind: 'flux-project'
