@@ -408,6 +408,48 @@ export function cd(folderName: string) {
         ) as Observable<Shell>
 }
 
+export function cdGroup(name: string) {
+
+    return (source$: Observable<Shell>) =>
+        source$.pipe(
+            take(1),
+            mergeMap((shell) => {
+                let targetGroupId = window.btoa(unescape(encodeURIComponent(`/${name}`)))
+                let sidebar = getFromDocument<SideBarView>(`.${SideBarView.ClassSelector}`)
+                expect(sidebar).toBeTruthy()
+                sidebar.extended$.next(true)
+                let grpContaineView = getFromDocument<GroupsView>(`.${GroupsView.ClassSelector}`)
+                expect(grpContaineView).toBeTruthy()
+                grpContaineView.groupsExpanded$.next(true)
+                let groupsView = queryFromDocument<GroupView>(`.${GroupView.ClassSelector}`)
+                let targetGrp = groupsView.find(view => view.group.name == name)
+                expect(targetGrp).toBeTruthy()
+                targetGrp.onclick()
+                return shell.explorerState.openFolder$.pipe(
+                    skipWhile(({ folder }) => {
+                        if (folder.groupId == targetGroupId)
+                            return false
+                        return true
+                    }),
+                    take(1),
+                    mergeMap(() => {
+                        let actionsContainer = getFromDocument<ActionsView>(`.${ActionsView.ClassSelector}`)
+                        return actionsContainer.displayedActions$
+                    }),
+                    skipWhile(({ folder }) => {
+                        if (folder.groupId == targetGroupId)
+                            return false
+                        return true
+                    }),
+                    take(1),
+                    map(({ folder, actions }) => {
+                        return new Shell({ folder, actions, explorerState: shell.explorerState })
+                    })
+                )
+            })
+        )
+}
+
 
 export function selectItem(itemName: string) {
     return (source$: Observable<Shell>) =>
