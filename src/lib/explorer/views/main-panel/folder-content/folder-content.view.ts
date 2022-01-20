@@ -1,6 +1,6 @@
 import { child$, VirtualDOM } from "@youwol/flux-view";
-import { combineLatest } from "rxjs";
-import { filter, map, shareReplay } from "rxjs/operators";
+import { combineLatest, Observable } from "rxjs";
+import { filter, map, shareReplay, tap } from "rxjs/operators";
 import { ExplorerState, TreeGroup } from "../../../explorer.state";
 import { BrowserNode } from "../../../nodes";
 import { DisplayMode } from "../main-panel.view";
@@ -22,7 +22,7 @@ export class FolderContentView implements VirtualDOM {
     public readonly children: VirtualDOM[]
 
     public readonly tree: TreeGroup
-    public readonly items$: any
+    public readonly items$: Observable<BrowserNode[]>
 
     constructor(params: { state: ExplorerState, folderId: string, groupId: string }) {
 
@@ -34,7 +34,7 @@ export class FolderContentView implements VirtualDOM {
                     ? root
                     : this.tree.getNode(this.folderId)
             }),
-            map(node => node.children),
+            map(node => node.children as BrowserNode[]),
             // When dble-clicking on side-bar this prevent error (an observable is actually reaching here)
             filter(children => Array.isArray(children)),
             shareReplay(1)
