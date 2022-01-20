@@ -627,6 +627,37 @@ export function purgeTrash() {
 }
 
 
+export function deleteDrive() {
+
+    return (source$: Observable<Shell>) =>
+        source$.pipe(
+            take(1),
+            mergeMap((shell) => {
+                let actionDelete = getFromDocument<ActionBtnView>(
+                    `.${ActionBtnView.ClassSelector}`,
+                    (view) => view.action.name == "delete drive"
+                )
+                expect(actionDelete).toBeDefined()
+                actionDelete.dispatchEvent(new MouseEvent('click', { bubbles: true }))
+                let folderContentView = getFromDocument<FolderContentView>(`.${FolderContentView.ClassSelector}`)
+                expect(folderContentView).toBeTruthy()
+
+                return folderContentView.items$.pipe(
+                    skipWhile((items) => {
+                        if (items.length == 0)
+                            return false
+                        return true
+                    }),
+                    take(1),
+                    mergeMap((items) => {
+                        expect(items.length).toEqual(0)
+                        return of(new Shell({ ...shell }))
+                    })
+                )
+            })
+        )
+}
+
 export function expectSnapshot({ items, explorerState, actions, assetCardView }: {
     items?: (items: BrowserNode[]) => void,
     explorerState?: (state: ExplorerState) => void,
