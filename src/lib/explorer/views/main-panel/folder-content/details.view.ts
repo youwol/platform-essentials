@@ -1,9 +1,11 @@
 import { attr$, child$, Stream$, VirtualDOM } from "@youwol/flux-view"
 import { ExplorerState } from "../../../explorer.state"
-import { Action } from "../../../actions.factory"
 import { ItemView } from "./item.view"
 import { BehaviorSubject, Observable } from "rxjs"
 import { BrowserNode, DriveNode, FolderNode, ItemNode } from "../../../nodes"
+import { ChildApplicationAPI, PlatformSettingsStore } from "../../../.."
+import { filter, map, mergeMap, take } from "rxjs/operators"
+import { IPlatformHandler } from "../../../../platform.state"
 
 
 export class DetailsContentView {
@@ -58,14 +60,8 @@ export class RowView implements VirtualDOM {
 
     public readonly hoveredRow$ = new BehaviorSubject<BrowserNode>(undefined)
 
-    public readonly onclick = () => {
-        this.state.selectItem(this.item)
-    }
+    public readonly platformHandler: IPlatformHandler
 
-    public readonly ondblclick = () => {
-        if (this.item instanceof FolderNode || this.item instanceof DriveNode)
-            this.state.openFolder(this.item)
-    }
     public readonly onmouseenter = () => {
         this.hoveredRow$.next(this.item)
     }
@@ -73,9 +69,38 @@ export class RowView implements VirtualDOM {
         this.hoveredRow$.next(undefined)
     }
 
+    public readonly onclick = (ev: PointerEvent) => {
+        this.state.selectItem(this.item)
+        ev.stopPropagation()
+    }
+
+    public readonly ondblclick = (ev) => {
+        ev.stopPropagation()
+        if (this.item instanceof FolderNode || this.item instanceof DriveNode) {
+            this.state.openFolder(this.item)
+            return
+        }
+
+        PlatformSettingsStore.getOpeningApps$(this.item as any).pipe(
+            take(1),
+            filter(apps => apps.length > 0),
+            map(apps => apps[0]),
+            mergeMap((app) => {
+                return this.platformHandler.createInstance$({
+                    cdnPackage: app.cdnPackage,
+                    parameters: app.parameters,
+                    title: this.item.name,
+                    focus: true
+                })
+            })
+        ).subscribe(() => { })
+    }
+
     constructor(params: { state: ExplorerState, item: BrowserNode }) {
 
         Object.assign(this, params)
+
+        this.platformHandler = ChildApplicationAPI.getOsInstance()
 
         this.class = attr$(
             this.state.selectedItem$,
@@ -115,6 +140,7 @@ export class RowView implements VirtualDOM {
                 hoveredRow$: this.hoveredRow$
             })
         ]
+
     }
 }
 

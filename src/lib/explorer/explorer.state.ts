@@ -192,7 +192,8 @@ export class ExplorerState {
     }
 
     selectItem(item: BrowserNode) {
-        this.selectedItem$.next(item)
+        if (this.selectedItem$.getValue() != item)
+            this.selectedItem$.next(item)
     }
 
     selectGroup(group) {

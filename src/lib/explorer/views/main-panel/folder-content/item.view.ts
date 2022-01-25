@@ -1,17 +1,14 @@
 import { attr$, child$, Stream$, VirtualDOM } from "@youwol/flux-view";
 import {
     popupAssetModalView, ywSpinnerView, AssetActionsView,
-    PackageInfoView, AssetPermissionsView, FluxDependenciesView, PlatformState, Asset
+    PackageInfoView, AssetPermissionsView, FluxDependenciesView, Asset
 } from "../../../..";
 
 import { BehaviorSubject, merge, Observable, of } from "rxjs";
-import { distinct, filter, map, mergeMap, take } from "rxjs/operators";
+import { distinct, map, mergeMap, take } from "rxjs/operators";
 import { ExplorerState } from "../../../explorer.state";
 import { RequestsExecutor } from "../../../requests-executor";
-import { AnyItemNode, BrowserNode, FolderNode, ItemNode } from "../../../nodes";
-import { PlatformSettingsStore } from "../../../../platform-settings";
-import { ChildApplicationAPI, IPlatformHandler } from "../../../../platform.state";
-
+import { AnyItemNode, BrowserNode, ItemNode } from "../../../nodes";
 
 export class ItemView {
 
@@ -26,16 +23,12 @@ export class ItemView {
     public readonly item: BrowserNode
     public readonly hovered$: Observable<BrowserNode>
 
-
-    public readonly platformHandler: IPlatformHandler
-
     constructor(params: {
         state: ExplorerState,
         item: BrowserNode,
         hovered$?: Observable<BrowserNode>
     }) {
         Object.assign(this, params)
-        this.platformHandler = ChildApplicationAPI.getOsInstance()
 
         this.hovered$ = params.hovered$
             ? merge(params.hovered$, this.state.selectedItem$)
@@ -87,23 +80,7 @@ export class ItemView {
                 }
             )
         ]
-        this.onclick = () => this.state.selectItem(this.item)
 
-        this.ondblclick = () => {
-            PlatformSettingsStore.getOpeningApps$(this.item as any).pipe(
-                take(1),
-                filter(apps => apps.length > 0),
-                map(apps => apps[0]),
-                mergeMap((app) => {
-                    return this.platformHandler.createInstance$({
-                        cdnPackage: app.cdnPackage,
-                        parameters: app.parameters,
-                        title: this.item.name,
-                        focus: true
-                    })
-                })
-            ).subscribe(() => { })
-        }
     }
 
     originView(node: BrowserNode) {
