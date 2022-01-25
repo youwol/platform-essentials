@@ -4,6 +4,7 @@ import { AssetsGatewayClient } from '../../lib/clients/assets-gateway/assets-gat
 import { getPyYouwolBasePath, resetPyYouwolDbs } from '../common'
 
 AssetsGatewayClient.staticBasePath = `${getPyYouwolBasePath()}/api/assets-gateway`
+AssetsGatewayClient.staticHeaders = { 'py-youwol-local-only': true }
 
 import { cd, deleteDrive, mkDir, mkFluxApp, purgeTrash, rm, selectItem, shell$ } from './shell'
 

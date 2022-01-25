@@ -4,7 +4,7 @@ import { AssetsGatewayClient } from '../../lib/clients/assets-gateway/assets-gat
 import { getFromDocument, getPyYouwolBasePath, queryFromDocument, resetPyYouwolDbs } from '../common'
 
 AssetsGatewayClient.staticBasePath = `${getPyYouwolBasePath()}/api/assets-gateway`
-
+AssetsGatewayClient.staticHeaders = { 'py-youwol-local-only': true }
 
 import { render, VirtualDOM } from "@youwol/flux-view"
 import { BehaviorSubject, of } from "rxjs"

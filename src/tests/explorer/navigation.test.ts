@@ -4,6 +4,8 @@ import { AssetsGatewayClient } from '../../lib/clients/assets-gateway/assets-gat
 import { getPyYouwolBasePath, resetPyYouwolDbs } from '../common'
 
 AssetsGatewayClient.staticBasePath = `${getPyYouwolBasePath()}/api/assets-gateway`
+AssetsGatewayClient.staticHeaders = { 'py-youwol-local-only': true }
+
 import { BrowserNode, FolderNode } from '../../lib/explorer/nodes'
 import { cd, cdGroup, expectSnapshot, mkDir, rm, selectItem, shell$ } from './shell'
 
@@ -22,6 +24,7 @@ let FolderSelectedActions = [
 ]
 
 beforeEach(async (done) => {
+    jest.setTimeout(90 * 1000)
     resetPyYouwolDbs().then(() => {
         done()
     })

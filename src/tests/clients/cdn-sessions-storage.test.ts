@@ -6,8 +6,10 @@ import {
 import { Json } from '../..'
 import { getPyYouwolBasePath, resetPyYouwolDbs } from '../common'
 
+
 let storage = new CdnSessionsStorageClient({
-    basePath: `${getPyYouwolBasePath()}/api/cdn-sessions-storage`
+    basePath: `${getPyYouwolBasePath()}/api/cdn-sessions-storage`,
+    headers: { 'py-youwol-local-only': true }
 })
 
 

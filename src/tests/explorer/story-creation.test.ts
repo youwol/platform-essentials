@@ -4,6 +4,8 @@ import { AssetsGatewayClient } from '../../lib/clients/assets-gateway/assets-gat
 import { getPyYouwolBasePath, resetPyYouwolDbs } from '../common'
 
 AssetsGatewayClient.staticBasePath = `${getPyYouwolBasePath()}/api/assets-gateway`
+AssetsGatewayClient.staticHeaders = { 'py-youwol-local-only': true }
+
 import { StoryNode } from '../../lib/explorer/nodes'
 import { expectSnapshot, mkStory, popupInfo, rm, selectItem, shell$ } from './shell'
 

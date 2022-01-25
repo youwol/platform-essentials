@@ -1,12 +1,17 @@
+import { AssetsGatewayClient } from "../lib/clients/assets-gateway"
 
 
 export function getPyYouwolBasePath() {
     return "http://localhost:2001"
 }
 
-export function resetPyYouwolDbs() {
+export function resetPyYouwolDbs(headers = AssetsGatewayClient.staticHeaders) {
     return fetch(new Request(
-        `${getPyYouwolBasePath()}/admin/custom-commands/reset-db`
+        `${getPyYouwolBasePath()}/admin/custom-commands/reset-db`,
+        {
+            method: 'GET',
+            headers: { ...headers, 'py-youwol-local-only': 'true' }
+        }
     ))
 }
 

@@ -6,6 +6,7 @@ import {
 import { mergeMap } from 'rxjs/operators'
 import { expectAttributes, getPyYouwolBasePath, resetPyYouwolDbs } from '../common'
 
+AssetsGatewayClient.staticHeaders = { 'py-youwol-local-only': true }
 
 let assetsGtw = new AssetsGatewayClient({
     basePath: `${getPyYouwolBasePath()}/api/assets-gateway`
