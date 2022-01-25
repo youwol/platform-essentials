@@ -10,7 +10,7 @@ import { Router } from '../router';
 export class AssetsGatewayClient extends Router {
 
     static staticBasePath = "/api/assets-gateway"
-
+    static staticHeaders = {}
     public readonly explorer: ExplorerRouter
     public readonly assets: AssetsRouter
     public readonly raw: RawRouter
@@ -18,13 +18,16 @@ export class AssetsGatewayClient extends Router {
     constructor({ basePath, headers }:
         {
             basePath?: string,
-            headers?: { [key: string]: string }
+            headers?: { [key: string]: any }
         } = {}) {
-        super(headers, basePath || AssetsGatewayClient.staticBasePath)
+        super(
+            { ...headers, ...AssetsGatewayClient.staticHeaders },
+            basePath || AssetsGatewayClient.staticBasePath
+        )
 
-        this.explorer = new ExplorerRouter({ rootPath: this.basePath, headers })
-        this.assets = new AssetsRouter({ rootPath: this.basePath, headers })
-        this.raw = new RawRouter({ rootPath: this.basePath, headers })
+        this.explorer = new ExplorerRouter(this)
+        this.assets = new AssetsRouter(this)
+        this.raw = new RawRouter(this)
     }
 
     /**

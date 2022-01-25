@@ -38,7 +38,7 @@ export class Router {
         if (!requestOptions.method)
             requestOptions.method = Router.defaultMethodMapping[command]
 
-        let headers = requestOptions.headers || {}
+        let headers = { ...requestOptions.headers, ...this.headers }
 
         return send$(
             command,

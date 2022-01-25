@@ -12,14 +12,11 @@ export class RawRouter extends Router {
     public readonly package: PackageRouter
     public readonly data: DataRouter
 
-    constructor({ rootPath, headers }: {
-        rootPath: string,
-        headers: { [key: string]: string }
-    }) {
-        super(headers, `${rootPath}/raw`)
+    constructor(parent: Router) {
+        super(parent.headers, `${parent.basePath}/raw`)
 
-        this.fluxProject = new FluxProjectRouter({ rootPath: this.basePath, headers: this.headers })
-        this.package = new PackageRouter({ rootPath: this.basePath, headers: this.headers })
-        this.data = new DataRouter({ rootPath: this.basePath, headers: this.headers })
+        this.fluxProject = new FluxProjectRouter(this)
+        this.package = new PackageRouter(this)
+        this.data = new DataRouter(this)
     }
 }

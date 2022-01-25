@@ -14,10 +14,10 @@ export class CdnSessionsStorageClient extends Router {
     constructor({ basePath, headers }:
         {
             basePath?: string,
-            headers?: { [key: string]: string }
+            headers?: { [key: string]: any }
         } = {}) {
         super(headers, basePath || CdnSessionsStorageClient.staticBasePath)
-        this.applications = new ApplicationsRouter({ headers, rootPath: this.basePath })
+        this.applications = new ApplicationsRouter(this)
     }
 
     /**

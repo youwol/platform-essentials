@@ -14,13 +14,10 @@ export class AssetsRouter extends Router {
     public readonly story: StoryRouter
 
 
-    constructor(params: {
-        rootPath: string,
-        headers: { [key: string]: string }
-    }) {
-        super(params.headers, `${params.rootPath}/assets`)
-        this.fluxProject = new FluxProjectRouter({ rootPath: this.basePath, headers: this.headers })
-        this.story = new StoryRouter({ rootPath: this.basePath, headers: this.headers })
+    constructor(parent: Router) {
+        super(parent.headers, `${parent.basePath}/assets`)
+        this.fluxProject = new FluxProjectRouter(this)
+        this.story = new StoryRouter(this)
     }
 
 

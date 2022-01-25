@@ -5,11 +5,8 @@ import { Json, RequestMonitoring } from "../../../utils"
 
 export class ApplicationsRouter extends Router {
 
-    constructor({ headers, rootPath }: {
-        rootPath: string,
-        headers: { [key: string]: string }
-    }) {
-        super(headers, `${rootPath}/applications`)
+    constructor(parent: Router) {
+        super(parent.headers, `${parent.basePath}/applications`)
     }
 
     /**

@@ -7,11 +7,8 @@ import { Router } from "../../../router"
 
 export class GroupsRouter extends Router {
 
-    constructor(params: {
-        rootPath: string,
-        headers: { [key: string]: string }
-    }) {
-        super(params.headers, `${params.rootPath}/groups`)
+    constructor(parent: Router) {
+        super(parent.headers, `${parent.basePath}/groups`)
     }
 
     /**
@@ -77,11 +74,8 @@ export class GroupsRouter extends Router {
 
 export class DrivesRouter extends Router {
 
-    constructor(params: {
-        rootPath: string,
-        headers: { [key: string]: string }
-    }) {
-        super(params.headers, `${params.rootPath}/drives`)
+    constructor(parent: Router) {
+        super(parent.headers, `${parent.basePath}/drives`)
     }
 
     /**
@@ -172,11 +166,8 @@ export class DrivesRouter extends Router {
 
 export class FoldersRouter extends Router {
 
-    constructor(params: {
-        rootPath: string,
-        headers: { [key: string]: string }
-    }) {
-        super(params.headers, `${params.rootPath}/folders`)
+    constructor(parent: Router) {
+        super(parent.headers, `${parent.basePath}/folders`)
     }
 
     queryChildren$(
@@ -247,11 +238,8 @@ export class FoldersRouter extends Router {
 
 export class ItemsRouter extends Router {
 
-    constructor({ headers, rootPath }: {
-        rootPath: string,
-        headers: { [key: string]: string }
-    }) {
-        super(headers, `${rootPath}/items`)
+    constructor(parent: Router) {
+        super(parent.headers, `${parent.basePath}/items`)
     }
 
 
@@ -295,15 +283,12 @@ export class ExplorerRouter extends Router {
     public readonly items: ItemsRouter
 
 
-    constructor({ headers, rootPath }: {
-        rootPath: string,
-        headers: { [key: string]: string }
-    }) {
-        super(headers, `${rootPath}/tree`)
-        this.groups = new GroupsRouter({ headers, rootPath: this.basePath })
-        this.drives = new DrivesRouter({ headers, rootPath: this.basePath })
-        this.folders = new FoldersRouter({ headers, rootPath: this.basePath })
-        this.items = new ItemsRouter({ headers, rootPath: this.basePath })
+    constructor(parent: Router) {
+        super(parent.headers, `${parent.basePath}/tree`)
+        this.groups = new GroupsRouter(this)
+        this.drives = new DrivesRouter(this)
+        this.folders = new FoldersRouter(this)
+        this.items = new ItemsRouter(this)
     }
 
     /**

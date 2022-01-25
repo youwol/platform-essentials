@@ -7,11 +7,8 @@ import { RequestMonitoring, uploadBlob, downloadBlob } from "../../../../utils"
 export class DataRouter extends Router {
 
 
-    constructor({ rootPath, headers }: {
-        rootPath: string,
-        headers: { [key: string]: string }
-    }) {
-        super(headers, `${rootPath}/data`)
+    constructor(parent: Router) {
+        super(parent.headers, `${parent.basePath}/data`)
     }
 
     upload(

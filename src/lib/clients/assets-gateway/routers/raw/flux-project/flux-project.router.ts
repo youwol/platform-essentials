@@ -7,11 +7,8 @@ import { Project } from "./interfaces"
 
 export class FluxProjectRouter extends Router {
 
-    constructor({ headers, rootPath }: {
-        rootPath: string,
-        headers: { [key: string]: string }
-    }) {
-        super(headers, `${rootPath}/flux-project`)
+    constructor(parent: Router) {
+        super(parent.headers, `${parent.basePath}/flux-project`)
     }
 
     queryProject$(

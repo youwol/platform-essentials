@@ -4,11 +4,8 @@ import { send$, RequestMonitoring, BodyContentType } from "../../../../utils"
 
 export class PackageRouter extends Router {
 
-    constructor({ headers, rootPath }: {
-        rootPath: string,
-        headers: { [key: string]: string }
-    }) {
-        super(headers, `${rootPath}/package`)
+    constructor(parent: Router) {
+        super(parent.headers, `${parent.basePath}/package`)
     }
 
     queryMetadata$(

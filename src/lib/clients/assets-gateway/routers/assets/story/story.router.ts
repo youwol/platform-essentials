@@ -7,11 +7,8 @@ import { FolderId } from "../../explorer"
 
 export class StoryRouter extends Router {
 
-    constructor({ headers, rootPath }: {
-        rootPath: string,
-        headers: { [key: string]: string }
-    }) {
-        super(headers, `${rootPath}/story`)
+    constructor(parent: Router) {
+        super(parent.headers, `${parent.basePath}/story`)
     }
 
     create$(
