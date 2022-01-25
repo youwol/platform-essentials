@@ -11,8 +11,11 @@ class MockRequest {
         public readonly url,
         public readonly options: {
             method: RequestMethod,
-            body: string
-        } = { method: 'GET', body: '' }) { }
+            body: string,
+            headers: any
+        } = { method: 'GET', body: '', headers: {} }) {
+
+    }
 }
 
 class RawResponse {
@@ -39,7 +42,10 @@ function mockFetch(req: MockRequest): Promise<any> {
         switch (req.options.method) {
 
             case 'GET': {
-                request.get(req.url, (err, response, body) => {
+                request.get({
+                    url: req.url,
+                    headers: req.options.headers || {}
+                }, (err, response, body) => {
                     resolve(new RawResponse(body))
                 })
                 break
@@ -49,7 +55,8 @@ function mockFetch(req: MockRequest): Promise<any> {
                     url: req.url,
                     method: req.options.method,
                     body: JSON.parse(req.options.body),
-                    json: true
+                    json: true,
+                    headers: req.options.headers || {}
                 }, (err, response, body) => {
                     resolve(new RawResponse(body))
                 })
@@ -60,7 +67,8 @@ function mockFetch(req: MockRequest): Promise<any> {
                     url: req.url,
                     method: req.options.method,
                     body: req.options.body ? JSON.parse(req.options.body) : {},
-                    json: true
+                    json: true,
+                    headers: req.options.headers || {}
                 }, (err, response, body) => {
                     resolve(new RawResponse(body))
                 })
@@ -70,7 +78,8 @@ function mockFetch(req: MockRequest): Promise<any> {
                 request({
                     url: req.url,
                     method: req.options.method,
-                    json: true
+                    json: true,
+                    headers: req.options.headers || {}
                 }, (err, response, body) => {
                     resolve(new RawResponse(body))
                 })
