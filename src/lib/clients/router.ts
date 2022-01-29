@@ -1,7 +1,5 @@
-import { Observable } from "rxjs";
-import { CommandType, RequestMonitoring, NativeRequestOptions, send$ } from "./utils";
-
-
+import {Observable} from "rxjs";
+import {CommandType, NativeRequestOptions, RequestMonitoring, send$} from "./utils";
 
 
 export class Router {
@@ -9,7 +7,8 @@ export class Router {
     constructor(
         public readonly headers: { [key: string]: string },
         public readonly basePath: string
-    ) { }
+    ) {
+    }
 
     static defaultMethodMapping: Record<CommandType, 'GET' | 'POST' | 'PUT' | 'DELETE'> = {
         'upload': 'POST',
@@ -45,6 +44,22 @@ export class Router {
             `${this.basePath}${path}`,
             { ...requestOptions, headers },
             monitoring
+        )
+    }
+}
+
+export class RootRouter extends Router {
+
+    static Headers: { [key: string]: string } = {}
+    static HostName: string = "" // By default, relative resolution is used. Otherwise, protocol + hostname
+
+    constructor(params: {
+        basePath: string,
+        headers?: { [key: string]: string }
+    }) {
+        super(
+            {...RootRouter.Headers, ...(params.headers || {})},
+            `${RootRouter.HostName}${params.basePath}`
         )
     }
 }

@@ -1,30 +1,24 @@
-import { Observable } from 'rxjs';
-import { GroupsResponse, HealthzResponse, UserInfoResponse } from './interfaces';
-import { RequestMonitoring } from '../utils';
-import { ExplorerRouter } from './routers/explorer/explorer.router'
-import { AssetsRouter } from './routers/assets/assets.router';
-import { RawRouter } from './routers/raw/raw.router';
-import { Router } from '../router';
+import {Observable} from 'rxjs';
+import {GroupsResponse, HealthzResponse, UserInfoResponse} from './interfaces';
+import {RequestMonitoring} from '../utils';
+import {AssetsRouter, ExplorerRouter, RawRouter} from './routers'
+import {RootRouter} from '../router';
 
 
-export class AssetsGatewayClient extends Router {
+export class AssetsGatewayClient extends RootRouter {
 
-    static staticBasePath = "/api/assets-gateway"
-    static staticHeaders = {}
     public readonly explorer: ExplorerRouter
     public readonly assets: AssetsRouter
     public readonly raw: RawRouter
 
-    constructor({ basePath, headers }:
-        {
-            basePath?: string,
-            headers?: { [key: string]: any }
-        } = {}) {
-        super(
-            { ...headers, ...AssetsGatewayClient.staticHeaders },
-            basePath || AssetsGatewayClient.staticBasePath
-        )
-
+    constructor({headers}:
+                    {
+                        headers?: { [_key: string]: string }
+                    } = {}) {
+        super({
+            basePath: "/api/assets-gateway",
+            headers
+        })
         this.explorer = new ExplorerRouter(this)
         this.assets = new AssetsRouter(this)
         this.raw = new RawRouter(this)
@@ -32,8 +26,8 @@ export class AssetsGatewayClient extends Router {
 
     /**
      * Healthz of the service
-     * 
-     * @param monitoring 
+     *
+     * @param monitoring
      * @returns response
      */
     getHealthz(
@@ -66,7 +60,7 @@ export class AssetsGatewayClient extends Router {
 
     /**
      * Groups in which the user belong
-     * @param options options of the request
+     * @param monitoring
      * @returns response
      */
     queryGroups(
