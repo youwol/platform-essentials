@@ -1,7 +1,6 @@
 /*
  * Public API Surface of @youwol/flux-code-mirror
  */
-export * from './clients';
 export * from './top-banner/index'
 export * from './assets/index'
 export * from './explorer/index'

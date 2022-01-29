@@ -12,7 +12,7 @@ export interface IPlatformHandler {
     runningApplications$: Observable<RunningApp[]>
     broadcastedEvents$: Observable<PlatformEvent>
 
-    createInstance$({ cdnPackage, parameters, focus, title }: {
+    createInstance$({cdnPackage, parameters, focus, title}: {
         cdnPackage: string,
         title?: string,
         parameters?: { [key: string]: string },
@@ -55,20 +55,15 @@ class NoPlatformHandler implements IPlatformHandler {
     public readonly runningApplications$ = new Subject<RunningApp[]>()
     public readonly broadcastedEvents$ = new Subject<PlatformEvent>()
 
-    createInstance$({ cdnPackage, parameters, focus, title }: {
+    createInstance$({cdnPackage, version, parameters, focus, title}: {
         cdnPackage: string,
+        version: string,
         title?: string,
         parameters?: { [key: string]: string },
         focus: boolean
     }) {
-        return PlatformSettingsStore.queryMetadata$(cdnPackage).pipe(
-            tap((metadata) => {
-                let queryParams = Object.entries(parameters || {})
-                    .reduce((acc, [k, v]) => `${acc}&${k}=${v}`, "")
-                let url = `/applications/${cdnPackage}/latest?${queryParams}`
-                focus ? window.open(url, '_self') : window.open(url, '_blank')
-            })
-        )
+        let url = getExeUrl({cdnPackage, version, parameters})
+        focus ? window.open(url, '_self') : window.open(url, '_blank')
     }
 
     broadcastEvent(event: PlatformEvent) {
@@ -91,6 +86,8 @@ export class PlatformState implements IPlatformHandler {
     public readonly runningApplications$ = new BehaviorSubject<RunningApp[]>([])
 
     public readonly broadcastedEvents$ = new Subject<PlatformEvent>()
+
+    public readonly platformSettingsStore = new PlatformSettingsStore()
     static instance: PlatformState
 
 
@@ -107,22 +104,22 @@ export class PlatformState implements IPlatformHandler {
         return this.runningApplications$.getValue().find(app => app.instanceId === appId)
     }
 
-    createInstance$({ cdnPackage, parameters, focus, title }: {
+    createInstance$({cdnPackage, version, parameters, focus, title}: {
         cdnPackage: string,
         title?: string,
+        version: string,
         parameters?: { [key: string]: string },
         focus: boolean
     }) {
-        return PlatformSettingsStore.queryMetadata$(cdnPackage).pipe(
-            tap((metadata) => {
 
+        return of({}).pipe(
+            tap(() => {
                 let app = new RunningApp({
-                    ...metadata,
+                    version,
                     state: this,
                     parameters,
                     title: title,
-                    cdnPackage,
-                    icon: JSON.parse(metadata.icon)
+                    cdnPackage
                 })
                 this.runningApplications$.next([...this.runningApplications$.getValue(), app])
                 focus && this.focus(app.instanceId)
@@ -143,9 +140,8 @@ export class PlatformState implements IPlatformHandler {
 
     setTopBannerViews(
         appId: string,
-        { actionsView, badgesView, youwolMenuView, userMenuView }: {
+        {actionsView, youwolMenuView, userMenuView}: {
             actionsView: VirtualDOM,
-            badgesView: VirtualDOM,
             youwolMenuView: VirtualDOM,
             userMenuView: VirtualDOM
         }) {

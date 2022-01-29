@@ -3,7 +3,7 @@ import {BehaviorSubject, merge, Observable} from "rxjs"
 import {ExplorerState} from "../../explorer.state"
 import {delay, mapTo, take} from "rxjs/operators"
 import {AnyFolderNode, DownloadNode, DriveNode, HomeNode, TrashNode} from "../../nodes"
-import {GroupResponse} from "../../../clients/assets-gateway";
+import {GroupResponse} from "../../../clients/assets-gateway"
 
 
 class PredefinedFolderView implements VirtualDOM {
@@ -188,12 +188,12 @@ export class GroupsView implements VirtualDOM {
                         class: attr$(
                             this.groupsExpanded$,
                             (expanded) => expanded ? 'fa-chevron-circle-down' : 'fa-chevron-circle-right',
-                            { wrapper: (d) => `${d} fas mr-2` }
+                            {wrapper: (d) => `${d} fas mr-2`}
                         )
                     },
-                    {
-                        innerText: 'Groups'
-                    }
+                        {
+                            innerText: 'Groups'
+                        }
                     ]
                 },
                 {

@@ -2,18 +2,29 @@ import {VirtualDOM} from "@youwol/flux-view"
 import {Observable, of, ReplaySubject} from "rxjs"
 import {map} from "rxjs/operators"
 import {AUTO_GENERATED} from "../auto_generated"
-import {Parametrization, PlatformSettings, UserSettingsClient} from "./clients"
+import {Parametrization, PlatformSettings} from "./platform-settings.models"
 import {Asset} from "./clients/assets-gateway";
 import {CdnSessionsStorageClient} from "./clients/cdn-sessions-storage";
 
 
 export interface Executable {
 
-    name: string
     cdnPackage: string
-    url: string
+    version: string
     parameters: { [key: string]: string }
-    icon: VirtualDOM
+    appMetadata$: Observable<{ name: string, icon: VirtualDOM }>
+}
+
+export function getExeUrl(exe: { cdnPackage, version, parameters }) {
+
+    let base = `/applications/${exe.cdnPackage}/${exe.version}`
+    if (Object.keys(exe.parameters).length == 0)
+        return base
+
+    let queryParams = Object.entries(exe.parameters)
+        .reduce((acc, [k, v]) => `${acc}&${k}=${v}`, "")
+    console.log("Exe url", {base, queryParams})
+    return `${base}?${queryParams}`
 }
 
 
@@ -40,148 +51,168 @@ export class PlatformSettingsStore {
         },
         appearance: {
             theme: '@youwol/fv-widgets#latest~assets/styles/style.youwol.css',
-            desktopImage: `url("data:image/svg+xml;utf8,${PlatformSettingsStore.defaultBg}")`
+            desktopStyle: {
+                'background-image': `url("data:image/svg+xml;utf8,${PlatformSettingsStore.defaultBg.replace(/#/g, '%23')}")`
+            }
         },
-        applications: {
-            associations: [
-                {
-                    cdnPackage: "@youwol/flux-runner",
-                    version: "latest",
-                    canOpen: "return (asset) => asset.kind == 'flux-project'",
-                    parameters: "return (asset) => ({ 'id':asset.rawId })"
-                },
-                {
-                    cdnPackage: "@youwol/flux-builder",
-                    version: "latest",
-                    canOpen: "return (asset) => asset.kind == 'flux-project'",
-                    parameters: "return (asset) => ({ 'id':asset.rawId })"
-                },
-                {
-                    cdnPackage: "@youwol/stories",
-                    version: "latest",
-                    canOpen: "return (asset) => asset.kind == 'story'",
-                    parameters: "return (asset) => ({ 'id':asset.rawId })"
+        browserApplications: [
+            {
+                package: "@youwol/flux-runner",
+                version: "latest",
+                icon: {class: 'fas fa-play'},
+                displayName: "flux-runner",
+                execution: {
+                    standalone: false,
+                    parametrized: [
+                        {
+                            match: {kind: 'flux-project'},
+                            parameters: {id: 'rawId'}
+                        }
+                    ]
                 }
-            ]
-        },
-        dockerBar: {
-            applications: [
-                {
-                    cdnPackage: "@youwol/explorer",
-                    version: "latest"
-                },
-                {
-                    cdnPackage: "@youwol/exhibition-halls",
-                    version: "latest"
-                },
-                {
-                    cdnPackage: "@youwol/developer-portal",
-                    version: "latest"
+            },
+            {
+                package: "@youwol/flux-builder",
+                version: "latest",
+                icon: {class: 'fas fa-play'},
+                displayName: "flux-builder",
+                execution: {
+                    standalone: false,
+                    parametrized: [
+                        {
+                            match: {kind: 'flux-project'},
+                            parameters: {id: 'rawId'}
+                        }
+                    ]
                 }
-            ]
-        },
+            },
+            {
+                package: "@youwol/stories",
+                version: "latest",
+                icon: {class: 'fas fa-book'},
+                displayName: "Story",
+                execution: {
+                    standalone: false,
+                    parametrized: [
+                        {
+                            match: {kind: 'story'},
+                            parameters: {id: 'rawId'}
+                        }
+                    ]
+                }
+            },
+            {
+                package: "@youwol/explorer",
+                version: "latest",
+                icon: {class: 'fas fa-folder'},
+                displayName: "Explorer",
+                execution: {
+                    standalone: true
+                }
+            },
+            {
+                package: "@youwol/developer-portal",
+                version: "latest",
+                icon: {class: 'fas fa-code'},
+                displayName: "Dev. Portal",
+                execution: {
+                    standalone: true
+                }
+            },
+            {
+                package: "@youwol/exhibition-halls",
+                version: "latest",
+                icon: {class: 'fas fa-shopping-cart'},
+                displayName: "Discover",
+                execution: {
+                    standalone: true
+                }
+            },
+        ]
     }
 
-    static userSettingsClient = new UserSettingsClient()
-
-    static settings$ = PlatformSettingsStore.userSettingsClient.querySettings(AUTO_GENERATED.name, PlatformSettingsStore.default)
+    static settings$ = new ReplaySubject<PlatformSettings>(1)
 
     constructor() {
-
     }
 
-    static desktopImages$ = PlatformSettingsStore.settings$.pipe(
-        map((s: PlatformSettings) => s.appearance.desktopImage.replace(/#/g, '%23'))
-    )
-
-    /** Mock implementation until expected metadata are published with cdn package 
-     * 
-    */
-    static queryMetadata$(cdnPackage: string): Observable<{ name: string, icon: string }> {
-
-        let metadata = {
-            "@youwol/explorer": {
-                name: 'Explorer',
-                icon: '{ "class": "fas fa-folder"}'
-            },
-            "@youwol/exhibition-halls": {
-                name: 'Discover',
-                icon: '{ "class": "fas fa-shopping-cart"}'
-            },
-            "@youwol/developer-portal": {
-                name: 'Dev. Portal',
-                icon: '{ "class": "fas fa-code"}'
-            },
-            "@youwol/flux-runner": {
-                name: 'Flux runner',
-                icon: '{ "class":"d-flex align-items-center", "children":[{"class": "fas fa-project-diagram"},{"class": "ml-1 fas fa-play"}]}'
-            },
-            "@youwol/flux-builder": {
-                name: 'Flux builder',
-                icon: '{ "class":"d-flex align-items-center", "children":[{"class": "fas fa-project-diagram"},{"class": "ml-1 fas fa-tools"}]}'
-            },
-            "@youwol/stories": {
-                name: 'Story',
-                icon: '{ "class": "fas fa-book-open"}'
-            }
-        }
-        return of(metadata[cdnPackage])
+    static fetchSettings() {
+        /*
+        Called at least when the file is loaded, see below
+         */
+        let sessionStorage = new CdnSessionsStorageClient()
+        sessionStorage.applications
+            .getData(AUTO_GENERATED.name, "settings")
+            .pipe(
+                map((savedData) => {
+                    let settings = savedData as unknown as PlatformSettings
+                    let you = settings['you'] ||
+                        PlatformSettingsStore.default.you
+                    let appearance = settings['appearance'] ||
+                        PlatformSettingsStore.default.appearance
+                    let browserApps = settings['browserApplications'] ||
+                        PlatformSettingsStore.default.browserApplications
+                    let missingDefaults = PlatformSettingsStore.default.browserApplications.filter(defaultApp => {
+                        return browserApps.find(included => included.package == defaultApp.package) == undefined
+                    })
+                    browserApps = [...browserApps, ...missingDefaults]
+                    return {you, appearance, browserApplications: browserApps} as PlatformSettings
+                })
+            )
+            .subscribe((settings) => {
+                PlatformSettingsStore.settings$.next(settings)
+            })
     }
-
 
     static getDockerBarApps$(): Observable<Executable[]> {
-
         return this.settings$.pipe(
-            mergeMap((s: PlatformSettings) =>
-                forkJoin(s.dockerBar.applications.map(app => {
-
-                    return this.queryMetadata$(app.cdnPackage).pipe(
-                        map((metadata) => ({
-                            ...app,
-                            ...metadata,
-                            url: `/applications/${app.cdnPackage}/${app.version}`,
-                            icon: JSON.parse(metadata.icon),
-                            parameters: {}
-                        }))
-                    )
-                })
-                )
-            )
-        )
-    }
-
-
-    static getOpeningApps$(asset: Asset): Observable<Executable[]> {
-
-        let evalFct = (code: string | ((asset: Asset) => { [key: string]: string } | boolean)) => {
-            return typeof (code) == 'string'
-                ? new Function(code)()(asset)
-                : code(asset)
-        }
-        return this.settings$.pipe(
-            map((s: PlatformSettings) => s.applications.associations),
-            mergeMap((apps: ApplicationAssociation[]) => {
-
-                let openingApps = apps.filter((app) => evalFct(app.canOpen))
-                return openingApps.length == 0
-                    ? of([])
-                    : forkJoin(openingApps.map(app => {
-
-                        return this.queryMetadata$(app.cdnPackage).pipe(
-                            map((metadata) => ({
-                                ...metadata,
-                                ...app,
-                                icon: JSON.parse(metadata.icon),
-                                url: `/applications/${app.cdnPackage}/${app.version}`,
-                                parameters: evalFct(app.parameters)
-                            }))
-                        )
-                    }))
+            map((s: PlatformSettings) => {
+                return s.browserApplications
+                    .filter(app => app.execution.standalone)
+                    .map(app => {
+                        return {
+                            version: app.version,
+                            cdnPackage: app.package,
+                            parameters: {},
+                            appMetadata$: of({icon: app.icon, name: app.displayName})
+                        }
+                    })
             })
         )
     }
 
-    static save(settings: PlatformSettings) {
-        PlatformSettingsStore.userSettingsClient.updateSettings(AUTO_GENERATED.name, settings)
+    static getOpeningApps$(asset: Asset): Observable<Executable[]> {
+
+        let parametrizationMatch = (asset: Asset, parametrization: Parametrization) =>
+            Object.entries(parametrization.match).reduce((acc, [key, target]) => {
+                return acc && asset[key] == target
+            }, true)
+
+        return this.settings$.pipe(
+            map((s: PlatformSettings) => {
+
+                return s.browserApplications.map(app =>
+                    (app.execution.parametrized || [])
+                        .filter(parametrized => parametrizationMatch(asset, parametrized))
+                        .map(parametrized => {
+                            let params = Object.entries(parametrized.parameters)
+                                .map(([k, v]) => [k, asset[v]])
+                                .reduce((acc, [k, v]) => ({...acc, [k]: v}), {})
+                            return {
+                                version: app.version,
+                                cdnPackage: app.package,
+                                parameters: params,
+                                appMetadata$: of({name: app.displayName, icon: app.icon})
+                            }
+                        })
+                ).flat()
+            })
+        )
+    }
+
+    static save(_settings: PlatformSettings) {
     }
 }
+
+
+PlatformSettingsStore.fetchSettings()

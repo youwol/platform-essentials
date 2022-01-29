@@ -1,6 +1,6 @@
-import { attr$, child$, children$, VirtualDOM } from "@youwol/flux-view"
-import { BehaviorSubject, combineLatest, Observable } from "rxjs"
-import { Executable, PlatformSettingsStore, PlatformState, RunningApp } from "."
+import {attr$, child$, children$, VirtualDOM} from "@youwol/flux-view"
+import {BehaviorSubject, combineLatest, Observable} from "rxjs"
+import {Executable, PlatformSettingsStore, PlatformState, RunningApp} from "."
 
 
 class DockerItemDetailsView implements VirtualDOM {
@@ -10,7 +10,7 @@ class DockerItemDetailsView implements VirtualDOM {
     public readonly executable: Executable
     public readonly instances: RunningApp[]
     public readonly class = 'd-flex flex-column justify-content-center p-1 w-100 rounded'
-    public readonly style = { userSelect: 'none' }
+    public readonly style = {userSelect: 'none'}
 
     constructor(
         params: {
@@ -40,8 +40,12 @@ class DockerItemDetailsView implements VirtualDOM {
                     innerText: 'New'
                 }
             ],
-            onclick: (ev: MouseEvent) =>
-                this.state.createInstance$({ cdnPackage: this.executable.cdnPackage, focus: true }).subscribe()
+            onclick: () =>
+                this.state.createInstance$({
+                    cdnPackage: this.executable.cdnPackage,
+                    version: this.executable.version,
+                    focus: true
+                }).subscribe()
         }
     }
 
@@ -49,7 +53,7 @@ class DockerItemDetailsView implements VirtualDOM {
 
         return {
             class: 'w-100',
-            children: this.instances.map((app, i) => {
+            children: this.instances.map((app) => {
 
                 return {
                     class: 'fv-pointer px-1 my-1 border rounded fv-hover-bg-background-alt d-flex align-items-center justify-content-between',
@@ -99,7 +103,6 @@ export class DockerItemView implements VirtualDOM {
     }
     public readonly instances: RunningApp[]
     public readonly state: PlatformState
-    public readonly expanded$: Observable<boolean>
 
     constructor(
         params: {
@@ -125,11 +128,16 @@ export class DockerItemView implements VirtualDOM {
                     : 'fv-text-primary',
                 { wrapper: (d) => `${d} d-flex align-items-center`, }),
             children: [
-                this.executable.icon,
+                child$(
+                    this.executable.appMetadata$,
+                    (d) => d.icon),
                 {
                     tag: 'span',
                     class: 'mx-2',
-                    innerText: this.executable.name
+                    innerText: attr$(
+                        this.executable.appMetadata$,
+                        (d) => d.name
+                    )
                 }
             ]
         }

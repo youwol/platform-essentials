@@ -1,8 +1,7 @@
-import { VirtualDOM } from "@youwol/flux-view";
-import { Asset } from "../../assets-gateway";
+import {VirtualDOM} from "@youwol/flux-view";
 
 
-type ImplementationFunction = string
+//type ImplementationFunction = string
 
 export interface You {
 
@@ -14,9 +13,9 @@ export interface Appearance {
 
     theme: string
     /**
-     * a string that can be used in css 'backgroundImage' property
+     * style properties of the desktop background
      */
-    desktopImage: string
+    desktopStyle: { [_key: string]: string }
 }
 
 
@@ -26,27 +25,39 @@ export interface ApplicationStandalone {
     version: string
 }
 
+/*
 export interface ApplicationAssociation extends ApplicationStandalone {
 
     canOpen: ImplementationFunction | ((asset: Asset) => boolean)
     parameters: ImplementationFunction | ((asset: Asset) => { [key: string]: string })
 }
 
-export interface DockerBar {
-
-    applications: ApplicationStandalone[]
-}
-
 export interface Applications {
 
     associations: ApplicationAssociation[]
+}*/
+
+export interface Parametrization {
+    match: { [_key: string]: string }
+    parameters: { [_key: string]: string }
 }
 
+export interface Execution {
+    standalone: boolean
+    parametrized?: Parametrization[]
+}
+
+export interface BrowserApplication {
+    package: string
+    icon: VirtualDOM
+    version: string
+    displayName: string
+    execution: Execution
+}
 
 export interface PlatformSettings {
 
     you: You
     appearance: Appearance
-    applications: Applications
-    dockerBar: DockerBar
+    browserApplications: BrowserApplication[]
 }

@@ -246,8 +246,13 @@ export function getActions$(
 export function openWithActionFromExe(app: Executable) {
 
     return {
-        icon: "fas fa-play",
-        name: app.name,
+        icon: child$(
+            app.appMetadata$,
+            ({icon}) => icon),
+        name: attr$(
+            app.appMetadata$,
+            ({name}) => name
+        ), //app.name,
         enable: true,
         exe: () => {
             ChildApplicationAPI.getOsInstance().createInstance$({

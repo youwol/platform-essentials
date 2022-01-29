@@ -1,4 +1,3 @@
-import { PlatformSettings } from "./clients"
 
 
 type EventType = "FileAddedEvent"

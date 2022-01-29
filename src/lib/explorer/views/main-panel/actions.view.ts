@@ -1,23 +1,25 @@
-import { child$, VirtualDOM } from '@youwol/flux-view'
-import { Button } from '@youwol/fv-button'
-import { ReplaySubject } from 'rxjs'
-import { ExplorerState } from '../../explorer.state'
-import { Action } from '../../actions.factory'
-import { AnyFolderNode, AnyItemNode, DriveNode, GroupNode } from '../../nodes'
-import { ChildApplicationAPI, IPlatformHandler } from '../../../platform.state'
+import {child$, VirtualDOM} from '@youwol/flux-view'
+import {Button} from '@youwol/fv-button'
+import {ReplaySubject} from 'rxjs'
+import {ExplorerState} from '../../explorer.state'
+import {Action} from '../../actions.factory'
+import {AnyFolderNode, AnyItemNode, DriveNode, GroupNode} from '../../nodes'
+import {ChildApplicationAPI, IPlatformHandler} from '../../../platform.state'
 
 
 export class ButtonView extends Button.View {
 
     class = 'fv-btn fv-bg-secondary-alt fv-hover-bg-secondary'
 
-    constructor({ name, icon, withClass, enabled }: { name: string, icon: string, withClass: string, enabled: boolean }) {
+    constructor({name, icon, withClass, enabled}: { name: string, icon: string, withClass: string, enabled: boolean }) {
         super({
             state: new Button.State(),
             contentView: () => ({
                 class: 'd-flex align-items-center',
                 children: [
-                    { class: icon },
+                    typeof (icon) == 'string'
+                        ? {class: icon}
+                        : icon,
                     {
                         class: 'ml-1',
                         innerText: name

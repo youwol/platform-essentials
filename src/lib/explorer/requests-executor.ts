@@ -83,9 +83,7 @@ let databaseActionsFactory = {
                 return false
 
             let node = update.removedNodes[0]
-            if (!(node instanceof FolderNode))
-                return false
-            return true// node.kind === 'regular'
+            return node instanceof FolderNode
         },
         then: () => {
             let node = update.removedNodes[0] as FolderNode<'regular'>

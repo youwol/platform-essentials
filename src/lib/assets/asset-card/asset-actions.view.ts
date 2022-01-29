@@ -21,7 +21,7 @@ export function runApplication(instance: Executable, title) {
         }).subscribe()
         return
     }
-    window.location.href = instance.url
+    window.location.href = getExeUrl(instance)
 }
 
 
@@ -83,10 +83,15 @@ export class OpenWithView implements VirtualDOM {
         return {
             class: btnClasses,
             children: [
-                executable.icon,
+                child$(
+                    executable.appMetadata$,
+                    (d) => d.icon),
                 {
                     class: 'ml-1',
-                    innerText: executable.name
+                    innerText: attr$(
+                        executable.appMetadata$,
+                        (d) => d.name
+                    )
                 }
             ],
             onclick: () => runApplication(executable, title)

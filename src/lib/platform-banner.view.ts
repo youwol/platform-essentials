@@ -32,14 +32,10 @@ class RunningAppTitleView implements VirtualDOM {
         let baseClass = 'fas my-auto fv-pointer fv-hover-text-secondary mx-2'
 
         this.children = [
-            {
-                class: 'border-bottom px-1 fv-text-focus',
-                style: {
-                    fontFamily: 'serif',
-                    fontSize: 'x-large'
-                },
-                innerText: app.title
-            },
+            child$(
+                app.header$,
+                (view) => view
+            ),
             {
                 class: 'd-flex align-items-center',
                 children: [
