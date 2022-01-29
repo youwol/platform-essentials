@@ -1,8 +1,10 @@
-import { VirtualDOM } from "@youwol/flux-view"
-import { forkJoin, Observable, of } from "rxjs"
-import { map, mergeMap } from "rxjs/operators"
-import { AUTO_GENERATED } from "../auto_generated"
-import { ApplicationAssociation, Asset, PlatformSettings, UserSettingsClient } from "./clients"
+import {VirtualDOM} from "@youwol/flux-view"
+import {Observable, of, ReplaySubject} from "rxjs"
+import {map} from "rxjs/operators"
+import {AUTO_GENERATED} from "../auto_generated"
+import {Parametrization, PlatformSettings, UserSettingsClient} from "./clients"
+import {Asset} from "./clients/assets-gateway";
+import {CdnSessionsStorageClient} from "./clients/cdn-sessions-storage";
 
 
 export interface Executable {

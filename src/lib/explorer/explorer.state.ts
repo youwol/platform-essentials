@@ -1,22 +1,33 @@
-import { uuidv4 } from '@youwol/flux-core'
-import { BehaviorSubject, combineLatest, from, Observable, of, ReplaySubject, Subscription } from "rxjs"
-import { distinctUntilChanged, filter, map, mergeMap, share, shareReplay } from 'rxjs/operators'
-import { RequestsExecutor } from './requests-executor'
-import { ImmutableTree } from '@youwol/fv-tree'
-import { FluxState } from './specific-assets/flux/flux.state'
-import { StoryState } from './specific-assets/story/story.state'
-import { DataState } from './specific-assets/data/data.state'
+import {uuidv4} from '@youwol/flux-core'
+import {BehaviorSubject, combineLatest, Observable, of, ReplaySubject, Subscription} from "rxjs"
+import {distinctUntilChanged, filter, map, mergeMap, share, shareReplay} from 'rxjs/operators'
+import {RequestsExecutor} from './requests-executor'
+import {ImmutableTree} from '@youwol/fv-tree'
+import {FluxState} from './specific-assets/flux/flux.state'
+import {StoryState} from './specific-assets/story/story.state'
+import {DataState} from './specific-assets/data/data.state'
 import {
-    AnyFolderNode, AnyItemNode, BrowserNode, DownloadNode, DriveNode, FolderNode,
-    FutureNode, GroupNode, HomeNode, ItemNode, RegularFolderNode, serialize, TrashNode
+    AnyFolderNode,
+    AnyItemNode,
+    BrowserNode,
+    DownloadNode,
+    DriveNode,
+    FolderNode,
+    FutureNode,
+    GroupNode,
+    HomeNode,
+    ItemNode,
+    RegularFolderNode,
+    serialize,
+    TrashNode
 } from './nodes'
-import { createTreeGroup, processBorrowItem, processMoveFolder, processMoveItem } from './utils'
-import { PlatformSettingsStore, YouwolBannerState } from '..'
-import { DisplayMode } from '.'
-import { ChildApplicationAPI } from '../platform.state'
-import { FileAddedEvent, PlatformEvent } from '../platform.events'
-import { ItemResponse } from '../clients'
-import { GENERIC_ACTIONS, getActions$, openWithActionFromExe, Action } from './actions.factory'
+import {createTreeGroup, processBorrowItem, processMoveFolder, processMoveItem} from './utils'
+import {PlatformSettingsStore, YouwolBannerState} from '..'
+import {DisplayMode} from '.'
+import {ChildApplicationAPI} from '../platform.state'
+import {FileAddedEvent, PlatformEvent} from '../platform.events'
+import {ItemResponse} from '../clients/assets-gateway'
+import {Action, GENERIC_ACTIONS, getActions$, openWithActionFromExe} from './actions.factory'
 
 /**
  * Ideally this concept should not exist.

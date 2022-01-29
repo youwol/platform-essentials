@@ -1,14 +1,19 @@
-import { attr$, child$, Stream$, VirtualDOM } from "@youwol/flux-view";
+import {attr$, child$, Stream$, VirtualDOM} from "@youwol/flux-view";
 import {
-    popupAssetModalView, ywSpinnerView, AssetActionsView,
-    PackageInfoView, AssetPermissionsView, FluxDependenciesView, Asset
+    AssetActionsView,
+    AssetPermissionsView,
+    FluxDependenciesView,
+    PackageInfoView,
+    popupAssetModalView,
+    ywSpinnerView
 } from "../../../..";
 
-import { BehaviorSubject, merge, Observable, of } from "rxjs";
-import { distinct, map, mergeMap, take } from "rxjs/operators";
-import { ExplorerState } from "../../../explorer.state";
-import { RequestsExecutor } from "../../../requests-executor";
-import { AnyItemNode, BrowserNode, ItemNode } from "../../../nodes";
+import {BehaviorSubject, merge, Observable, of} from "rxjs";
+import {distinct, map, mergeMap, take} from "rxjs/operators";
+import {ExplorerState} from "../../../explorer.state";
+import {RequestsExecutor} from "../../../requests-executor";
+import {AnyItemNode, BrowserNode, ItemNode} from "../../../nodes";
+import {Asset} from "../../../../clients/assets-gateway";
 
 export class ItemView {
 

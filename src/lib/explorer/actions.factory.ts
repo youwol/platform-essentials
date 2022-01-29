@@ -1,13 +1,25 @@
-
-import { Observable, of } from 'rxjs'
-import { map } from 'rxjs/operators'
-import { AssetsGatewayClient, ChildApplicationAPI, Executable } from '..'
-import { ExplorerState, SelectedItem } from './explorer.state'
+import {Observable, of} from 'rxjs'
+import {map} from 'rxjs/operators'
+import {ChildApplicationAPI, Executable} from '..'
+import {ExplorerState, SelectedItem} from './explorer.state'
 import {
-    AnyFolderNode, AnyItemNode, BrowserNode, DataNode, DeletedNode, DriveNode, FolderNode, FutureNode,
-    GroupNode, ItemNode, ProgressNode, RegularFolderNode, TrashNode
+    AnyFolderNode,
+    AnyItemNode,
+    BrowserNode,
+    DataNode,
+    DeletedNode,
+    DriveNode,
+    FolderNode,
+    FutureNode,
+    GroupNode,
+    ItemNode,
+    ProgressNode,
+    RegularFolderNode,
+    TrashNode
 } from './nodes'
-import { isLocalYouwol } from './utils'
+import {isLocalYouwol} from './utils'
+import {attr$, child$} from "@youwol/flux-view";
+import {AssetsGatewayClient} from "../clients/assets-gateway";
 
 export interface Action {
     sourceEventNode: BrowserNode,

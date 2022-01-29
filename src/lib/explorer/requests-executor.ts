@@ -1,15 +1,23 @@
-import { delay, map, tap } from 'rxjs/operators';
+import {delay, map, tap} from 'rxjs/operators';
 import {
-    AnyFolderNode, AnyItemNode, BrowserNode, DeletedFolderNode, DeletedItemNode, DriveNode,
-    FolderNode, FutureNode, ItemNode, RegularFolderNode
+    AnyFolderNode,
+    AnyItemNode,
+    BrowserNode,
+    DeletedFolderNode,
+    DeletedItemNode,
+    DriveNode,
+    FolderNode,
+    FutureNode,
+    ItemNode,
+    RegularFolderNode
 } from './nodes';
 
-import { uuidv4 } from '@youwol/flux-core';
-import { ImmutableTree } from "@youwol/fv-tree";
-import { Asset, AssetsGatewayClient, DriveResponse, FolderResponse, ItemResponse } from '..';
-import { Observable, of } from 'rxjs';
-import { send$ } from '../clients/utils';
-import { isLocalYouwol } from './utils';
+import {uuidv4} from '@youwol/flux-core';
+import {ImmutableTree} from "@youwol/fv-tree";
+import {Asset, AssetsGatewayClient, DriveResponse, FolderResponse, ItemResponse} from '../clients/assets-gateway';
+import {Observable, of} from 'rxjs';
+import {send$} from '../clients/utils';
+import {isLocalYouwol} from './utils';
 
 export let debugDelay = 0
 

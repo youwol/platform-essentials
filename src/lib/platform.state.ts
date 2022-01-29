@@ -1,10 +1,10 @@
-import { BehaviorSubject, Observable, Subject } from "rxjs"
-import { RunningApp } from './running-app.view'
-import { VirtualDOM } from '@youwol/flux-view'
-import { YouwolBannerState } from './top-banner'
-import { PlatformSettingsStore } from './platform-settings'
-import { filter, map, take, tap } from 'rxjs/operators'
-import { PlatformEvent } from "./platform.events"
+import {BehaviorSubject, Observable, of, Subject} from "rxjs"
+import {RunningApp} from './running-app.view'
+import {VirtualDOM} from '@youwol/flux-view'
+import {YouwolBannerState} from './top-banner'
+import {filter, map, take, tap} from 'rxjs/operators'
+import {PlatformEvent} from "./platform.events"
+import {getExeUrl, PlatformSettingsStore} from "./platform-settings";
 
 
 export interface IPlatformHandler {
