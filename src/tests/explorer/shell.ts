@@ -1,16 +1,24 @@
-import { render } from "@youwol/flux-view"
-import { combineLatest, Observable, of } from "rxjs"
-import { filter, map, mapTo, mergeMap, skip, skipWhile, take, tap } from "rxjs/operators"
-import { AssetCardView, ExplorerState, MainPanelView, SideBarView } from "../../lib"
-import { Action } from "../../lib/explorer/actions.factory"
-import { AnyFolderNode, AnyItemNode, BrowserNode, DriveNode, FolderNode, FutureNode, GroupNode } from "../../lib/explorer/nodes"
-import { ActionBtnView, ActionsView } from "../../lib/explorer/views/main-panel/actions.view"
-import { RowView } from "../../lib/explorer/views/main-panel/folder-content/details.view"
-import { FolderContentView } from "../../lib/explorer/views/main-panel/folder-content/folder-content.view"
-import { InfoBtnView, ItemView } from "../../lib/explorer/views/main-panel/folder-content/item.view"
-import { ActionsMenuView, HeaderPathView, PathElementView } from "../../lib/explorer/views/main-panel/header-path.view"
-import { GroupsView, GroupView } from "../../lib/explorer/views/sidebar/sidebar.view"
-import { expectAttributes, getFromDocument, queryFromDocument } from "../common"
+import {render} from "@youwol/flux-view"
+import {combineLatest, Observable, of} from "rxjs"
+import {filter, map, mapTo, mergeMap, skip, skipWhile, take, tap} from "rxjs/operators"
+import {AssetCardView, FolderContentView, MainPanelView, SideBarView} from "../../lib"
+import {ExplorerState} from "../../lib/explorer";
+import {Action} from "../../lib/explorer/actions.factory"
+import {
+    AnyFolderNode,
+    AnyItemNode,
+    BrowserNode,
+    DriveNode,
+    FolderNode,
+    FutureNode,
+    GroupNode
+} from "../../lib/explorer/nodes"
+import {ActionBtnView, ActionsView} from "../../lib/explorer/views/main-panel/actions.view"
+import {RowView} from "../../lib/explorer/views/main-panel/folder-content/details.view"
+import {InfoBtnView, ItemView} from "../../lib/explorer/views/main-panel/folder-content/item.view"
+import {ActionsMenuView, HeaderPathView, PathElementView} from "../../lib/explorer/views/main-panel/header-path.view"
+import {GroupsView, GroupView} from "../../lib/explorer/views/sidebar/sidebar.view"
+import {expectAttributes, getFromDocument, queryFromDocument} from "../common"
 
 
 export class Shell {
@@ -238,9 +246,8 @@ export function rm(itemName) {
                         return actionsContainer.displayedActions$
                             .pipe(
                                 skipWhile(({ folder }) => {
-                                    if (folder.id == folderContentView.folderId)
-                                        return false
-                                    return true
+                                    return folder.id != folderContentView.folderId;
+
                                 }),
                                 take(1),
                                 map(() => shell)
@@ -343,17 +350,16 @@ export function navigateStepBack() {
                     }),
                     skipWhile(({ actions, targetFolder }) => {
                         /**
-                         * The next is a hack: when selecting a GroupNode => 
+                         * The next is a hack: when selecting a GroupNode =>
                          * displayedActions$ never fire with actions.folder == groupNode.
                          */
                         if (targetFolder instanceof GroupNode)
                             return false
 
-                        if (((actions.folder instanceof FolderNode) || (actions.folder instanceof DriveNode))
-                            && actions.folder.name == targetFolder.name)
-                            return false
+                        return !(((actions.folder instanceof FolderNode) || (actions.folder instanceof DriveNode))
+                            && actions.folder.name == targetFolder.name);
 
-                        return true
+
                     }),
                     take(1),
                     map(({ actions, targetFolder }) => {
@@ -385,9 +391,8 @@ export function cd(folderName: string) {
                 // Wait for actions menu view to be updated
                 return shell.explorerState.currentFolder$.pipe(
                     skipWhile(({ folder }) => {
-                        if (folder instanceof FolderNode && folder.name == folderName)
-                            return false
-                        return true
+                        return !(folder instanceof FolderNode && folder.name == folderName);
+
                     }),
                     take(1),
                     tap(({ folder }) => {
@@ -404,9 +409,8 @@ export function cd(folderName: string) {
                         return actionsContainer.displayedActions$
                     }),
                     skipWhile(({ folder }) => {
-                        if (folder instanceof FolderNode && folder.name == folderName)
-                            return false
-                        return true
+                        return !(folder instanceof FolderNode && folder.name == folderName);
+
                     }),
                     take(1),
                     map(({ item, folder, actions }) => {
@@ -444,9 +448,7 @@ export function cdGroup(name: string) {
                 targetGrp.onclick()
                 return shell.explorerState.openFolder$.pipe(
                     skipWhile(({ folder }) => {
-                        if (folder.groupId == targetGroupId)
-                            return false
-                        return true
+                        return folder.groupId != targetGroupId
                     }),
                     take(1),
                     mergeMap(() => {
@@ -454,9 +456,7 @@ export function cdGroup(name: string) {
                         return actionsContainer.displayedActions$
                     }),
                     skipWhile(({ folder }) => {
-                        if (folder.groupId == targetGroupId)
-                            return false
-                        return true
+                        return folder.groupId != targetGroupId
                     }),
                     take(1),
                     map(({ folder, actions }) => {
@@ -490,9 +490,8 @@ export function selectItem(itemName: string) {
                         let actionsContainer = getFromDocument<ActionsView>(`.${ActionsView.ClassSelector}`)
                         return actionsContainer.displayedActions$.pipe(
                             skipWhile(({ item }) => {
-                                if (item && item.name == itemName)
-                                    return false
-                                return true
+                                return !(item && item.name == itemName);
+
                             }),
                             take(1),
                             map(() => {
@@ -630,9 +629,8 @@ export function purgeTrash() {
                 expect(folderContentView).toBeTruthy()
                 return folderContentView.items$.pipe(
                     skipWhile((items) => {
-                        if (items.length == 0)
-                            return false
-                        return true
+                        return items.length != 0;
+
                     }),
                     take(1),
                     mergeMap((items) => {
@@ -662,9 +660,8 @@ export function deleteDrive() {
 
                 return folderContentView.items$.pipe(
                     skipWhile((items) => {
-                        if (items.length == 0)
-                            return false
-                        return true
+                        return items.length != 0;
+
                     }),
                     take(1),
                     mergeMap((items) => {

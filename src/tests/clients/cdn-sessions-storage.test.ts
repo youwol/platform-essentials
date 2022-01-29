@@ -1,20 +1,13 @@
 import '../mock-requests'
-import {
-    CdnSessionsStorageClient, HealthzResponse
-} from '../../lib/clients/cdn-sessions-storage'
+import {CdnSessionsStorageClient, HealthzResponse} from '../../lib/clients/cdn-sessions-storage'
 
-import { Json } from '../..'
-import { getPyYouwolBasePath, resetPyYouwolDbs } from '../common'
+import {resetPyYouwolDbs$} from '../common'
 
-
-let storage = new CdnSessionsStorageClient({
-    basePath: `${getPyYouwolBasePath()}/api/cdn-sessions-storage`,
-    headers: { 'py-youwol-local-only': true }
-})
+let storage = new CdnSessionsStorageClient()
 
 
 beforeAll(async (done) => {
-    resetPyYouwolDbs().then(() => {
+    resetPyYouwolDbs$().subscribe(() => {
         done()
     })
 })
@@ -36,7 +29,7 @@ test('get data', (done) => {
     storage.applications.getData(
         "@youwol/platform-essentials",
         "integration-tests"
-    ).subscribe((resp: Json) => {
+    ).subscribe((resp: any) => {
         expect(resp).toEqual({})
         done()
     })
@@ -59,7 +52,7 @@ test('get data', (done) => {
     storage.applications.getData(
         "@youwol/platform-essentials",
         "integration-tests"
-    ).subscribe((resp: Json) => {
+    ).subscribe((resp: any) => {
         expect(resp).toEqual(testData)
         done()
     })

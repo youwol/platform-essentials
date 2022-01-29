@@ -1,27 +1,26 @@
 import '../mock-requests'
-import { AssetsGatewayClient } from '../../lib/clients/assets-gateway/assets-gateway.client'
+import {getFromDocument, queryFromDocument, resetPyYouwolDbs$} from '../common'
 
-import { getFromDocument, getPyYouwolBasePath, queryFromDocument, resetPyYouwolDbs } from '../common'
-
-AssetsGatewayClient.staticBasePath = `${getPyYouwolBasePath()}/api/assets-gateway`
-AssetsGatewayClient.staticHeaders = { 'py-youwol-local-only': true }
-
-import { render, VirtualDOM } from "@youwol/flux-view"
-import { BehaviorSubject, of } from "rxjs"
-
-
-import { LockerBadge } from "../../lib/top-banner/badges"
-import { UserMenuView } from "../../lib/top-banner/user-menu.view"
-import { YouwolMenuView } from "../../lib/top-banner/youwol-menu.view"
-import { YouwolBannerState, YouwolBannerView } from '../../lib/top-banner/top-banner.view'
-import { ComboTogglesView, FaIconToggleView } from '../../lib/top-banner/actions.view'
-import { defaultUserMenu, defaultYouWolMenu, MenuSection } from '../../lib/top-banner/menu.view'
-import { MenuItem } from '../../lib/top-banner/settings-menu.view'
-import { take } from 'rxjs/operators'
+import {render, VirtualDOM} from "@youwol/flux-view"
+import {BehaviorSubject, of} from "rxjs"
+import {
+    ComboTogglesView,
+    defaultUserMenu,
+    defaultYouWolMenu,
+    FaIconToggleView,
+    LockerBadge,
+    MenuItem,
+    MenuSection,
+    UserMenuView,
+    YouwolBannerState,
+    YouwolBannerView,
+    YouwolMenuView
+} from "../../lib"
+import {take} from 'rxjs/operators'
 
 
 beforeAll(async (done) => {
-    resetPyYouwolDbs().then(() => {
+    resetPyYouwolDbs$().subscribe(() => {
         done()
     })
 })

@@ -1,20 +1,17 @@
 import '../mock-requests'
-import { AssetsGatewayClient } from '../../lib/clients/assets-gateway/assets-gateway.client'
 
-import { getFromDocument, getPyYouwolBasePath, resetPyYouwolDbs } from '../common'
+import {getFromDocument, resetPyYouwolDbs$} from '../common'
+import {render} from "@youwol/flux-view"
+import {Subject} from "rxjs"
+import {mergeMap, take} from "rxjs/operators"
+import {AssetActionsView, AssetCardView, AssetOverview, AssetPermissionsView} from "../../lib/"
+import {AssetCardTabs} from '../../lib/assets/asset-card/asset-card.view'
+import {GroupsPermissionsView, UserPermissionsView} from '../../lib/assets/asset-card/permissions/permissions.view'
+import {Asset, AssetsGatewayClient} from "../../lib/clients/assets-gateway";
 
-AssetsGatewayClient.staticBasePath = `${getPyYouwolBasePath()}/api/assets-gateway`
-AssetsGatewayClient.staticHeaders = { 'py-youwol-local-only': true }
-
-import { render } from "@youwol/flux-view"
-import { Subject } from "rxjs"
-import { mergeMap, take } from "rxjs/operators"
-import { Asset, AssetActionsView, AssetCardView, AssetOverview, AssetPermissionsView } from "../../lib"
-import { AssetCardTabs } from '../../lib/assets/asset-card/asset-card.view'
-import { GroupsPermissionsView, UserPermissionsView } from '../../lib/assets/asset-card/permissions/permissions.view'
 
 beforeAll(async (done) => {
-    resetPyYouwolDbs().then(() => {
+    resetPyYouwolDbs$().subscribe(() => {
         done()
     })
 })

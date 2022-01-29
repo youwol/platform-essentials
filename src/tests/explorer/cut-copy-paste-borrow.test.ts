@@ -1,20 +1,13 @@
 import '../mock-requests'
-import { AssetsGatewayClient } from '../../lib/clients/assets-gateway/assets-gateway.client'
-
-import { getPyYouwolBasePath, resetPyYouwolDbs } from '../common'
-
-AssetsGatewayClient.staticBasePath = `${getPyYouwolBasePath()}/api/assets-gateway`
-AssetsGatewayClient.staticHeaders = { 'py-youwol-local-only': true }
-
-import { FolderNode, ItemNode, StoryNode } from '../../lib/explorer/nodes'
-import { take } from 'rxjs/operators'
-import { mkDir, cd, shell$, mkStory, expectSnapshot, cut, paste, borrow } from './shell'
-
+import {resetPyYouwolDbs$} from '../common'
+import {FolderNode, ItemNode, StoryNode} from '../../lib/explorer/nodes'
+import {take} from 'rxjs/operators'
+import {borrow, cd, cut, expectSnapshot, mkDir, mkStory, paste, shell$} from './shell'
 
 
 beforeEach(async (done) => {
     jest.setTimeout(90 * 1000)
-    resetPyYouwolDbs().then(() => {
+    resetPyYouwolDbs$().subscribe(() => {
         done()
     })
 })
@@ -53,7 +46,7 @@ test(`cut & paste`, (done) => {
         cut('my story'),
         expectSnapshot(
             {
-                items: (items) => {
+                items: () => {
                     // let cutItemView = items.find( item => item instanceOf CutItemView)
                 },
                 explorerState: (state) => {
@@ -88,7 +81,7 @@ test(`cut & paste`, (done) => {
                 }
             }
         ),
-    ).subscribe((shell) => {
+    ).subscribe(() => {
         done()
     })
 })
@@ -103,7 +96,7 @@ test(`borrow & paste`, (done) => {
         borrow('my story'),
         expectSnapshot(
             {
-                items: (items) => {
+                items: () => {
                     // let cutItemView = items.find( item => item instanceOf CutItemView)
                 },
                 explorerState: (state) => {
@@ -127,7 +120,7 @@ test(`borrow & paste`, (done) => {
                 }
             }
         ),
-    ).subscribe((shell) => {
+    ).subscribe(() => {
         done()
     })
 })

@@ -4,9 +4,9 @@ from pathlib import Path
 from youwol.configuration.config_from_module import IConfigurationFactory, Configuration
 from youwol.environment.models import Events
 from youwol.environment.youwol_environment import YouwolEnvironment
+from youwol.main_args import MainArguments
 from youwol.routers.custom_commands.models import Command
 from youwol_utils.context import Context
-from youwol.main_args import MainArguments
 
 
 async def clear_database(ctx: Context):
@@ -30,7 +30,7 @@ class ConfigurationFactory(IConfigurationFactory):
             cacheDir=Path(__file__).parent / 'youwol_system',
             customCommands=[
                 Command(
-                    name="reset-db",
+                    name="reset",
                     do_get=lambda ctx: clear_database(ctx)
                 )
             ],

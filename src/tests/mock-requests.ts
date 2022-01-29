@@ -1,9 +1,8 @@
-import { Json } from ".."
-
 const http = require('http')
 const request = require('request')
 
-type RequestMethod = 'GET' | 'POST' | 'PUT' | 'POST' | 'DELETE'
+type RequestMethod = 'GET' | 'POST' | 'PUT' | 'DELETE'
+type Json = any
 
 class MockRequest {
 
@@ -13,7 +12,7 @@ class MockRequest {
             method: RequestMethod,
             body: string,
             headers: any
-        } = { method: 'GET', body: '', headers: {} }) {
+        } = {method: 'GET', body: '', headers: {}}) {
 
     }
 }
@@ -37,7 +36,7 @@ class RawResponse {
 
 function mockFetch(req: MockRequest): Promise<any> {
 
-    const promise = new Promise((resolve, reject) => {
+    return new Promise((resolve, _reject) => {
 
         switch (req.options.method) {
 
@@ -86,8 +85,7 @@ function mockFetch(req: MockRequest): Promise<any> {
                 break
             }
         }
-    });
-    return promise
+    })
 }
 
 (window as any)["Request"] = MockRequest;

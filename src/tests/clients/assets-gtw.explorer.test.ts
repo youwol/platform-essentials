@@ -1,20 +1,23 @@
 import '../mock-requests'
 import {
-    AssetsGatewayClient, DriveResponse, DrivesResponse, GroupsResponse, HealthzResponse,
-    ChildrenFolderResponse, DefaultDriveResponse, FolderResponse
-} from '../../lib/clients'
-import { mergeMap } from 'rxjs/operators'
-import { expectAttributes, getPyYouwolBasePath, resetPyYouwolDbs } from '../common'
+    AssetsGatewayClient,
+    ChildrenFolderResponse,
+    DefaultDriveResponse,
+    DriveResponse,
+    DrivesResponse,
+    FolderResponse,
+    GroupsResponse,
+    HealthzResponse
+} from '../../lib/clients/assets-gateway'
+import {mergeMap} from 'rxjs/operators'
+import {expectAttributes, resetPyYouwolDbs$} from '../common'
 
-AssetsGatewayClient.staticHeaders = { 'py-youwol-local-only': true }
 
-let assetsGtw = new AssetsGatewayClient({
-    basePath: `${getPyYouwolBasePath()}/api/assets-gateway`
-})
+let assetsGtw = new AssetsGatewayClient()
 
 
 beforeAll(async (done) => {
-    resetPyYouwolDbs().then(() => {
+    resetPyYouwolDbs$().subscribe(() => {
         done()
     })
 })

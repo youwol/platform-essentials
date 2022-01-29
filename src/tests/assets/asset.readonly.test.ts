@@ -1,18 +1,15 @@
 import '../mock-requests'
-import { AssetsGatewayClient } from '../../lib/clients/assets-gateway/assets-gateway.client'
+import {getFromDocument, resetPyYouwolDbs$} from '../common'
 
-import { getFromDocument, getPyYouwolBasePath, resetPyYouwolDbs } from '../common'
+import {render} from "@youwol/flux-view"
+import {Subject} from "rxjs"
+import {mergeMap} from "rxjs/operators"
+import {AssetCardView} from "../../lib"
+import {Asset, AssetsGatewayClient} from "../../lib/clients/assets-gateway";
 
-AssetsGatewayClient.staticBasePath = `${getPyYouwolBasePath()}/api/assets-gateway`
-AssetsGatewayClient.staticHeaders = { 'py-youwol-local-only': true }
-
-import { render } from "@youwol/flux-view"
-import { Subject } from "rxjs"
-import { mergeMap } from "rxjs/operators"
-import { Asset, AssetCardView } from "../../lib"
 
 beforeAll(async (done) => {
-    resetPyYouwolDbs().then(() => {
+    resetPyYouwolDbs$().subscribe(() => {
         done()
     })
 })

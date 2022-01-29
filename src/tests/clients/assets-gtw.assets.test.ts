@@ -1,30 +1,26 @@
 import '../mock-requests'
 import {
-    AssetsGatewayClient, GroupsResponse, HealthzResponse, DefaultDriveResponse, Asset
-} from '../../lib/clients'
-import { expectAttributes, getPyYouwolBasePath, resetPyYouwolDbs } from '../common'
+    Asset,
+    AssetsGatewayClient,
+    DefaultDriveResponse,
+    GroupsResponse,
+    HealthzResponse
+} from '../../lib/clients/assets-gateway'
+import {expectAttributes, resetPyYouwolDbs$} from '../common'
 
 
-AssetsGatewayClient.staticHeaders = { 'py-youwol-local-only': true }
-
-let assetsGtw = new AssetsGatewayClient({
-    basePath: `${getPyYouwolBasePath()}/api/assets-gateway`
-})
+let assetsGtw = new AssetsGatewayClient()
 
 
 beforeAll(async (done) => {
-    resetPyYouwolDbs().then(() => {
+    resetPyYouwolDbs$().subscribe(() => {
         done()
     })
 })
 
 let privateGrpPath = "private"
 let privateGrpId: string
-let defaultDriveId: string
 let homeFolderId: string
-let newDriveId: string
-let workingFolderId: string
-let ywUsersGrpPath = "/youwol-users"
 
 test('assetsGtw.getHealthz()', (done) => {
 
