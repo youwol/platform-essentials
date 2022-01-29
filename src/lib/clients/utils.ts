@@ -112,6 +112,19 @@ export interface NativeRequestOptions extends RequestInit {
     json?: any
 }
 
+export function requestToJson$<T = unknown>(request, extractFct = (d) => d) {
+
+    return new Observable<T>(observer => {
+        fetch(request)
+            .then(response => response.json()) // or text() or blob() etc.
+            .then(data => {
+                observer.next(extractFct(data));
+                observer.complete();
+            })
+            .catch(err => observer.error(err));
+    });
+}
+
 export function send$<T>(
     commandType: CommandType,
     path: string,
@@ -136,7 +149,7 @@ export function send$<T>(
     );
 
     if (!channels$) {
-        return createObservableFromFetch(request)
+        return requestToJson$(request)
     }
 
     let follower = new RequestFollower({
@@ -147,7 +160,7 @@ export function send$<T>(
 
     return of({}).pipe(
         tap(() => follower.start(1)),
-        mergeMap(() => createObservableFromFetch(request)),
+        mergeMap(() => requestToJson$(request)),
         tap(() => follower.end())
     ) as Observable<T>
 }
