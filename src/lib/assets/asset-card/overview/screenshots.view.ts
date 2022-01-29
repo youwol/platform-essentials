@@ -1,7 +1,6 @@
-import { child$, VirtualDOM } from "@youwol/flux-view";
-import { BehaviorSubject, ReplaySubject } from "rxjs";
-import { Asset } from "../../..";
-import { AssetsGatewayClient } from "../../../clients/assets-gateway";
+import {child$, VirtualDOM} from "@youwol/flux-view";
+import {BehaviorSubject, ReplaySubject} from "rxjs";
+import {Asset} from "../../../clients/assets-gateway";
 
 
 export class ImagesCarouselView implements VirtualDOM {
@@ -186,7 +185,7 @@ export class AssetScreenShotsView implements VirtualDOM {
 
         let files = pasteEvent.clipboardData.files;
         if (files.length == 1 && files[0].type.indexOf("image") === 0 && this.validImageFile(files[0])) {
-            var file = files[0]
+            let file = files[0]
             let url = URL.createObjectURL(file)
             this.fileUploaded$.next({ file, src: url })
             this.images$.next([...this.images$.getValue(), url])

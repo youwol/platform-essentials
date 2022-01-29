@@ -1,9 +1,8 @@
-import { child$, VirtualDOM } from '@youwol/flux-view'
-import { Asset } from '../../..'
-import { AssetsGatewayClient } from '../../../clients/assets-gateway'
+import {child$, VirtualDOM} from '@youwol/flux-view'
+import {Asset, AssetsGatewayClient} from '../../../clients/assets-gateway'
 
 
-export function getActions(asset: Asset) {
+export function getActions(_asset: Asset) {
 
     return {
         class: "w-100 d-flex flex-wrap",

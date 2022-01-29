@@ -29,11 +29,12 @@ export interface Action {
     exe: () => void,
     applicable: () => boolean
 }
-export type ActionConstructor = (state: ExplorerState, { node, selection }: SelectedItem, permissions) => Action
+
+export type ActionConstructor = (state: ExplorerState, {node, selection}: SelectedItem, permissions) => Action
 
 
 export let GENERIC_ACTIONS = {
-    rename: (state: ExplorerState, { node, selection }: SelectedItem, permissions) => ({
+    rename: (state: ExplorerState, {node, selection}: SelectedItem, permissions) => ({
         sourceEventNode: node,
         icon: 'fas fa-pen',
         name: 'rename',
@@ -75,7 +76,7 @@ export let GENERIC_ACTIONS = {
             anchor.remove()
         }
     }),
-    upload: (state: ExplorerState, { node, selection }: SelectedItem, permissions) => ({
+    upload: (state: ExplorerState, {node}: SelectedItem) => ({
         sourceEventNode: node,
         icon: 'fas fa-upload', name: 'upload asset',
         enable: true,
@@ -87,29 +88,35 @@ export let GENERIC_ACTIONS = {
             console.log("Upload node!", node)
         }
     }),
-    deleteFolder: (state: ExplorerState, { node, selection }: SelectedItem, permissions) => ({
+    deleteFolder: (state: ExplorerState, {node, selection}: SelectedItem) => ({
         sourceEventNode: node,
         icon: 'fas fa-trash',
         name: 'delete',
         enable: true /*permissions.write*/,
         applicable: () => node instanceof FolderNode && selection == 'direct' /*&& node.kind == 'regular'*/,
-        exe: () => { state.deleteFolder(node as RegularFolderNode) }
+        exe: () => {
+            state.deleteFolder(node as RegularFolderNode)
+        }
     }),
-    deleteDrive: (state: ExplorerState, { node, selection }: SelectedItem, permissions) => ({
+    deleteDrive: (state: ExplorerState, {node, selection}: SelectedItem) => ({
         sourceEventNode: node,
         icon: 'fas fa-trash',
         name: 'delete drive',
         enable: true /*permissions.write*/,
         applicable: () => node instanceof DriveNode && selection == 'direct',
-        exe: () => { state.deleteDrive(node as DriveNode) }
+        exe: () => {
+            state.deleteDrive(node as DriveNode)
+        }
     }),
-    clearTrash: (state: ExplorerState, { node, selection }: SelectedItem, permissions) => ({
+    clearTrash: (state: ExplorerState, {node}: SelectedItem) => ({
         sourceEventNode: node,
         icon: 'fas fa-times',
         name: 'clear trash',
         enable: true /*permissions.write*/,
         applicable: () => node instanceof FolderNode && node.kind == 'trash',
-        exe: () => { state.purgeDrive(node as TrashNode) }
+        exe: () => {
+            state.purgeDrive(node as TrashNode)
+        }
     }),
     newFluxProject: (state: ExplorerState, { node, selection }: SelectedItem, permissions) => ({
         sourceEventNode: node,
@@ -171,7 +178,7 @@ export let GENERIC_ACTIONS = {
             input.setAttribute("type", "file")
             input.setAttribute("multiple", "true")
             input.dispatchEvent(new MouseEvent('click'))
-            input.onchange = (ev) => {
+            input.onchange = () => {
                 state.data.import(node as AnyFolderNode, input)
                 input.remove()
             }

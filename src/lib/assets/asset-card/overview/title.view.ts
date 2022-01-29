@@ -1,7 +1,7 @@
-import { attr$, VirtualDOM } from "@youwol/flux-view";
-import { BehaviorSubject } from "rxjs";
-import { Asset } from "../../..";
-import { TextEditableView } from "../misc.view";
+import {attr$, VirtualDOM} from "@youwol/flux-view";
+import {BehaviorSubject} from "rxjs";
+import {TextEditableView} from "../misc.view";
+import {Asset} from "../../../clients/assets-gateway";
 
 export class AssetTitleView implements VirtualDOM {
 

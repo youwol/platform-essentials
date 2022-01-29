@@ -1,11 +1,8 @@
-
-
-import { share } from 'rxjs/operators'
-import { child$, VirtualDOM } from '@youwol/flux-view'
-import { ExposedGroupState, ExposedGroupView } from './group-permissions.view'
-import { Asset } from '../../..'
-import { AccessInfo, AssetsGatewayClient } from '../../../clients/assets-gateway'
-import { Observable } from 'rxjs'
+import {share} from 'rxjs/operators'
+import {child$, VirtualDOM} from '@youwol/flux-view'
+import {ExposedGroupState, ExposedGroupView} from './group-permissions.view'
+import {AccessInfo, Asset, AssetsGatewayClient} from '../../../clients/assets-gateway'
+import {Observable} from 'rxjs'
 
 
 export class AssetPermissionsView implements VirtualDOM {
@@ -16,7 +13,6 @@ export class AssetPermissionsView implements VirtualDOM {
 
     public readonly accessInfo$: Observable<AccessInfo>
     public readonly asset: Asset
-    public readonly classSection = 'py-2'
     static readonly titleClass = "w-100 text-center"
     static readonly titleStyle = { 'font-family': 'fantasy', 'font-size': 'large' }
 
@@ -111,8 +107,7 @@ export class GroupsPermissionsView implements VirtualDOM {
             .filter((group) => group.name != 'private')
             .map((group) => {
                 let expState = new ExposedGroupState(this.asset.assetId, group)
-                let expView = new ExposedGroupView(expState)
-                return expView
+                return new ExposedGroupView(expState)
             })
         let expState = new ExposedGroupState(
             this.asset.assetId,

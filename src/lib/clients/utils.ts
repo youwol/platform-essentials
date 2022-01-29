@@ -1,13 +1,17 @@
-import { createObservableFromFetch } from '@youwol/flux-core';
-import { Observable, of, ReplaySubject, Subject } from 'rxjs';
-import { map, mergeMap, tap } from 'rxjs/operators';
+import {Observable, of, ReplaySubject, Subject} from 'rxjs';
+import {map, mergeMap, tap} from 'rxjs/operators';
 
 
 export type BodyContentType = 'text/plain' | 'application/json'
 
 
-export interface JsonMap { [member: string]: string | number | boolean | null | JsonArray | JsonMap };
-export interface JsonArray extends Array<string | number | boolean | null | JsonArray | JsonMap> { }
+export interface JsonMap {
+    [member: string]: string | number | boolean | null | JsonArray | JsonMap
+}
+
+export interface JsonArray extends Array<string | number | boolean | null | JsonArray | JsonMap> {
+}
+
 export type Json = JsonMap | JsonArray | string | number | boolean | null;
 
 
@@ -200,7 +204,7 @@ export function downloadBlob(
 
     xhr.onprogress = (event) => follower.progressTo(event.loaded)
 
-    xhr.onload = (e) => {
+    xhr.onload = () => {
         follower.end()
         response$.next(xhr.response)
     }
@@ -217,7 +221,7 @@ export function uploadBlob(
     fileId?: string
 ): Observable<any | Error> {
 
-    let { requestId, channels$ } = options
+    let {channels$} = options
 
     let follower = new RequestFollower({
         targetId: fileId,
@@ -241,13 +245,12 @@ export function uploadBlob(
 
     channels$ && (xhr.upload.onprogress = (event) => follower.progressTo(event.loaded))
 
-    xhr.onload = (event) => {
+    xhr.onload = () => {
         if (xhr.readyState === 4) {
             if (xhr.status === 200) {
                 channels$ && follower.end()
                 response.next(JSON.parse(xhr.responseText))
-            }
-            else {
+            } else {
                 response.next(new Error(xhr.statusText))
             }
         }

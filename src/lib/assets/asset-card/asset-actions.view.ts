@@ -1,10 +1,12 @@
-import { attr$, children$, VirtualDOM } from "@youwol/flux-view"
-import { Asset, AssetsGatewayClient, DefaultDriveResponse, Executable, PlatformSettingsStore } from "../.."
-import { BehaviorSubject } from "rxjs"
-import { map, mergeMap, take } from "rxjs/operators"
-import { ButtonView } from "./misc.view"
-import { FileAddedEvent } from "../../platform.events"
-import { ChildApplicationAPI } from "../../platform.state"
+import {attr$, child$, children$, VirtualDOM} from "@youwol/flux-view"
+import {Executable, PlatformSettingsStore} from "../.."
+import {Asset, AssetsGatewayClient, DefaultDriveResponse} from '../../clients/assets-gateway'
+import {BehaviorSubject} from "rxjs"
+import {map, mergeMap, take} from "rxjs/operators"
+import {ButtonView} from "./misc.view"
+import {FileAddedEvent} from "../../platform.events"
+import {ChildApplicationAPI} from "../../platform.state"
+import {getExeUrl} from "../../platform-settings";
 
 
 export function runApplication(instance: Executable, title) {
@@ -40,19 +42,6 @@ export class OpenWithView implements VirtualDOM {
     constructor(params: { asset: Asset }) {
 
         Object.assign(this, params)
-
-        let options$ = PlatformSettingsStore.getOpeningApps$(this.asset).pipe(
-            map((apps) => {
-                return apps.map((app) => {
-                    return {
-                        icon: "fas fa-play",
-                        appName: app.name,
-                        instanceName: `${app.name}#${this.asset.name}`,
-                        URL: app.url
-                    }
-                })
-            })
-        )
 
         this.children = [
             {

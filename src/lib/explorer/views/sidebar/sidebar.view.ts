@@ -1,11 +1,9 @@
-import { attr$, child$, children$, Stream$, VirtualDOM } from "@youwol/flux-view"
-import { BehaviorSubject, merge, Observable } from "rxjs"
-import { ExplorerState } from "../../explorer.state"
-import { GroupResponse } from "../../.."
-import { delay, mapTo, take } from "rxjs/operators"
-import { AnyFolderNode, DownloadNode, DriveNode, HomeNode, TrashNode } from "../../nodes"
-
-
+import {attr$, child$, children$, Stream$, VirtualDOM} from "@youwol/flux-view"
+import {BehaviorSubject, merge, Observable} from "rxjs"
+import {ExplorerState} from "../../explorer.state"
+import {delay, mapTo, take} from "rxjs/operators"
+import {AnyFolderNode, DownloadNode, DriveNode, HomeNode, TrashNode} from "../../nodes"
+import {GroupResponse} from "../../../clients/assets-gateway";
 
 
 class PredefinedFolderView implements VirtualDOM {
@@ -33,7 +31,7 @@ class PredefinedFolderView implements VirtualDOM {
                     untilFirst: `${defaultClasses} fv-text-primary fv-hover-bg-secondary`
                 }
             ),
-            children: [,
+            children: [
                 {
                     class: attr$(
                         extended$,
@@ -225,7 +223,7 @@ export class SideBarView implements VirtualDOM {
             (extended) => extended
                 ? {
                     width: '250px'
-                } : { width: 'auto' }
+                } : {width: 'auto'}
         )
 
         this.children = [
@@ -234,17 +232,19 @@ export class SideBarView implements VirtualDOM {
                 children: [
                     {
                         class: 'ml-auto fas fa-bars fv-pointer fv-hover-text-focus',
-                        onclick: () => { extended$.next(!extended$.getValue()) }
+                        onclick: () => {
+                            extended$.next(!extended$.getValue())
+                        }
                     }
                 ]
             },
             child$(
                 state.currentFolder$.pipe(take(1)),
-                () => new PredefinedFoldersView({ state, extended$ })
+                () => new PredefinedFoldersView({state, extended$})
             ),
             child$(
                 state.userInfo$,
-                (userInfo) => new GroupsView({ state, groups: userInfo.groups, extended$ })
+                (userInfo) => new GroupsView({state, groups: userInfo.groups, extended$})
             )
         ]
     }

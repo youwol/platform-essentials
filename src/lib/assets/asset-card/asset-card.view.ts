@@ -1,11 +1,11 @@
-import { VirtualDOM } from "@youwol/flux-view"
-import { Subject } from "rxjs"
-import { uuidv4 } from "@youwol/flux-core"
+import {VirtualDOM} from "@youwol/flux-view"
+import {Subject} from "rxjs"
+import {uuidv4} from "@youwol/flux-core"
 
-import { Tabs } from '@youwol/fv-tabs'
+import {Tabs} from '@youwol/fv-tabs'
 
-import { AssetOverview } from "./overview/overview.view"
-import { Asset } from "../.."
+import {AssetOverview} from "./overview/overview.view"
+import {Asset} from "../../clients/assets-gateway";
 
 
 class AssetTab extends Tabs.TabData {

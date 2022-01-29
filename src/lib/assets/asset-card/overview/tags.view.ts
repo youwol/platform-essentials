@@ -1,8 +1,8 @@
-import { attr$, child$, children$, HTMLElement$, VirtualDOM } from "@youwol/flux-view";
-import { BehaviorSubject, Observable, of } from "rxjs";
-import { IconButtonView, TextEditableView } from "../misc.view";
-import { skip } from "rxjs/operators";
-import { Asset } from "../../..";
+import {attr$, child$, children$, HTMLElement$, VirtualDOM} from "@youwol/flux-view";
+import {BehaviorSubject, Observable, of} from "rxjs";
+import {IconButtonView, TextEditableView} from "../misc.view";
+import {skip} from "rxjs/operators";
+import {Asset} from "../../../clients/assets-gateway";
 
 
 export class AssetTagsView implements VirtualDOM {
@@ -60,7 +60,6 @@ class TagsEditableView implements VirtualDOM {
     static ClassSelector = "tags-editable-view"
     public readonly class = `${TagsEditableView.ClassSelector}`
     public readonly children: VirtualDOM[]
-    public readonly editionMode$ = new BehaviorSubject(false)
 
     public readonly tags$: BehaviorSubject<string[]>
 
@@ -104,17 +103,17 @@ class EditableTagView implements VirtualDOM {
         this.children = [
             child$(
                 this.tags$,
-                (tags) => ({
+                () => ({
                     class: 'd-flex flex-align-center mr-5 my-2',
                     children: [
                         new TextEditableView({
                             text$,
-                            regularView: (text$) => ({ innerText: attr$(text$, t => t) }),
+                            regularView: (text$) => ({innerText: attr$(text$, t => t)}),
                             class: 'border rounded p-2 d-flex flex-align-center'
                         } as any),
                         {
                             tag: 'i',
-                            style: { height: 'fit-content' },
+                            style: {height: 'fit-content'},
                             class: 'fas fa-times mx-1 fv-text-error fv-pointer fv-hover-xx-lighter',
                             onclick: () => {
                                 let newTags = this.tags$.getValue().filter((_, i) => i != this.index);

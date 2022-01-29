@@ -1,12 +1,11 @@
-import { child$, VirtualDOM } from "@youwol/flux-view";
-import { Button } from "@youwol/fv-button";
-import { from } from "rxjs";
-import { map } from "rxjs/operators";
-import { AssetsGatewayClient } from "../clients/assets-gateway";
-import { PlatformSettingsStore } from "../platform-settings";
-import { ChildApplicationAPI, isPlatformInstance, PlatformState } from "../platform.state";
-import { UserMenuView } from "./user-menu.view";
-import { YouwolMenuView } from "./youwol-menu.view";
+import {child$, VirtualDOM} from "@youwol/flux-view";
+import {Button} from "@youwol/fv-button";
+import {map} from "rxjs/operators";
+import {AssetsGatewayClient} from "../clients/assets-gateway";
+import {PlatformSettingsStore} from "../platform-settings";
+import {ChildApplicationAPI, isPlatformInstance} from "../platform.state";
+import {UserMenuView} from "./user-menu.view";
+import {YouwolMenuView} from "./youwol-menu.view";
 
 
 export class YouwolBannerState {
@@ -75,7 +74,6 @@ export class YouwolBannerView implements VirtualDOM {
                 instanceId,
                 {
                     actionsView: this.customActionsView,
-                    badgesView: this.badgesView,
                     youwolMenuView: this.youwolMenuView,
                     userMenuView: this.userMenuView
                 }

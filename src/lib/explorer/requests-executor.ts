@@ -22,13 +22,11 @@ import {isLocalYouwol} from './utils';
 export let debugDelay = 0
 
 
-function isToProcess({ update, targetCmd }) {
+function isToProcess({update, targetCmd}) {
 
     if (!(update.command instanceof targetCmd))
         return false
-    if (update.command.metadata && !update.command.metadata.toBeSaved)
-        return false
-    return true
+    return !(update.command.metadata && !update.command.metadata.toBeSaved);
 }
 
 let databaseActionsFactory = {

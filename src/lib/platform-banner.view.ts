@@ -4,28 +4,6 @@ import {PlatformState} from './platform.state'
 import {defaultUserMenu, YouwolBannerView} from "./top-banner";
 import {AppsDockerView} from './platform-docker-bar.view'
 
-
-class RunningAppView implements VirtualDOM {
-
-    public readonly class = 'd-flex w-100 align-items-center fv-bg-background px-2 fv-text-primary fv-pointer border-bottom fv-hover-bg-secondary'
-
-    public readonly children: VirtualDOM[]
-
-    public readonly onclick: () => void
-    constructor(app: RunningApp, state: PlatformState) {
-        this.children = [
-            {
-                class: app.icon
-            },
-            {
-                class: 'mx-1',
-                innerText: app.title
-            }
-        ]
-        this.onclick = () => state.focus(app.instanceId)
-    }
-}
-
 /**
  * Regular top banner of the application (no application running)
  */

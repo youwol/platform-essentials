@@ -1,10 +1,10 @@
-import { attr$, child$, HTMLElement$, VirtualDOM } from "@youwol/flux-view";
-import { BehaviorSubject, from, merge, Observable, of } from "rxjs";
+import {attr$, child$, HTMLElement$, VirtualDOM} from "@youwol/flux-view";
+import {BehaviorSubject, from, Observable, of} from "rxjs";
 
-import { IconButtonView } from "../misc.view";
-import { filter, mapTo, mergeMap } from "rxjs/operators";
-import { install } from "@youwol/cdn-client";
-import { Asset } from "../../..";
+import {IconButtonView} from "../misc.view";
+import {mapTo, mergeMap} from "rxjs/operators";
+import {install} from "@youwol/cdn-client";
+import {Asset} from "../../../clients/assets-gateway";
 
 export class AssetDescriptionView implements VirtualDOM {
 

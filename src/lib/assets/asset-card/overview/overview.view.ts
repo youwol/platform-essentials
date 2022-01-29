@@ -1,14 +1,12 @@
-import { HTMLElement$, VirtualDOM } from "@youwol/flux-view"
-import { BehaviorSubject, combineLatest, Observable, Subject } from "rxjs"
-import { AssetTitleView } from "./title.view"
-import { AssetDescriptionView } from "./description.view"
-import { AssetTagsView } from "./tags.view"
-import { AssetScreenShotsView } from "./screenshots.view"
-import { sectionTitleView } from "../misc.view"
-import { Asset } from "../../.."
-import { mergeMap, scan, shareReplay } from "rxjs/operators"
-import { AssetsGatewayClient } from "../../../clients/assets-gateway"
-import { uuidv4 } from "@youwol/flux-core"
+import {HTMLElement$, VirtualDOM} from "@youwol/flux-view"
+import {BehaviorSubject, combineLatest, Subject} from "rxjs"
+import {AssetTitleView} from "./title.view"
+import {AssetDescriptionView} from "./description.view"
+import {AssetTagsView} from "./tags.view"
+import {AssetScreenShotsView} from "./screenshots.view"
+import {sectionTitleView} from "../misc.view"
+import {mergeMap, shareReplay} from "rxjs/operators"
+import {Asset, AssetsGatewayClient} from "../../../clients/assets-gateway"
 
 
 export class AssetOverview implements VirtualDOM {
@@ -54,8 +52,8 @@ export class AssetOverview implements VirtualDOM {
             this.images$,
             this.description$
         ]).pipe(
-            mergeMap(([name, tags, images, description]) => {
-                return this.assetsGtwClient.assets.update$(this.asset.assetId, { name, tags, description })
+            mergeMap(([name, tags, _, description]) => {
+                return this.assetsGtwClient.assets.update$(this.asset.assetId, {name, tags, description})
             }),
             shareReplay(1)
         )
@@ -94,9 +92,9 @@ export class AssetOverview implements VirtualDOM {
                     this.assetOutput$.next(asset)
                 }),
                 screenShotsView.fileUploaded$.pipe(
-                    mergeMap(({ file, src }) => {
+                    mergeMap(({file}) => {
                         let id = Math.floor(Math.random() * 1e5) + "." + file.name.split('.').slice(-1)
-                        return this.assetsGtwClient.assets.addPicture$(this.asset.assetId, { id, file: file })
+                        return this.assetsGtwClient.assets.addPicture$(this.asset.assetId, {id, file: file})
                     })
                 ).subscribe((asset: Asset) => {
                     this.assetOutput$.next(asset)
