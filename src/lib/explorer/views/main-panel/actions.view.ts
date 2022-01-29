@@ -4,7 +4,7 @@ import {ReplaySubject} from 'rxjs'
 import {ExplorerState} from '../../explorer.state'
 import {Action} from '../../actions.factory'
 import {AnyFolderNode, AnyItemNode, DriveNode, GroupNode} from '../../nodes'
-import {ChildApplicationAPI, IPlatformHandler} from '../../../platform.state'
+import {ChildApplicationAPI, IPlatformHandler} from '../../../core/platform.state'
 
 
 export class ButtonView extends Button.View {

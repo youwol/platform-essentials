@@ -24,8 +24,8 @@ import {
 import {createTreeGroup, processBorrowItem, processMoveFolder, processMoveItem} from './utils'
 import {PlatformSettingsStore, YouwolBannerState} from '..'
 import {DisplayMode} from '.'
-import {ChildApplicationAPI} from '../platform.state'
-import {FileAddedEvent, PlatformEvent} from '../platform.events'
+import {ChildApplicationAPI} from '../core'
+import {FileAddedEvent, PlatformEvent} from '../core/platform.events'
 import {ItemResponse} from '../clients/assets-gateway'
 import {Action, GENERIC_ACTIONS, getActions$, openWithActionFromExe} from './actions.factory'
 
@@ -43,7 +43,6 @@ export class TreeGroup extends ImmutableTree.State<BrowserNode> {
 
     public readonly homeFolderId: string
     public readonly trashFolderId: string
-    public readonly defaultDriveId: string
     public readonly drivesId: string
     public readonly downloadFolderId?: string
     public readonly recentId?: string

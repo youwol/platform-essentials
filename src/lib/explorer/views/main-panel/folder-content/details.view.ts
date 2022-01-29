@@ -1,17 +1,17 @@
-import { attr$, child$, Stream$, VirtualDOM } from "@youwol/flux-view"
-import { ExplorerState } from "../../../explorer.state"
-import { ItemView } from "./item.view"
-import { BehaviorSubject, Observable } from "rxjs"
-import { BrowserNode, DriveNode, FolderNode, ItemNode } from "../../../nodes"
-import { ChildApplicationAPI, PlatformSettingsStore } from "../../../.."
-import { filter, map, mergeMap, take } from "rxjs/operators"
-import { IPlatformHandler } from "../../../../platform.state"
+import {attr$, child$, Stream$, VirtualDOM} from "@youwol/flux-view"
+import {ExplorerState} from "../../../explorer.state"
+import {ItemView} from "./item.view"
+import {BehaviorSubject, Observable} from "rxjs"
+import {BrowserNode, DriveNode, FolderNode, ItemNode} from "../../../nodes"
+import {ChildApplicationAPI, PlatformSettingsStore} from "../../../.."
+import {filter, map, mergeMap, take} from "rxjs/operators"
+import {IPlatformHandler} from "../../../../core/platform.state"
 
 
 export class DetailsContentView {
 
     public readonly class = 'fv-text-primary w-100 h-100 d-flex flex-column text-center overflow-auto'
-    public readonly style = { 'max-height': '100%' }
+    public readonly style = {'max-height': '100%'}
     public readonly children: VirtualDOM[]
 
     public readonly items: BrowserNode[]

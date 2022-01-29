@@ -4,9 +4,9 @@ import {Asset, AssetsGatewayClient, DefaultDriveResponse} from '../../clients/as
 import {BehaviorSubject} from "rxjs"
 import {map, mergeMap, take} from "rxjs/operators"
 import {ButtonView} from "./misc.view"
-import {FileAddedEvent} from "../../platform.events"
-import {ChildApplicationAPI} from "../../platform.state"
-import {getExeUrl} from "../../platform-settings";
+import {FileAddedEvent} from "../../core/platform.events"
+import {ChildApplicationAPI} from "../../core"
+import {getExeUrl} from "../../core/platform-settings";
 
 
 export function runApplication(instance: Executable, title) {

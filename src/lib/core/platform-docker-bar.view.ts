@@ -1,6 +1,6 @@
 import {attr$, child$, children$, VirtualDOM} from "@youwol/flux-view"
 import {BehaviorSubject, combineLatest, Observable} from "rxjs"
-import {Executable, PlatformSettingsStore, PlatformState, RunningApp} from "."
+import {Executable, PlatformSettingsStore, PlatformState, RunningApp} from "../index"
 
 
 class DockerItemDetailsView implements VirtualDOM {

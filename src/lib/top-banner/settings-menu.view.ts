@@ -1,10 +1,10 @@
-import { child$, HTMLElement$, render, VirtualDOM } from "@youwol/flux-view"
-import { Modal } from "@youwol/fv-group"
-import { combineLatest, from, merge } from "rxjs"
-import { ywSpinnerView } from "../misc-views/youwol-spinner.view"
-import { install } from '@youwol/cdn-client'
-import { YouwolBannerState } from "./top-banner.view"
-import { PlatformSettingsStore } from "../platform-settings"
+import {child$, HTMLElement$, render, VirtualDOM} from "@youwol/flux-view"
+import {Modal} from "@youwol/fv-group"
+import {combineLatest, from, merge} from "rxjs"
+import {ywSpinnerView} from "../misc-views/youwol-spinner.view"
+import {install} from '@youwol/cdn-client'
+import {YouwolBannerState} from "./top-banner.view"
+import {PlatformSettingsStore} from "../core/platform-settings"
 import js_beautify from 'js-beautify'
 
 /**

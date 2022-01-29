@@ -1,7 +1,7 @@
 import {child$, VirtualDOM} from '@youwol/flux-view'
 import {RunningApp} from './running-app.view'
 import {PlatformState} from './platform.state'
-import {defaultUserMenu, YouwolBannerView} from "./top-banner";
+import {defaultUserMenu, YouwolBannerView} from "../top-banner";
 import {AppsDockerView} from './platform-docker-bar.view'
 
 /**

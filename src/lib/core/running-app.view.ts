@@ -1,9 +1,9 @@
 import {uuidv4} from "@youwol/flux-core";
 import {attr$, HTMLElement$, VirtualDOM} from "@youwol/flux-view";
 import {ReplaySubject} from "rxjs";
-import {Executable} from ".";
+import {Executable} from "../index";
 import {PlatformState} from "./platform.state"
-import {AssetsGatewayClient} from "./clients/assets-gateway";
+import {AssetsGatewayClient} from "../clients/assets-gateway";
 
 
 export class RunningApp implements Executable {

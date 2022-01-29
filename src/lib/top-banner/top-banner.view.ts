@@ -2,8 +2,8 @@ import {child$, VirtualDOM} from "@youwol/flux-view";
 import {Button} from "@youwol/fv-button";
 import {map} from "rxjs/operators";
 import {AssetsGatewayClient} from "../clients/assets-gateway";
-import {PlatformSettingsStore} from "../platform-settings";
-import {ChildApplicationAPI, isPlatformInstance} from "../platform.state";
+import {PlatformSettingsStore} from "../core/platform-settings";
+import {ChildApplicationAPI, isPlatformInstance} from "../core/platform.state";
 import {UserMenuView} from "./user-menu.view";
 import {YouwolMenuView} from "./youwol-menu.view";
 

@@ -1,9 +1,9 @@
 import {child$, VirtualDOM} from "@youwol/flux-view"
 import {BehaviorSubject} from "rxjs"
-import {PlatformSettingsStore} from "../platform-settings"
+import {PlatformSettingsStore} from "../core/platform-settings"
 import {ExpandableMenu} from "./menu.view"
 import {YouwolBannerState} from "./top-banner.view"
-import {PlatformSettings} from "../platform-settings.models";
+import {PlatformSettings} from "../core/platform-settings.models";
 
 
 /**
