@@ -1,5 +1,5 @@
-import { Router } from "../../../../router"
-import { send$, RequestMonitoring, BodyContentType } from "../../../../utils"
+import {Router} from "../../../../router"
+import {RequestMonitoring} from "../../../../utils"
 
 
 export class PackageRouter extends Router {
@@ -15,6 +15,18 @@ export class PackageRouter extends Router {
         return this.send$({
             command: 'query',
             path: `/metadata/${rawId}`,
+            monitoring
+        })
+    }
+
+    getResource$(
+        rawId: string,
+        restOfPath: string,
+        monitoring: RequestMonitoring = {}
+    ) {
+        return this.send$({
+            command: 'query',
+            path: `/${rawId}/${restOfPath}`,
             monitoring
         })
     }
