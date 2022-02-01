@@ -1,12 +1,10 @@
+import { render } from '@youwol/flux-view'
+import { Subject } from 'rxjs'
+import { mergeMap } from 'rxjs/operators'
+import { AssetCardView } from '../../lib'
+import { Asset, AssetsGatewayClient } from '../../lib/clients/assets-gateway'
+import { getFromDocument, resetPyYouwolDbs$ } from '../common'
 import '../mock-requests'
-import {getFromDocument, resetPyYouwolDbs$} from '../common'
-
-import {render} from "@youwol/flux-view"
-import {Subject} from "rxjs"
-import {mergeMap} from "rxjs/operators"
-import {AssetCardView} from "../../lib"
-import {Asset, AssetsGatewayClient} from "../../lib/clients/assets-gateway";
-
 
 beforeAll(async (done) => {
     resetPyYouwolDbs$().subscribe(() => {
@@ -16,29 +14,35 @@ beforeAll(async (done) => {
 
 let asset: Asset
 
-
 test('create story', (done) => {
-
-    let client = new AssetsGatewayClient()
-    client.explorer.getDefaultUserDrive$().pipe(
-        mergeMap((drive) => client.assets.story.create$(drive.homeFolderId, { title: 'test' }))
-    ).subscribe((resp) => {
-        asset = resp
-        done()
-    })
+    const client = new AssetsGatewayClient()
+    client.explorer
+        .getDefaultUserDrive$()
+        .pipe(
+            mergeMap((drive) =>
+                client.assets.story.create$(drive.homeFolderId, {
+                    title: 'test',
+                }),
+            ),
+        )
+        .subscribe((resp) => {
+            asset = resp
+            done()
+        })
 })
 
-test("create asset card view", (done) => {
-
-    let assetOutput$ = new Subject<Asset>()
-    let view = new AssetCardView({
+test('create asset card view', (done) => {
+    const assetOutput$ = new Subject<Asset>()
+    const view = new AssetCardView({
         asset,
         actionsFactory: () => ({}),
         assetOutput$,
-        forceReadonly: true
+        forceReadonly: true,
     })
     document.body.appendChild(render(view))
-    let elem = getFromDocument<AssetCardView>(`.${AssetCardView.ClassSelector}`)
+    const elem = getFromDocument<AssetCardView>(
+        `.${AssetCardView.ClassSelector}`,
+    )
     expect(elem).toBeTruthy()
     done()
 })

@@ -1,16 +1,12 @@
-import {VirtualDOM} from "@youwol/flux-view";
-
+import { VirtualDOM } from '@youwol/flux-view'
 
 //type ImplementationFunction = string
 
 export interface You {
-
     avatar: VirtualDOM
 }
 
-
 export interface Appearance {
-
     theme: string
     /**
      * style properties of the desktop background
@@ -18,9 +14,7 @@ export interface Appearance {
     desktopStyle: { [_key: string]: string }
 }
 
-
 export interface ApplicationStandalone {
-
     cdnPackage: string
     version: string
 }
@@ -56,7 +50,6 @@ export interface BrowserApplication {
 }
 
 export interface PlatformSettings {
-
     you: You
     appearance: Appearance
     browserApplications: BrowserApplication[]

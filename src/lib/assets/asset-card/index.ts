@@ -1,9 +1,8 @@
-
 /**
  * # Assets
- * 
+ *
  * Utilities to display views related to asset-card.
- * 
+ *
  * @module lib/assets
  */
 

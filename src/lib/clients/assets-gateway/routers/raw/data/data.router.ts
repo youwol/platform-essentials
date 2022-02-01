@@ -1,12 +1,9 @@
-import { Observable } from "rxjs"
-import { map } from "rxjs/operators"
-import { Router } from "../../../../router"
-import { RequestMonitoring, uploadBlob, downloadBlob } from "../../../../utils"
-
+import { Observable } from 'rxjs'
+import { map } from 'rxjs/operators'
+import { Router } from '../../../../router'
+import { downloadBlob, RequestMonitoring, uploadBlob } from '../../../../utils'
 
 export class DataRouter extends Router {
-
-
     constructor(parent: Router) {
         super(parent.headers, `${parent.basePath}/data`)
     }
@@ -15,27 +12,36 @@ export class DataRouter extends Router {
         folderId: string,
         fileName: string,
         blob: Blob,
-        monitoring: RequestMonitoring = {}
-    ): Observable<{ itemId: string, name: string, folderId: string }> {
-
+        monitoring: RequestMonitoring = {},
+    ): Observable<{ itemId: string; name: string; folderId: string }> {
         return uploadBlob(
             `${this.basePath}/assets/data/location/${folderId}`,
-            fileName, blob, {}, monitoring
+            fileName,
+            blob,
+            {},
+            monitoring,
         ).pipe(
-            map(resp => ({ itemId: resp.itemId, name: resp.name, folderId: resp.folderId })
-            )
+            map((resp) => ({
+                itemId: resp.itemId,
+                name: resp.name,
+                folderId: resp.folderId,
+            })),
         )
     }
 
     download(
         itemId: string,
         monitoring: RequestMonitoring = {},
-        useCache = true
+        useCache = true,
     ): Observable<Blob> {
-
         return downloadBlob(
             `${this.basePath}/raw/data/${itemId}`,
-            itemId, {}, monitoring, undefined, useCache)
+            itemId,
+            {},
+            monitoring,
+            undefined,
+            useCache,
+        )
     }
     /*
     updateFile(

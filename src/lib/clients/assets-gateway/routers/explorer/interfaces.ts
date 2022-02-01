@@ -1,8 +1,6 @@
-
 export type ItemId = string
 export type FolderId = string
 export type DriveId = string
-
 
 export interface Origin {
     local: boolean
@@ -10,7 +8,6 @@ export interface Origin {
 }
 
 export interface DefaultDriveResponse {
-
     driveId: string
     driveName: string
     downloadFolderId: string
@@ -21,14 +18,11 @@ export interface DefaultDriveResponse {
 }
 
 export interface DriveResponse {
-
     driveId: string
     name: string
 }
 
-
 export interface DrivesResponse {
-
     drives: Array<{
         driveId: string
         name: string
@@ -36,7 +30,6 @@ export interface DrivesResponse {
 }
 
 export interface FolderResponse {
-
     folderId: string
     parentFolderId: string
     name: string
@@ -45,13 +38,11 @@ export interface FolderResponse {
 }
 
 export interface ChildrenFolderResponse {
-
     folders: FolderResponse[]
     items: ItemResponse[]
 }
 
 export interface ItemResponse {
-
     name: string
     treeId: string
     rawId: string
@@ -65,7 +56,6 @@ export interface ItemResponse {
 }
 
 export interface PermissionsResponse {
-
     read: boolean
     share: boolean
     write: boolean

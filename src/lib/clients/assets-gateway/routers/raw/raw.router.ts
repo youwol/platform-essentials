@@ -1,12 +1,10 @@
-import { Router } from '../../../router';
-import { DataRouter } from './data/data.router';
-import { FluxProjectRouter } from './flux-project/flux-project.router';
-import { PackageRouter } from './package/package.router';
-
+import { Router } from '../../../router'
+import { DataRouter } from './data/data.router'
+import { FluxProjectRouter } from './flux-project/flux-project.router'
+import { PackageRouter } from './package/package.router'
 
 export class RawRouter extends Router {
-
-    static dedicatedPathDomain = "raw"
+    static dedicatedPathDomain = 'raw'
 
     public readonly fluxProject: FluxProjectRouter
     public readonly package: PackageRouter

@@ -1,9 +1,14 @@
+import { FluxProjectNode } from '../../lib/explorer/nodes'
+import { resetPyYouwolDbs$ } from '../common'
 import '../mock-requests'
-import {resetPyYouwolDbs$} from '../common'
-
-import {FluxProjectNode} from '../../lib/explorer/nodes'
-import {expectSnapshot, mkFluxApp, popupInfo, rm, selectItem, shell$} from './shell'
-
+import {
+    expectSnapshot,
+    mkFluxApp,
+    popupInfo,
+    rm,
+    selectItem,
+    shell$,
+} from './shell'
 
 beforeEach(async (done) => {
     resetPyYouwolDbs$().subscribe(() => {
@@ -11,44 +16,38 @@ beforeEach(async (done) => {
     })
 })
 
-
 test('Create, info & delete flux application', (done) => {
-
-    let projectName = 'my flux-app'
-    shell$().pipe(
-        mkFluxApp(projectName),
-        expectSnapshot(
-            {
+    const projectName = 'my flux-app'
+    shell$()
+        .pipe(
+            mkFluxApp(projectName),
+            expectSnapshot({
                 items: (items) => {
-                    expect(items.length).toEqual(1)
-                    let fluxNode = items[0] as FluxProjectNode
-                    expect(fluxNode.kind).toEqual('flux-project')
+                    expect(items).toHaveLength(1)
+                    const fluxNode = items[0] as FluxProjectNode
+                    expect(fluxNode.kind).toBe('flux-project')
                     expect(fluxNode.name).toEqual(projectName)
-                }
-            }
-        ),
-        selectItem(projectName),
-        popupInfo(),
-        expectSnapshot(
-            {
+                },
+            }),
+            selectItem(projectName),
+            popupInfo(),
+            expectSnapshot({
                 assetCardView: (assetCardView) => {
                     expect(assetCardView).toBeTruthy()
                     expect(assetCardView.withTabs.Permissions).toBeTruthy()
                     expect(assetCardView.withTabs.Dependencies).toBeTruthy()
-                    expect(assetCardView.asset.kind).toEqual('flux-project')
+                    expect(assetCardView.asset.kind).toBe('flux-project')
                     expect(assetCardView.asset.name).toEqual(projectName)
-                }
-            }
-        ),
-        rm("my flux-app"),
-        expectSnapshot(
-            {
+                },
+            }),
+            rm('my flux-app'),
+            expectSnapshot({
                 items: (items) => {
-                    expect(items.length).toEqual(0)
-                }
-            }
-        ),
-    ).subscribe(() => {
-        done()
-    })
+                    expect(items).toHaveLength(0)
+                },
+            }),
+        )
+        .subscribe(() => {
+            done()
+        })
 })

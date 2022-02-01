@@ -1,11 +1,8 @@
-import {Router} from "../../router";
-import {RequestMonitoring} from "../../utils";
-import {Observable} from "rxjs";
-
-
+import { Observable } from 'rxjs'
+import { Router } from '../../router'
+import { RequestMonitoring } from '../../utils'
 
 export class AdminRouter extends Router {
-
     public readonly customCommands: CustomCommandsRouter
 
     constructor(parent: Router) {
@@ -15,7 +12,6 @@ export class AdminRouter extends Router {
 }
 
 export class CustomCommandsRouter extends Router {
-
     constructor(parent: Router) {
         super(parent.headers, `${parent.basePath}/custom-commands`)
     }
@@ -27,13 +23,12 @@ export class CustomCommandsRouter extends Router {
      */
     doGet$(
         name: string,
-        monitoring: RequestMonitoring = {}
-    ):Observable<unknown>{
+        monitoring: RequestMonitoring = {},
+    ): Observable<unknown> {
         return this.send$({
             command: 'query',
             path: `/${name}`,
-            monitoring
+            monitoring,
         })
     }
 }
-

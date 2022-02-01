@@ -1,18 +1,19 @@
-import { Observable } from "rxjs"
-import { } from "../.."
-import { Router } from "../../../router"
-import { RequestMonitoring } from "../../../utils"
-import { FluxProjectRouter } from "./flux-project/flux-project.router"
-import { AccessInfo, ExposingGroup, AccessPolicyBody, Asset, UpdateAssetBody } from "./interfaces"
-import { StoryRouter } from "./story/story.router"
-
+import { Observable } from 'rxjs'
+import { Router } from '../../../router'
+import { RequestMonitoring } from '../../../utils'
+import { FluxProjectRouter } from './flux-project/flux-project.router'
+import {
+    AccessInfo,
+    AccessPolicyBody,
+    Asset,
+    ExposingGroup,
+    UpdateAssetBody,
+} from './interfaces'
+import { StoryRouter } from './story/story.router'
 
 export class AssetsRouter extends Router {
-
-
     public readonly fluxProject: FluxProjectRouter
     public readonly story: StoryRouter
-
 
     constructor(parent: Router) {
         super(parent.headers, `${parent.basePath}/assets`)
@@ -20,28 +21,25 @@ export class AssetsRouter extends Router {
         this.story = new StoryRouter(this)
     }
 
-
     get$(
         assetId: string,
-        monitoring: RequestMonitoring = {}
+        monitoring: RequestMonitoring = {},
     ): Observable<Asset> {
-
         return this.send$({
             command: 'query',
             path: `/${assetId}`,
-            monitoring
+            monitoring,
         })
     }
 
     getAccess$(
         assetId: string,
-        monitoring: RequestMonitoring = {}
+        monitoring: RequestMonitoring = {},
     ): Observable<AccessInfo> {
-
         return this.send$({
             command: 'query',
             path: `/${assetId}/access`,
-            monitoring
+            monitoring,
         })
     }
 
@@ -49,59 +47,54 @@ export class AssetsRouter extends Router {
         assetId: string,
         groupId: string,
         body: AccessPolicyBody,
-        monitoring: RequestMonitoring = {}
+        monitoring: RequestMonitoring = {},
     ): Observable<ExposingGroup> {
-
         return this.send$({
             command: 'update',
             path: `/${assetId}/access/${groupId}`,
             requestOptions: { method: 'PUT', json: body },
-            monitoring
+            monitoring,
         })
     }
 
     update$(
         assetId: string,
         body: UpdateAssetBody,
-        monitoring: RequestMonitoring = {}
+        monitoring: RequestMonitoring = {},
     ): Observable<Asset> {
-
         return this.send$({
             command: 'update',
             path: `/${assetId}`,
             requestOptions: { json: body },
-            monitoring
+            monitoring,
         })
     }
 
     addPicture$(
         assetId: string,
-        picture: { id: string, file: File },
-        monitoring: RequestMonitoring = {}
+        picture: { id: string; file: File },
+        monitoring: RequestMonitoring = {},
     ): Observable<Asset> {
-
-        let formData = new FormData();
+        const formData = new FormData()
         formData.append('file', picture.file, picture.id)
 
         return this.send$({
             command: 'create',
             path: `/${assetId}`,
             requestOptions: { body: formData },
-            monitoring
+            monitoring,
         })
     }
 
     removePicture$(
         assetId: string,
         pictureId: string,
-        monitoring: RequestMonitoring = {}
+        monitoring: RequestMonitoring = {},
     ): Observable<Asset> {
-
         return this.send$({
             command: 'delete',
             path: `/${assetId}/images/${pictureId}`,
-            monitoring
+            monitoring,
         })
     }
-
 }

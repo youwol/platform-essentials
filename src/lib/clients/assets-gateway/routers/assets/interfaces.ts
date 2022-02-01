@@ -1,8 +1,4 @@
-
-
-
 export interface Asset {
-
     readonly assetId: string
     readonly rawId: string
     readonly treeId: string
@@ -16,10 +12,9 @@ export interface Asset {
     readonly permissions: PermissionsResp
 }
 
-
 export interface GroupAccess {
-    read: "forbidden" | "authorized" | "owning" | "expiration-date"
-    share: "forbidden" | "authorized"
+    read: 'forbidden' | 'authorized' | 'owning' | 'expiration-date'
+    share: 'forbidden' | 'authorized'
     parameters: { [key: string]: any }
     expiration: number | null
 }
@@ -36,7 +31,6 @@ export interface OwnerInfo {
 }
 
 export interface PermissionsResp {
-
     write: boolean
     read: boolean
     share: boolean
@@ -47,13 +41,11 @@ export interface ConsumerInfo {
     permissions: PermissionsResp
 }
 
-
 export interface AccessInfo {
-    owningGroup: { name: string },
-    consumerInfo: ConsumerInfo,
+    owningGroup: { name: string }
+    consumerInfo: ConsumerInfo
     ownerInfo?: OwnerInfo
 }
-
 
 export interface UpdateAssetBody {
     name?: string

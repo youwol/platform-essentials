@@ -1,12 +1,20 @@
-import { Observable } from "rxjs"
-import { DeletedEntityResponse } from "../.."
-import { ChildrenFolderResponse, DefaultDriveResponse, DriveId, DriveResponse, DrivesResponse, FolderId, FolderResponse, ItemId, ItemResponse } from "./interfaces"
-import { RequestMonitoring } from "../../../utils"
-import { Router } from "../../../router"
-
+import { Observable } from 'rxjs'
+import { DeletedEntityResponse } from '../..'
+import { Router } from '../../../router'
+import { RequestMonitoring } from '../../../utils'
+import {
+    ChildrenFolderResponse,
+    DefaultDriveResponse,
+    DriveId,
+    DriveResponse,
+    DrivesResponse,
+    FolderId,
+    FolderResponse,
+    ItemId,
+    ItemResponse,
+} from './interfaces'
 
 export class GroupsRouter extends Router {
-
     constructor(parent: Router) {
         super(parent.headers, `${parent.basePath}/groups`)
     }
@@ -19,16 +27,14 @@ export class GroupsRouter extends Router {
      */
     queryDrives$(
         groupId: string,
-        monitoring: RequestMonitoring = {}
+        monitoring: RequestMonitoring = {},
     ): Observable<DrivesResponse> {
-
         return this.send$({
             command: 'query',
             path: `/${groupId}/drives`,
-            monitoring
+            monitoring,
         })
     }
-
 
     /**
      * Default drive of a particular group
@@ -38,13 +44,12 @@ export class GroupsRouter extends Router {
      */
     getDefaultDrive$(
         groupId: string,
-        monitoring: RequestMonitoring = {}
+        monitoring: RequestMonitoring = {},
     ): Observable<DefaultDriveResponse> {
-
         return this.send$({
             command: 'query',
             path: `/${groupId}/default-drive`,
-            monitoring
+            monitoring,
         })
     }
 
@@ -57,23 +62,18 @@ export class GroupsRouter extends Router {
     createDrive$(
         groupId: string,
         body: { name: string },
-        monitoring: RequestMonitoring = {}
+        monitoring: RequestMonitoring = {},
     ): Observable<DriveResponse> {
-
         return this.send$({
             command: 'create',
             path: `/${groupId}/drives`,
             requestOptions: { json: body },
-            monitoring
+            monitoring,
         })
     }
-
-
 }
 
-
 export class DrivesRouter extends Router {
-
     constructor(parent: Router) {
         super(parent.headers, `${parent.basePath}/drives`)
     }
@@ -86,16 +86,14 @@ export class DrivesRouter extends Router {
      */
     get$(
         driveId: string,
-        monitoring: RequestMonitoring = {}
+        monitoring: RequestMonitoring = {},
     ): Observable<DriveResponse> {
-
         return this.send$({
             command: 'query',
             path: `/${driveId}`,
-            monitoring
+            monitoring,
         })
     }
-
 
     /**
      * delete a drive
@@ -105,80 +103,71 @@ export class DrivesRouter extends Router {
      */
     delete$(
         driveId: string,
-        monitoring: RequestMonitoring = {}
+        monitoring: RequestMonitoring = {},
     ): Observable<{}> {
-
         return this.send$({
             command: 'delete',
             path: `/${driveId}`,
-            monitoring
+            monitoring,
         })
     }
 
     /**
-     * Purge all items of a drive 
-     * 
+     * Purge all items of a drive
+     *
      * @param driveId id of the drive
-     * @param options 
-     * @returns 
+     * @param options
+     * @returns
      */
     purge$(
         driveId: string,
-        monitoring: RequestMonitoring = {}
+        monitoring: RequestMonitoring = {},
     ): Observable<{ foldersCount: number }> {
-
         return this.send$({
             command: 'delete',
             path: `/${driveId}/purge`,
-            monitoring
+            monitoring,
         })
     }
-
 
     rename$(
         driveId: string,
         body: { name: string },
-        monitoring: RequestMonitoring = {}
+        monitoring: RequestMonitoring = {},
     ): Observable<DriveResponse> {
-
         return this.send$({
             command: 'update',
             path: `/${driveId}`,
             requestOptions: { json: body },
-            monitoring
+            monitoring,
         })
     }
 
     queryDeletedItems$(
         driveId: string,
-        monitoring: RequestMonitoring = {}
+        monitoring: RequestMonitoring = {},
     ): Observable<ChildrenFolderResponse> {
-
         return this.send$({
             command: 'query',
             path: `/${driveId}/deleted`,
-            monitoring
+            monitoring,
         })
     }
-
 }
 
-
 export class FoldersRouter extends Router {
-
     constructor(parent: Router) {
         super(parent.headers, `${parent.basePath}/folders`)
     }
 
     queryChildren$(
         folderId: string,
-        monitoring: RequestMonitoring = {}
+        monitoring: RequestMonitoring = {},
     ): Observable<ChildrenFolderResponse> {
-
         return this.send$({
             command: 'query',
             path: `/${folderId}/children`,
-            monitoring
+            monitoring,
         })
     }
 
@@ -191,14 +180,13 @@ export class FoldersRouter extends Router {
     create$(
         parentFolderId: string,
         body: { name: string },
-        monitoring: RequestMonitoring = {}
+        monitoring: RequestMonitoring = {},
     ): Observable<FolderResponse> {
-
         return this.send$({
             command: 'create',
             path: `/${parentFolderId}`,
             requestOptions: { json: body },
-            monitoring
+            monitoring,
         })
     }
 
@@ -210,38 +198,33 @@ export class FoldersRouter extends Router {
      */
     delete$(
         folderId: string,
-        monitoring: RequestMonitoring = {}
+        monitoring: RequestMonitoring = {},
     ): Observable<{}> {
-
         return this.send$({
             command: 'delete',
             path: `/${folderId}`,
-            monitoring
+            monitoring,
         })
     }
 
     rename$(
         folderId: FolderId,
         body: { name: string },
-        monitoring: RequestMonitoring = {}
+        monitoring: RequestMonitoring = {},
     ): Observable<FolderResponse> {
-
         return this.send$({
             command: 'update',
             path: `/${folderId}`,
             requestOptions: { json: body },
-            monitoring
+            monitoring,
         })
     }
 }
 
-
 export class ItemsRouter extends Router {
-
     constructor(parent: Router) {
         super(parent.headers, `${parent.basePath}/items`)
     }
-
 
     /**
      * Retrieve item of particular id
@@ -251,37 +234,32 @@ export class ItemsRouter extends Router {
      */
     get$(
         itemId: string,
-        monitoring: RequestMonitoring = {}
+        monitoring: RequestMonitoring = {},
     ): Observable<ItemResponse> {
-
         return this.send$({
             command: 'query',
             path: `/${itemId}`,
-            monitoring
+            monitoring,
         })
     }
 
-
     delete$(
         itemId: string,
-        monitoring: RequestMonitoring = {}
+        monitoring: RequestMonitoring = {},
     ): Observable<DeletedEntityResponse> {
-
         return this.send$({
             command: 'delete',
             path: `/${itemId}`,
-            monitoring
+            monitoring,
         })
     }
 }
 
 export class ExplorerRouter extends Router {
-
     public readonly groups: GroupsRouter
     public readonly drives: DrivesRouter
     public readonly folders: FoldersRouter
     public readonly items: ItemsRouter
-
 
     constructor(parent: Router) {
         super(parent.headers, `${parent.basePath}/tree`)
@@ -293,18 +271,17 @@ export class ExplorerRouter extends Router {
 
     /**
      * Query the default drive of the user.
-     * 
-     * @param options 
-     * @returns 
+     *
+     * @param options
+     * @returns
      */
     getDefaultUserDrive$(
-        monitoring: RequestMonitoring = {}
+        monitoring: RequestMonitoring = {},
     ): Observable<DefaultDriveResponse> {
-
         return this.send$({
             command: 'query',
             path: `/default-drive`,
-            monitoring
+            monitoring,
         })
     }
 
@@ -318,41 +295,37 @@ export class ExplorerRouter extends Router {
     borrowItem$(
         targetId: ItemId | FolderId,
         body: { destinationFolderId: FolderId | DriveId },
-        monitoring: RequestMonitoring = {}
+        monitoring: RequestMonitoring = {},
     ): Observable<ItemResponse> {
-
         return this.send$({
             command: 'create',
             path: `/${targetId}/borrow`,
             requestOptions: { method: 'POST', json: body },
-            monitoring
+            monitoring,
         })
     }
 
     getPermissions$(
         treeId: string,
-        monitoring: RequestMonitoring = {}
+        monitoring: RequestMonitoring = {},
     ): Observable<ItemResponse> {
-
-
         return this.send$({
             command: 'query',
             path: `/${treeId}/permissions`,
-            monitoring
+            monitoring,
         })
     }
 
     move$(
         targetId: ItemId | FolderId,
         body: { destinationFolderId: FolderId | DriveId },
-        monitoring: RequestMonitoring = {}
+        monitoring: RequestMonitoring = {},
     ): Observable<ChildrenFolderResponse> {
-
         return this.send$({
             command: 'update',
             path: `/${targetId}/move`,
             requestOptions: { json: body },
-            monitoring
+            monitoring,
         })
     }
 }

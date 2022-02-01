@@ -1,23 +1,22 @@
-import {Observable} from 'rxjs';
-import {GroupsResponse, HealthzResponse, UserInfoResponse} from './interfaces';
-import {RequestMonitoring} from '../utils';
-import {AssetsRouter, ExplorerRouter, RawRouter} from './routers'
-import {RootRouter} from '../router';
-
+import { Observable } from 'rxjs'
+import { RootRouter } from '../router'
+import { RequestMonitoring } from '../utils'
+import { GroupsResponse, HealthzResponse, UserInfoResponse } from './interfaces'
+import { AssetsRouter, ExplorerRouter, RawRouter } from './routers'
 
 export class AssetsGatewayClient extends RootRouter {
-
     public readonly explorer: ExplorerRouter
     public readonly assets: AssetsRouter
     public readonly raw: RawRouter
 
-    constructor({headers}:
-                    {
-                        headers?: { [_key: string]: string }
-                    } = {}) {
+    constructor({
+        headers,
+    }: {
+        headers?: { [_key: string]: string }
+    } = {}) {
         super({
-            basePath: "/api/assets-gateway",
-            headers
+            basePath: '/api/assets-gateway',
+            headers,
         })
         this.explorer = new ExplorerRouter(this)
         this.assets = new AssetsRouter(this)
@@ -31,30 +30,28 @@ export class AssetsGatewayClient extends RootRouter {
      * @returns response
      */
     getHealthz(
-        monitoring: RequestMonitoring = {}
+        monitoring: RequestMonitoring = {},
     ): Observable<HealthzResponse> {
-
         return this.send$({
             command: 'query',
             path: `/healthz`,
-            monitoring
+            monitoring,
         })
     }
 
     /**
      * User infos
-     * 
-     * @param monitoring 
+     *
+     * @param monitoring
      * @returns response
      */
     getUserInfo(
-        monitoring: RequestMonitoring = {}
+        monitoring: RequestMonitoring = {},
     ): Observable<UserInfoResponse> {
-
         return this.send$({
             command: 'query',
             path: `/user-info`,
-            monitoring
+            monitoring,
         })
     }
 
@@ -64,14 +61,12 @@ export class AssetsGatewayClient extends RootRouter {
      * @returns response
      */
     queryGroups(
-        monitoring: RequestMonitoring = {}
+        monitoring: RequestMonitoring = {},
     ): Observable<GroupsResponse> {
-
         return this.send$({
             command: 'query',
             path: `/groups`,
-            monitoring
+            monitoring,
         })
     }
-
 }

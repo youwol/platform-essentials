@@ -1,21 +1,20 @@
-import {Observable} from 'rxjs';
-import {RequestMonitoring} from '../utils';
-import {RootRouter} from '../router';
-import {HealthzResponse} from './interfaces';
-import {ApplicationsRouter} from './routers';
-
+import { Observable } from 'rxjs'
+import { RootRouter } from '../router'
+import { RequestMonitoring } from '../utils'
+import { HealthzResponse } from './interfaces'
+import { ApplicationsRouter } from './routers'
 
 export class CdnSessionsStorageClient extends RootRouter {
-
     applications: ApplicationsRouter
 
-    constructor({headers}:
-                    {
-                        headers?: { [_key: string]: any }
-                    } = {}) {
+    constructor({
+        headers,
+    }: {
+        headers?: { [_key: string]: any }
+    } = {}) {
         super({
-            basePath: "/api/cdn-sessions-storage",
-            headers
+            basePath: '/api/cdn-sessions-storage',
+            headers,
         })
 
         this.applications = new ApplicationsRouter(this)
@@ -28,13 +27,12 @@ export class CdnSessionsStorageClient extends RootRouter {
      * @returns response
      */
     getHealthz(
-        monitoring: RequestMonitoring = {}
+        monitoring: RequestMonitoring = {},
     ): Observable<HealthzResponse> {
-
         return this.send$({
             command: 'query',
             path: `/healthz`,
-            monitoring
+            monitoring,
         })
     }
 }

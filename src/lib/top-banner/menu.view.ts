@@ -1,33 +1,31 @@
 /**
  * # Menu
- * 
+ *
  * Factorized style for menu, usually can be expanded by a click (see [[ExpandableMenu]]).
- * 
+ *
  * Based on [[MenuItem]] and [[MenuSection]]
- * 
+ *
  * @module lib/top-banner/burger-menu.view
  */
 
-import { child$, VirtualDOM } from "@youwol/flux-view"
-import { BehaviorSubject } from "rxjs"
-import { SettingsMenuItem, MenuItem } from "./settings-menu.view"
-import { YouwolBannerState } from "./top-banner.view"
-
+import { child$, VirtualDOM } from '@youwol/flux-view'
+import { BehaviorSubject } from 'rxjs'
+import { MenuItem, SettingsMenuItem } from './settings-menu.view'
+import { YouwolBannerState } from './top-banner.view'
 
 /**
  * YouWol's exhibition halls link
  */
 export class ExhibitionHallLink extends MenuItem {
+    static ClassSelector = 'exhibition-hall-link'
 
-    static ClassSelector = "exhibition-hall-link"
-
-    tag = "a"
-    href = "/applications/@youwol/exhibition-hall"
+    tag = 'a'
+    href = '/applications/@youwol/exhibition-hall'
     children = [
         {
-            class: "col-sm",
-            innerText: "Exhibition Halls"
-        }
+            class: 'col-sm',
+            innerText: 'Exhibition Halls',
+        },
     ]
 
     constructor() {
@@ -39,16 +37,15 @@ export class ExhibitionHallLink extends MenuItem {
  * YouWol's workspace link
  */
 export class WorkspaceLink extends MenuItem {
+    static ClassSelector = 'workspace-link'
 
-    static ClassSelector = "workspace-link"
-
-    tag = "a"
-    href = "/applications/@youwol/workspace-explorer"
+    tag = 'a'
+    href = '/applications/@youwol/workspace-explorer'
     children = [
         {
-            class: "col-sm",
-            innerText: "Workspace"
-        }
+            class: 'col-sm',
+            innerText: 'Workspace',
+        },
     ]
 
     constructor() {
@@ -56,21 +53,19 @@ export class WorkspaceLink extends MenuItem {
     }
 }
 
-
 /**
  * Py-youwol download link
  */
 export class PyYouwolDownload extends MenuItem {
+    static ClassSelector = 'py-youwol-download'
 
-    static ClassSelector = "py-youwol-download"
-
-    tag = "a"
-    href = "https://github.com/youwol/py-youwol"
+    tag = 'a'
+    href = 'https://github.com/youwol/py-youwol'
     children = [
         {
-            class: "col-sm",
-            innerText: "Py YouWol"
-        }
+            class: 'col-sm',
+            innerText: 'Py YouWol',
+        },
     ]
 
     constructor() {
@@ -78,21 +73,19 @@ export class PyYouwolDownload extends MenuItem {
     }
 }
 
-
 /**
  * User settings
  */
 export class UserSettings extends MenuItem {
-
-    static ClassSelector = "user-settings"
+    static ClassSelector = 'user-settings'
 
     children = [
         {
             tag: 'a',
             href: 'https://gc.auth.youwol.com/auth/realms/youwol/account/',
-            class: "col-sm",
-            innerText: "Profile"
-        }
+            class: 'col-sm',
+            innerText: 'Profile',
+        },
     ]
 
     constructor() {
@@ -100,21 +93,19 @@ export class UserSettings extends MenuItem {
     }
 }
 
-
 /**
  * Sign-out burgers item
  */
 export class SignOut extends MenuItem {
-
-    static ClassSelector = "sign-out"
+    static ClassSelector = 'sign-out'
 
     children = [
         {
             tag: 'a',
             href: 'https://gc.auth.youwol.com/auth/realms/youwol/protocol/openid-connect/logout?redirect=https://gc.platform.youwol.com/applications/@youwol/dashboard-user/v3',
-            class: "col-sm",
-            innerText: "Sign-out"
-        }
+            class: 'col-sm',
+            innerText: 'Sign-out',
+        },
     ]
 
     constructor() {
@@ -126,19 +117,16 @@ export class SignOut extends MenuItem {
  * A section in the burger menu
  */
 export class MenuSection implements VirtualDOM {
-
-    static ClassSelector = "menu-section"
+    static ClassSelector = 'menu-section'
     public readonly class = `${MenuSection.ClassSelector}`
 
     public readonly children: VirtualDOM[]
 
     /**
      * @param parameters Constructor's parameters
-     * @param parameters.items List of items in the section 
+     * @param parameters.items List of items in the section
      */
-    constructor(parameters: {
-        items: MenuItem[]
-    }) {
+    constructor(parameters: { items: MenuItem[] }) {
         Object.assign(this, parameters)
         this.children = parameters.items
     }
@@ -148,113 +136,92 @@ export class MenuSection implements VirtualDOM {
  * Menu of [[YouwolBannerView]]
  */
 export class Menu implements VirtualDOM {
-
-    static ClassSelector = "menu"
+    static ClassSelector = 'menu'
 
     public readonly id: string
     public readonly class = `py-3 px-1 ${Menu.ClassSelector} fv-bg-primary fv-text-on-primary `
     public readonly style = {
-        whiteSpace: 'nowrap'
+        whiteSpace: 'nowrap',
     }
     public readonly children: VirtualDOM[]
 
     static separation = {
         tag: 'hr',
-        class: 'w-100 fv-color-on-primary'
+        class: 'w-100 fv-color-on-primary',
     }
     /**
      * @param parameters Constructor's parameters
      * @param parameters.sections List of sections in the menu
      */
-    constructor(parameters: {
-        id: string,
-        sections: MenuSection[]
-    }) {
+    constructor(parameters: { id: string; sections: MenuSection[] }) {
         Object.assign(this, parameters)
-        this.children = parameters.sections.map(section => {
-            return [section, Menu.separation]
-        })
+        this.children = parameters.sections
+            .map((section) => {
+                return [section, Menu.separation]
+            })
             .flat()
             .slice(0, -1)
     }
 }
 
-
 export class ExpandableMenu implements VirtualDOM {
-
     public readonly showMenu$ = new BehaviorSubject(false)
     public readonly class = `position-absolute content-container`
 
     public readonly style = {
         left: '0px',
         top: '0%',
-        zIndex: 10
+        zIndex: 10,
     }
 
     contentView: VirtualDOM
     children: VirtualDOM[]
 
-    constructor(params: { contentView: VirtualDOM, style?: { [key: string]: string } }) {
-
+    constructor(params: {
+        contentView: VirtualDOM
+        style?: { [key: string]: string }
+    }) {
         Object.assign(this, params)
         this.children = [
-            child$(
-                this.showMenu$,
-                (visible) => {
-                    return visible
-                        ? {
-                            style: {
-                                marginTop: '50px'
-                            },
-                            class: 'h-100 w-100 d-flex flex-column p-2 rounded border fv-color-primary fv-bg-background-alt',
-                            children: [
-                                this.contentView
-                            ]
-                        }
-                        : {}
-                }
-            )
+            child$(this.showMenu$, (visible) => {
+                return visible
+                    ? {
+                          style: {
+                              marginTop: '50px',
+                          },
+                          class: 'h-100 w-100 d-flex flex-column p-2 rounded border fv-color-primary fv-bg-background-alt',
+                          children: [this.contentView],
+                      }
+                    : {}
+            }),
         ]
     }
 }
 
-
 export function defaultUserMenu(state: YouwolBannerState): VirtualDOM {
-
     return new Menu({
         id: 'expandable-user-menu',
         sections: [
             new MenuSection({
-                items: [
-                    new UserSettings(),
-                    new SettingsMenuItem({ state })
-                ]
+                items: [new UserSettings(), new SettingsMenuItem({ state })],
             }),
             new MenuSection({
-                items: [
-                    new SignOut()
-                ]
+                items: [new SignOut()],
             }),
-        ]
+        ],
     })
 }
 
 export function defaultYouWolMenu(state: YouwolBannerState): VirtualDOM {
-
     return new Menu({
         id: 'expandable-youwol-menu',
         sections: [
             new MenuSection({
-                items: [
-                    new WorkspaceLink(),
-                    new ExhibitionHallLink(),
-                ]
+                items: [new WorkspaceLink(), new ExhibitionHallLink()],
             }),
             new MenuSection({
-                items: [
-                    new PyYouwolDownload()
-                ]
-            })
-        ]
+                items: [new PyYouwolDownload()],
+            }),
+        ],
     })
 }

@@ -1,6 +1,6 @@
 module.exports = {
-  preset: 'ts-jest',
-  testEnvironment: 'jsdom',
-  reporters: ["default", "jest-junit"],
-  modulePathIgnorePatterns: ["/dist", "/yw_config"]
-};
+    preset: 'ts-jest',
+    testEnvironment: 'jsdom',
+    reporters: ['default', 'jest-junit'],
+    modulePathIgnorePatterns: ['/dist', '/yw_config'],
+}

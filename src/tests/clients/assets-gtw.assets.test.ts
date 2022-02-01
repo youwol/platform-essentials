@@ -1,16 +1,14 @@
-import '../mock-requests'
 import {
     Asset,
     AssetsGatewayClient,
     DefaultDriveResponse,
     GroupsResponse,
-    HealthzResponse
+    HealthzResponse,
 } from '../../lib/clients/assets-gateway'
-import {expectAttributes, resetPyYouwolDbs$} from '../common'
+import { expectAttributes, resetPyYouwolDbs$ } from '../common'
+import '../mock-requests'
 
-
-let assetsGtw = new AssetsGatewayClient()
-
+const assetsGtw = new AssetsGatewayClient()
 
 beforeAll(async (done) => {
     resetPyYouwolDbs$().subscribe(() => {
@@ -18,46 +16,40 @@ beforeAll(async (done) => {
     })
 })
 
-let privateGrpPath = "private"
+const privateGrpPath = 'private'
 let privateGrpId: string
 let homeFolderId: string
 
 test('assetsGtw.getHealthz()', (done) => {
-
     assetsGtw.getHealthz().subscribe((resp: HealthzResponse) => {
-        expect(resp.status).toEqual('assets-gateway ok')
+        expect(resp.status).toBe('assets-gateway ok')
         done()
     })
 })
 
 test('assetsGtw.queryGroups()', (done) => {
-
-    assetsGtw.queryGroups()
-        .subscribe((resp: GroupsResponse) => {
-            let privateGrp = resp.groups.find(g => g.path == privateGrpPath)
-            expect(privateGrp).toBeTruthy()
-            privateGrpId = privateGrp.id
-            done()
-        })
+    assetsGtw.queryGroups().subscribe((resp: GroupsResponse) => {
+        const privateGrp = resp.groups.find((g) => g.path == privateGrpPath)
+        expect(privateGrp).toBeTruthy()
+        privateGrpId = privateGrp.id
+        done()
+    })
 })
 
 test('assetsGtw.explorer.groups.getDefaultDrive$', (done) => {
-
-    assetsGtw.explorer.groups.getDefaultDrive$(privateGrpId)
+    assetsGtw.explorer.groups
+        .getDefaultDrive$(privateGrpId)
         .subscribe((resp: DefaultDriveResponse) => {
-
             homeFolderId = resp.homeFolderId
             done()
         })
 })
 
 test('assetsGtw.assets.fluxProject.create$', (done) => {
-
-    assetsGtw.assets.fluxProject.create$(
-        homeFolderId,
-        {
-            name: "test",
-            description: "platform-essentials integration test"
+    assetsGtw.assets.fluxProject
+        .create$(homeFolderId, {
+            name: 'test',
+            description: 'platform-essentials integration test',
         })
         .subscribe((resp: Asset) => {
             expectAttributes(resp, [
@@ -73,19 +65,18 @@ test('assetsGtw.assets.fluxProject.create$', (done) => {
                 'tags',
                 //'permissions'
             ])
-            expect(resp.name).toEqual("test")
-            expect(resp.description).toEqual("platform-essentials integration test")
+            expect(resp.name).toBe('test')
+            expect(resp.description).toBe(
+                'platform-essentials integration test',
+            )
             done()
         })
 })
 
-
 test('assetsGtw.assets.story.create$', (done) => {
-
-    assetsGtw.assets.story.create$(
-        homeFolderId,
-        {
-            title: "test-story"
+    assetsGtw.assets.story
+        .create$(homeFolderId, {
+            title: 'test-story',
         })
         .subscribe((resp: Asset) => {
             expectAttributes(resp, [
@@ -101,7 +92,7 @@ test('assetsGtw.assets.story.create$', (done) => {
                 'tags',
                 //'permissions'
             ])
-            expect(resp.name).toEqual("test-story")
+            expect(resp.name).toBe('test-story')
             done()
         })
 })

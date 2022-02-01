@@ -1,9 +1,14 @@
+import { StoryNode } from '../../lib/explorer/nodes'
+import { resetPyYouwolDbs$ } from '../common'
 import '../mock-requests'
-import {resetPyYouwolDbs$} from '../common'
-
-import {StoryNode} from '../../lib/explorer/nodes'
-import {expectSnapshot, mkStory, popupInfo, rm, selectItem, shell$} from './shell'
-
+import {
+    expectSnapshot,
+    mkStory,
+    popupInfo,
+    rm,
+    selectItem,
+    shell$,
+} from './shell'
 
 beforeEach(async (done) => {
     resetPyYouwolDbs$().subscribe(() => {
@@ -11,43 +16,37 @@ beforeEach(async (done) => {
     })
 })
 
-
 test('Create, info & delete flux application', (done) => {
-
-    let storyName = 'my story'
-    shell$().pipe(
-        mkStory(storyName),
-        expectSnapshot(
-            {
+    const storyName = 'my story'
+    shell$()
+        .pipe(
+            mkStory(storyName),
+            expectSnapshot({
                 items: (items) => {
-                    expect(items.length).toEqual(1)
-                    let fluxNode = items[0] as StoryNode
-                    expect(fluxNode.kind).toEqual('story')
+                    expect(items).toHaveLength(1)
+                    const fluxNode = items[0] as StoryNode
+                    expect(fluxNode.kind).toBe('story')
                     expect(fluxNode.name).toEqual(storyName)
-                }
-            }
-        ),
-        selectItem(storyName),
-        popupInfo(),
-        expectSnapshot(
-            {
+                },
+            }),
+            selectItem(storyName),
+            popupInfo(),
+            expectSnapshot({
                 assetCardView: (assetCardView) => {
                     expect(assetCardView).toBeTruthy()
                     expect(assetCardView.withTabs.Permissions).toBeTruthy()
-                    expect(assetCardView.asset.kind).toEqual('story')
+                    expect(assetCardView.asset.kind).toBe('story')
                     expect(assetCardView.asset.name).toEqual(storyName)
-                }
-            }
-        ),
-        rm(storyName),
-        expectSnapshot(
-            {
+                },
+            }),
+            rm(storyName),
+            expectSnapshot({
                 items: (items) => {
-                    expect(items.length).toEqual(0)
-                }
-            }
-        ),
-    ).subscribe(() => {
-        done()
-    })
+                    expect(items).toHaveLength(0)
+                },
+            }),
+        )
+        .subscribe(() => {
+            done()
+        })
 })

@@ -1,17 +1,15 @@
-import {HTMLElement$, VirtualDOM} from "@youwol/flux-view"
-import {BehaviorSubject, combineLatest, Subject} from "rxjs"
-import {AssetTitleView} from "./title.view"
-import {AssetDescriptionView} from "./description.view"
-import {AssetTagsView} from "./tags.view"
-import {AssetScreenShotsView} from "./screenshots.view"
-import {sectionTitleView} from "../misc.view"
-import {mergeMap, shareReplay} from "rxjs/operators"
-import {Asset, AssetsGatewayClient} from "../../../clients/assets-gateway"
-
+import { HTMLElement$, VirtualDOM } from '@youwol/flux-view'
+import { BehaviorSubject, combineLatest, Subject } from 'rxjs'
+import { mergeMap, shareReplay } from 'rxjs/operators'
+import { Asset, AssetsGatewayClient } from '../../../clients/assets-gateway'
+import { sectionTitleView } from '../misc.view'
+import { AssetDescriptionView } from './description.view'
+import { AssetScreenShotsView } from './screenshots.view'
+import { AssetTagsView } from './tags.view'
+import { AssetTitleView } from './title.view'
 
 export class AssetOverview implements VirtualDOM {
-
-    static ClassSelector = "asset-overview"
+    static ClassSelector = 'asset-overview'
     public readonly class = `${AssetOverview.ClassSelector} w-100 p-3 px-5 h-100 overflow-auto fv-text-primary`
     public readonly children: VirtualDOM[]
 
@@ -24,89 +22,106 @@ export class AssetOverview implements VirtualDOM {
     public readonly actionsFactory: (asset: Asset) => VirtualDOM
     public readonly forceReadonly: boolean
 
-    public readonly connectedCallback: (elem: HTMLElement$ & HTMLDivElement) => void
+    public readonly connectedCallback: (
+        elem: HTMLElement$ & HTMLDivElement,
+    ) => void
 
     public readonly assetOutput$: Subject<Asset>
 
     public readonly assetsGtwClient = new AssetsGatewayClient()
 
     constructor(params: {
-        asset: Asset,
-        actionsFactory: (asset: Asset) => VirtualDOM,
-        assetOutput$: Subject<Asset>,
-        withTabs?: { [key: string]: VirtualDOM },
+        asset: Asset
+        actionsFactory: (asset: Asset) => VirtualDOM
+        assetOutput$: Subject<Asset>
+        withTabs?: { [key: string]: VirtualDOM }
         forceReadonly?: boolean
-    },
-    ) {
-
+    }) {
         Object.assign(this, params)
         this.name$ = new BehaviorSubject(this.asset.name)
         this.tags$ = new BehaviorSubject(this.asset.tags)
         this.description$ = new BehaviorSubject(this.asset.description)
         this.images$ = new BehaviorSubject(this.asset.images)
-        let actionsView = this.actionsFactory(this.asset)
+        const actionsView = this.actionsFactory(this.asset)
 
-        let updatedAsset$ = combineLatest([
+        const updatedAsset$ = combineLatest([
             this.name$,
             this.tags$,
             this.images$,
-            this.description$
+            this.description$,
         ]).pipe(
             mergeMap(([name, tags, _, description]) => {
-                return this.assetsGtwClient.assets.update$(this.asset.assetId, {name, tags, description})
+                return this.assetsGtwClient.assets.update$(this.asset.assetId, {
+                    name,
+                    tags,
+                    description,
+                })
             }),
-            shareReplay(1)
+            shareReplay(1),
         )
 
-        let screenShotsView = new AssetScreenShotsView({
+        const screenShotsView = new AssetScreenShotsView({
             asset: this.asset,
             images$: this.images$,
-            forceReadonly: this.forceReadonly
+            forceReadonly: this.forceReadonly,
         })
 
         this.children = [
             new AssetTitleView({
                 name$: this.name$,
                 asset: this.asset,
-                forceReadonly: this.forceReadonly
+                forceReadonly: this.forceReadonly,
             }),
             actionsView,
-            sectionTitleView("Tags"),
+            sectionTitleView('Tags'),
             new AssetTagsView({
                 tags$: this.tags$,
                 asset: this.asset,
-                forceReadonly: this.forceReadonly
+                forceReadonly: this.forceReadonly,
             }),
-            sectionTitleView("ScreenShots"),
+            sectionTitleView('ScreenShots'),
             screenShotsView,
-            sectionTitleView("Descriptions"),
+            sectionTitleView('Descriptions'),
             new AssetDescriptionView({
                 description$: this.description$,
                 asset: this.asset,
-                forceReadonly: this.forceReadonly
-            })
+                forceReadonly: this.forceReadonly,
+            }),
         ]
         this.connectedCallback = (elem) => {
             elem.ownSubscriptions(
                 updatedAsset$.subscribe((asset: Asset) => {
                     this.assetOutput$.next(asset)
                 }),
-                screenShotsView.fileUploaded$.pipe(
-                    mergeMap(({file}) => {
-                        let id = Math.floor(Math.random() * 1e5) + "." + file.name.split('.').slice(-1)
-                        return this.assetsGtwClient.assets.addPicture$(this.asset.assetId, {id, file: file})
-                    })
-                ).subscribe((asset: Asset) => {
-                    this.assetOutput$.next(asset)
-                }),
-                screenShotsView.fileRemoved$.pipe(
-                    mergeMap(({ imageId }) => this.assetsGtwClient.assets.removePicture$(this.asset.assetId, imageId)
+                screenShotsView.fileUploaded$
+                    .pipe(
+                        mergeMap(({ file }) => {
+                            const id =
+                                Math.floor(Math.random() * 1e5) +
+                                '.' +
+                                file.name.split('.').slice(-1)
+                            return this.assetsGtwClient.assets.addPicture$(
+                                this.asset.assetId,
+                                { id, file: file },
+                            )
+                        }),
                     )
-                ).subscribe((asset: Asset) => {
-                    this.assetOutput$.next(asset)
-                })
+                    .subscribe((asset: Asset) => {
+                        this.assetOutput$.next(asset)
+                    }),
+                screenShotsView.fileRemoved$
+                    .pipe(
+                        mergeMap(({ imageId }) =>
+                            this.assetsGtwClient.assets.removePicture$(
+                                this.asset.assetId,
+                                imageId,
+                            ),
+                        ),
+                    )
+                    .subscribe((asset: Asset) => {
+                        this.assetOutput$.next(asset)
+                    }),
             )
         }
     }
-
 }

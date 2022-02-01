@@ -1,18 +1,15 @@
-import { child$, VirtualDOM } from "@youwol/flux-view";
-import { combineLatest, Observable } from "rxjs";
-import { filter, map, shareReplay, tap } from "rxjs/operators";
-import { ExplorerState, TreeGroup } from "../../../explorer.state";
-import { BrowserNode } from "../../../nodes";
-import { DisplayMode } from "../main-panel.view";
-import { DetailsContentView } from "./details.view";
+import { child$, VirtualDOM } from '@youwol/flux-view'
+import { combineLatest, Observable } from 'rxjs'
+import { filter, map, shareReplay } from 'rxjs/operators'
+import { ExplorerState, TreeGroup } from '../../../explorer.state'
+import { BrowserNode } from '../../../nodes'
+import { DisplayMode } from '../main-panel.view'
+import { DetailsContentView } from './details.view'
 
-function unreachable(mode: never) {
-
-}
+function unreachable(mode: never) {}
 
 export class FolderContentView implements VirtualDOM {
-
-    static ClassSelector = "folder-content-view"
+    static ClassSelector = 'folder-content-view'
     public readonly class = `${FolderContentView.ClassSelector} flex-grow-1 fv-text-primary h-100 px-3`
 
     public readonly state: ExplorerState
@@ -24,8 +21,11 @@ export class FolderContentView implements VirtualDOM {
     public readonly tree: TreeGroup
     public readonly items$: Observable<BrowserNode[]>
 
-    constructor(params: { state: ExplorerState, folderId: string, groupId: string }) {
-
+    constructor(params: {
+        state: ExplorerState
+        folderId: string
+        groupId: string
+    }) {
         Object.assign(this, params)
         this.tree = this.state.groupsTree[this.groupId]
         this.items$ = this.tree.root$.pipe(
@@ -34,10 +34,10 @@ export class FolderContentView implements VirtualDOM {
                     ? root
                     : this.tree.getNode(this.folderId)
             }),
-            map(node => node.children as BrowserNode[]),
+            map((node) => node.children as BrowserNode[]),
             // When dble-clicking on side-bar this prevent error (an observable is actually reaching here)
-            filter(children => Array.isArray(children)),
-            shareReplay(1)
+            filter((children) => Array.isArray(children)),
+            shareReplay(1),
         )
 
         this.children = [
@@ -46,11 +46,15 @@ export class FolderContentView implements VirtualDOM {
                 ([mode, items]: [DisplayMode, BrowserNode[]]) => {
                     switch (mode) {
                         case 'details':
-                            return new DetailsContentView({ state: this.state, items })
+                            return new DetailsContentView({
+                                state: this.state,
+                                items,
+                            })
                         default:
                             unreachable(mode)
                     }
-                })
+                },
+            ),
         ]
     }
 }
