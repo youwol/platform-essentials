@@ -92,7 +92,9 @@ export class RowView implements VirtualDOM {
                     })
                 }),
             )
-            .subscribe(() => {})
+            .subscribe(() => {
+                /* NOOP **/
+            })
     }
 
     constructor(params: { state: ExplorerState; item: BrowserNode }) {

@@ -21,7 +21,7 @@ export class AssetTitleView implements VirtualDOM {
         Object.assign(this, params)
 
         this.children = [
-            this.asset.permissions.write && this.forceReadonly == false
+            this.asset.permissions.write && !this.forceReadonly
                 ? new TextEditableView({
                       text$: this.name$,
                       regularView: AssetTitleView.readOnlyView,

@@ -1,4 +1,3 @@
-const http = require('http')
 const request = require('request')
 
 type RequestMethod = 'GET' | 'POST' | 'PUT' | 'DELETE'

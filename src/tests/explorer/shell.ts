@@ -18,6 +18,7 @@ import {
 } from '../../lib'
 import { ExplorerState } from '../../lib/explorer'
 import { Action } from '../../lib/explorer/actions.factory'
+import { OpenFolder } from '../../lib/explorer/explorer.state'
 import {
     AnyFolderNode,
     AnyItemNode,
@@ -30,6 +31,7 @@ import {
 import {
     ActionBtnView,
     ActionsView,
+    DisplayedActions,
 } from '../../lib/explorer/views/main-panel/actions.view'
 import { RowView } from '../../lib/explorer/views/main-panel/folder-content/details.view'
 import {
@@ -553,7 +555,7 @@ export function cdGroup(name: string) {
                 expect(targetGrp).toBeTruthy()
                 targetGrp.onclick()
                 return shell.explorerState.openFolder$.pipe(
-                    skipWhile(({ folder }) => {
+                    skipWhile(({ folder }: OpenFolder) => {
                         return folder.groupId != targetGroupId
                     }),
                     take(1),
@@ -563,7 +565,7 @@ export function cdGroup(name: string) {
                         )
                         return actionsContainer.displayedActions$
                     }),
-                    skipWhile(({ folder }) => {
+                    skipWhile(({ folder }: DisplayedActions) => {
                         return folder.groupId != targetGroupId
                     }),
                     take(1),
@@ -836,8 +838,6 @@ export function expectSnapshot({
                     `.${ActionsView.ClassSelector}`,
                 )
                 expect(actionsContainer).toBeTruthy()
-
-                actionsContainer.displayedActions$
 
                 return combineLatest([
                     folderContentView.items$,

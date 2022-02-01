@@ -53,7 +53,7 @@ export class YouwolBannerView implements VirtualDOM {
      * @param params.badgesView definition of the badges, see [[BadgeView]]
      * @param params.customActionsView definition of the custom actions of the app
      * @param params.userMenuView definition of the user's menu
-     * @param params.youwolMenuView definition of the youwol's menu
+     * @param params.youwolMenuView definition of the youwol’s menu
      */
     constructor(params: {
         state: YouwolBannerState

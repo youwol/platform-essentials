@@ -6,7 +6,9 @@ import { BrowserNode } from '../../../nodes'
 import { DisplayMode } from '../main-panel.view'
 import { DetailsContentView } from './details.view'
 
-function unreachable(mode: never) {}
+function unreachable(_mode: never) {
+    /* NOOP */
+}
 
 export class FolderContentView implements VirtualDOM {
     static ClassSelector = 'folder-content-view'
@@ -35,7 +37,7 @@ export class FolderContentView implements VirtualDOM {
                     : this.tree.getNode(this.folderId)
             }),
             map((node) => node.children as BrowserNode[]),
-            // When dble-clicking on side-bar this prevent error (an observable is actually reaching here)
+            // When double-clicking on sidebar this prevents error (an observable is actually reaching here)
             filter((children) => Array.isArray(children)),
             shareReplay(1),
         )
@@ -43,17 +45,13 @@ export class FolderContentView implements VirtualDOM {
         this.children = [
             child$(
                 combineLatest([this.state.displayMode$, this.items$]),
-                ([mode, items]: [DisplayMode, BrowserNode[]]) => {
-                    switch (mode) {
-                        case 'details':
-                            return new DetailsContentView({
-                                state: this.state,
-                                items,
-                            })
-                        default:
-                            unreachable(mode)
-                    }
-                },
+                ([mode, items]: [DisplayMode, BrowserNode[]]) =>
+                    mode === 'details'
+                        ? new DetailsContentView({
+                              state: this.state,
+                              items,
+                          })
+                        : unreachable(mode),
             ),
         ]
     }

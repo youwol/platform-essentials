@@ -97,7 +97,7 @@ export class PlatformBannerView implements VirtualDOM {
     public readonly state: PlatformState
     public readonly children: VirtualDOM[]
 
-    constructor(params: { state: PlatformState }) {
+    constructor(params: { state: PlatformState; [key: string]: unknown }) {
         Object.assign(this, params)
         this.children = [
             child$(this.state.runningApplication$, (app) =>

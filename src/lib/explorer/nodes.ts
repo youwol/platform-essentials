@@ -12,7 +12,7 @@ export const UploadStep = {
     FINISHED: 'finished',
 }
 
-export class progressMessage {
+export class ProgressMessage {
     constructor(
         public readonly fileName,
         public readonly step,
@@ -35,10 +35,7 @@ export class BrowserNode extends ImmutableTree.Node {
         id: string
         name: string
         icon?: string
-        children?:
-            | undefined
-            | Array<BrowserNode>
-            | Observable<Array<BrowserNode>>
+        children?: Array<BrowserNode> | Observable<Array<BrowserNode>>
         origin?: Origin
     }) {
         super(params)
@@ -276,7 +273,7 @@ export class DeletedItemNode extends DeletedNode {
 }
 
 export class ProgressNode extends BrowserNode {
-    progress$: Observable<progressMessage>
+    progress$: Observable<ProgressMessage>
 
     constructor({
         id,
@@ -285,7 +282,7 @@ export class ProgressNode extends BrowserNode {
     }: {
         id: string
         name: string
-        progress$: Observable<progressMessage>
+        progress$: Observable<ProgressMessage>
     }) {
         super({ id, name })
         this.progress$ = progress$

@@ -24,8 +24,8 @@ export class ItemView {
         { type: string; id: string }[],
         { [key: string]: string }
     >
-    public readonly onclick: any
-    public readonly ondblclick: any
+    public readonly onclick: () => void
+    public readonly ondblclick: () => void
     public readonly state: ExplorerState
     public readonly item: BrowserNode
     public readonly hovered$: Observable<BrowserNode>
@@ -164,8 +164,8 @@ export class InfoBtnView implements VirtualDOM {
         this.asset$.pipe(take(1)).subscribe((asset) => {
             const assetUpdate$ = popupAssetModalView({
                 asset,
-                actionsFactory: (asset) => {
-                    return new AssetActionsView({ asset })
+                actionsFactory: (targetAsset) => {
+                    return new AssetActionsView({ asset: targetAsset })
                 },
                 withTabs,
             })

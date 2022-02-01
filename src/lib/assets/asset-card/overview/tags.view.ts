@@ -111,11 +111,11 @@ class EditableTagView implements VirtualDOM {
                 children: [
                     new TextEditableView({
                         text$,
-                        regularView: (text$) => ({
-                            innerText: attr$(text$, (t) => t),
+                        regularView: (innerText$) => ({
+                            innerText: attr$(innerText$, (t) => t),
                         }),
                         class: 'border rounded p-2 d-flex flex-align-center',
-                    } as any),
+                    }),
                     {
                         tag: 'i',
                         style: { height: 'fit-content' },

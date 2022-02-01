@@ -31,7 +31,7 @@ export class PlatformView implements VirtualDOM {
             new PlatformBannerView({
                 state: this.state,
                 class: 'fv-bg-background',
-            } as any),
+            }),
             {
                 class: 'd-flex align-items-center h-100 w-100',
 
@@ -42,9 +42,9 @@ export class PlatformView implements VirtualDOM {
 }
 
 export class RunningAppView implements VirtualDOM {
-    public readonly class: any
+    public readonly class: Stream$<RunningApp, string>
     public readonly state: PlatformState
-    public readonly children: any
+    public readonly children
 
     cacheRunningAppsView = {}
 

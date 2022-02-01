@@ -135,8 +135,6 @@ export class PlatformSettingsStore {
 
     static settings$ = new ReplaySubject<PlatformSettings>(1)
 
-    constructor() {}
-
     static fetchSettings() {
         /*
         Called at least when the file is loaded, see below
@@ -245,7 +243,9 @@ export class PlatformSettingsStore {
         )
     }
 
-    static save(_settings: PlatformSettings) {}
+    static save(_settings: PlatformSettings) {
+        /* NOOP */
+    }
 }
 
 PlatformSettingsStore.fetchSettings()

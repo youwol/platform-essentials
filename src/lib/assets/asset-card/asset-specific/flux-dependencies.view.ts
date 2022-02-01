@@ -29,66 +29,45 @@ import {
 export function getActions(asset: Asset) {
     const classes = 'fv-btn fv-btn-secondary mx-1 '
 
-    const runBttnState = new Button.State()
-    const runBttn = new Button.View({
-        state: runBttnState,
+    const runButtonState = new Button.State()
+    const runButton = new Button.View({
+        state: runButtonState,
         class: classes,
         contentView: () => ({ innerText: 'run' }),
     } as any)
-    runBttnState.click$.subscribe(
+    runButtonState.click$.subscribe(
         () =>
             (window.location.href = `/applications/@youwol/flux-runner/?id=${asset.rawId}`),
     )
 
-    const constructBttnState = new Button.State()
-    const constructBttn = new Button.View({
-        state: constructBttnState,
+    const constructButtonState = new Button.State()
+    const constructButton = new Button.View({
+        state: constructButtonState,
         class: classes,
         contentView: () => ({ innerText: 'construct' }),
     } as any)
-    constructBttnState.click$.subscribe(
+    constructButtonState.click$.subscribe(
         () =>
             (window.location.href = `/applications/@youwol/flux-builder/?id=${asset.rawId}`),
     )
 
-    const editBttnState = new Button.State()
-    const editBttn = new Button.View({
-        state: editBttnState,
+    const editButtonState = new Button.State()
+    const editButton = new Button.View({
+        state: editButtonState,
         class: classes,
         contentView: () => ({ innerText: 'edit' }),
     } as any)
-    editBttnState.click$.subscribe(
+    editButtonState.click$.subscribe(
         () =>
             (window.location.href = `/applications/@youwol/assets-publish-ui?kind=flux-project&related_id=${asset.rawId}`),
     )
 
     return {
         class: 'w-100 d-flex flex-wrap',
-        children: [
-            runBttn,
-            constructBttn,
-            editBttn,
-            //clone: cloneBttn.data,
-            //delete:deleteBttn.data
-        ],
+        children: [runButton, constructButton, editButton],
     }
 }
-/*
-class LoadingGraph {
 
-    type: string
-    lock: Array<{ id: string, name: string, version: string }>
-    definition: Array<Array<string | [string, string]>>
-
-}
-
-class Requirements {
-
-    fluxPacks: Array<string>
-    libraries: { [key: string]: string }
-    loadingGraph: LoadingGraph
-}
-*/
 class Lib {
     id: string
     name: string
@@ -107,24 +86,24 @@ export class FluxDependenciesState {
     selectedComponents$ = new BehaviorSubject([])
 
     // dependencies$ : the dependencies of the project (included explicit update): { $libName : $selectedVersion }
-    // selectedVersion is : latest picked by the user || latest available
+    // selectedVersion is : latest picked by the user or latest available
     dependencies$ = new BehaviorSubject<{ [key: string]: Lib }>({})
 
-    //  versions$: Versions of the libs available for each dependencies
+    //  versions$: Versions of the libs available for each dependency
     versions$ = new BehaviorSubject({})
 
-    // selectedVersion$: the initial 'latest' version of each dependencies, then also the user picks
+    // selectedVersion$: the initial 'latest' version of each dependency, then also the user picks
     selectedVersion$ = new ReplaySubject(1)
 
     // selectedVersionAcc$: accumulation of this.selectedVersion$
     selectedVersionAcc$ = new BehaviorSubject({})
 
     // versionsState$: this.selectedVersionAcc$ with keys filtered on actual dependencies
-    // e.g. the user may have unselect a package => dependencies updated
+    // e.g. the user may have unselected a package => dependencies updated
     versionsState$ = new BehaviorSubject({})
 
     state$: Observable<{
-        fluxPacks: Array<any>
+        fluxPacks: Array<unknown>
         libraries: { [key: string]: Lib }
     }>
 
@@ -147,7 +126,7 @@ export class FluxDependenciesState {
                 //this.selectedComponents$.next(project.requirements.fluxComponents)
             })
 
-        //  versions$: Versions of the libs available for each dependencies
+        //  versions$: Versions of the libs available for each dependency
         const getLibVersions = (lib) => {
             if (lib.id) {
                 return this.libsVersionsCache[lib.id]
@@ -248,7 +227,7 @@ export class FluxDependenciesState {
             this.selectedPacks$,
         ]).pipe(
             takeUntil(this.unsubscribe$),
-            map(([deps, packs]: [{ [key: string]: Lib }, Array<any>]) => ({
+            map(([deps, packs]: [{ [_key: string]: Lib }, Array<any>]) => ({
                 fluxPacks: Object.entries(packs)
                     .filter(
                         ([id, included]) => included && id != 'flux-pack-core',
@@ -287,9 +266,9 @@ export class FluxDependenciesState {
         this.unsubscribe$.complete()
     }
     togglePacks(packs) {
-        const selecteds = this.selectedPacks$.getValue()
-        packs.forEach((pack) => (selecteds[pack.name] = !selecteds[pack.name]))
-        this.selectedPacks$.next(selecteds)
+        const selected = this.selectedPacks$.getValue()
+        packs.forEach((pack) => (selected[pack.name] = !selected[pack.name]))
+        this.selectedPacks$.next(selected)
         this.refreshDependencies()
     }
 
@@ -429,15 +408,15 @@ export class FluxDependenciesView implements VirtualDOM {
                 if (state.isCurrentVersion(lib, versions[lib])) {
                     return {}
                 }
-                const bttnState = new Button.State()
+                const buttonState = new Button.State()
                 this.subscriptions.push(
-                    bttnState.click$.subscribe(() =>
+                    buttonState.click$.subscribe(() =>
                         state.setDependency(lib, versions[lib]),
                     ),
                 )
 
                 return new Button.View({
-                    state: bttnState,
+                    state: buttonState,
                     contentView: () => ({ innerText: 'Update' }),
                     class: 'fv-text-focus fv-bg-background ',
                 } as any)

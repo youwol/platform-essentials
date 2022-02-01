@@ -20,7 +20,7 @@ export class FluxState {
             name: 'new project',
             icon: 'fas fa-play',
             request: FluxState.newFluxProject$(parentNode),
-            onResponse: (resp, node) => {
+            onResponse: (resp, targetNode) => {
                 const projectNode = new ItemNode({
                     kind: 'flux-project',
                     treeId: resp.treeId,
@@ -31,7 +31,7 @@ export class FluxState {
                     rawId: resp.rawId,
                     borrowed: false,
                 })
-                this.userTree.replaceNode(node, projectNode)
+                this.userTree.replaceNode(targetNode, projectNode)
             },
         })
         this.userTree.addChild(parentNode.id, node)

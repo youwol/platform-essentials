@@ -14,7 +14,7 @@ import { MenuItem, SettingsMenuItem } from './settings-menu.view'
 import { YouwolBannerState } from './top-banner.view'
 
 /**
- * YouWol's exhibition halls link
+ * Youwol’s exhibition halls link
  */
 export class ExhibitionHallLink extends MenuItem {
     static ClassSelector = 'exhibition-hall-link'
@@ -34,7 +34,7 @@ export class ExhibitionHallLink extends MenuItem {
 }
 
 /**
- * YouWol's workspace link
+ * Youwol’s workspace link
  */
 export class WorkspaceLink extends MenuItem {
     static ClassSelector = 'workspace-link'

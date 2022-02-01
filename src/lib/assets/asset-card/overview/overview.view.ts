@@ -36,6 +36,7 @@ export class AssetOverview implements VirtualDOM {
         assetOutput$: Subject<Asset>
         withTabs?: { [key: string]: VirtualDOM }
         forceReadonly?: boolean
+        [key: string]: unknown
     }) {
         Object.assign(this, params)
         this.name$ = new BehaviorSubject(this.asset.name)

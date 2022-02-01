@@ -165,10 +165,10 @@ export class AssetScreenShotsView implements VirtualDOM {
                                           [index].split('/')
                                           .slice(-1)[0]
                                       this.fileRemoved$.next({ imageId })
-                                      const images = this.images$
+                                      const nextImages = this.images$
                                           .getValue()
                                           .filter((_, i) => i != index)
-                                      this.images$.next(images)
+                                      this.images$.next(nextImages)
                                   }
                                 : undefined,
                     }),

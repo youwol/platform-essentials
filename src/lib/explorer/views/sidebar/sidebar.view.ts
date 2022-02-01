@@ -104,8 +104,7 @@ export class PredefinedFoldersView implements VirtualDOM {
                     tree.getTrashNode(),
                 ]
                 return nodes.map(
-                    (node) =>
-                        new PredefinedFolderView(state, node as any, extended$),
+                    (node) => new PredefinedFolderView(state, node, extended$),
                 )
             },
         )
@@ -158,7 +157,7 @@ export class GroupView implements VirtualDOM {
 
     public readonly onclick = () => this.state.selectGroup(this.group)
 
-    constructor(params: { group: any; state: ExplorerState }) {
+    constructor(params: { group: { name: string }; state: ExplorerState }) {
         Object.assign(this, params)
 
         this.innerText = this.group.name
@@ -248,7 +247,7 @@ export class SideBarView implements VirtualDOM {
     static ClassSelector = 'side-bar-view'
     public readonly class = `${SideBarView.ClassSelector} fv-bg-background  pt-1 px-2 border-right h-100`
 
-    public readonly style: any
+    public readonly style: Stream$<boolean, { width: string }>
     public readonly children: VirtualDOM[]
 
     constructor(

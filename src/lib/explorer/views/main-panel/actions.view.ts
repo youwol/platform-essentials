@@ -41,6 +41,12 @@ export class ButtonView extends Button.View {
     }
 }
 
+export type DisplayedActions = {
+    item: AnyItemNode
+    folder: AnyFolderNode | DriveNode | GroupNode
+    actions: Action[]
+}
+
 export class ActionsView implements VirtualDOM {
     static ClassSelector = 'actions-view'
 

@@ -8,7 +8,7 @@ import { RunningApp } from './running-app.view'
 
 export interface IPlatformHandler {
     runningApplications$: Observable<RunningApp[]>
-    broadcastedEvents$: Observable<PlatformEvent>
+    broadcastEvents$: Observable<PlatformEvent>
 
     createInstance$({
         cdnPackage,
@@ -59,7 +59,7 @@ export class ChildApplicationAPI {
 
 class NoPlatformHandler implements IPlatformHandler {
     public readonly runningApplications$ = new Subject<RunningApp[]>()
-    public readonly broadcastedEvents$ = new Subject<PlatformEvent>()
+    public readonly broadcastEvents$ = new Subject<PlatformEvent>()
 
     createInstance$({
         cdnPackage,
@@ -79,7 +79,7 @@ class NoPlatformHandler implements IPlatformHandler {
     }
 
     broadcastEvent(event: PlatformEvent) {
-        this.broadcastedEvents$.next(event)
+        this.broadcastEvents$.next(event)
     }
 }
 
@@ -100,7 +100,7 @@ export class PlatformState implements IPlatformHandler {
     )
     public readonly runningApplications$ = new BehaviorSubject<RunningApp[]>([])
 
-    public readonly broadcastedEvents$ = new Subject<PlatformEvent>()
+    public readonly broadcastEvents$ = new Subject<PlatformEvent>()
 
     public readonly platformSettingsStore = new PlatformSettingsStore()
     static instance: PlatformState
@@ -156,7 +156,7 @@ export class PlatformState implements IPlatformHandler {
     }
 
     broadcastEvent(event: PlatformEvent) {
-        this.broadcastedEvents$.next(event)
+        this.broadcastEvents$.next(event)
     }
 
     setTopBannerViews(
@@ -173,7 +173,7 @@ export class PlatformState implements IPlatformHandler {
     ) {
         const app = this.runningApplications$
             .getValue()
-            .find((app) => app.instanceId === appId)
+            .find((candidate) => candidate.instanceId === appId)
         app.topBannerActions$.next(actionsView)
         app.topBannerUserMenu$.next(userMenuView)
         app.topBannerYouwolMenu$.next(youwolMenuView)

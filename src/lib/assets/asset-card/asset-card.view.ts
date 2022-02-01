@@ -56,7 +56,7 @@ export class AssetCardView implements VirtualDOM {
                       assetOutput$: this.assetOutput$,
                       forceReadonly: this.forceReadonly,
                       class: 'overflow-auto h-100 p-3',
-                  } as any),
+                  }),
         ]
     }
 }
@@ -81,7 +81,7 @@ export class AssetCardTabs extends Tabs.View {
             assetOutput$: assetOutput$,
             forceReadonly: forceReadonly,
             class: `${AssetOverview.ClassSelector} overflow-auto h-100 p-3`,
-        } as any)
+        })
 
         const previews = Object.entries(withTabs).map(
             ([name, view]) => new AssetTab(name, view),

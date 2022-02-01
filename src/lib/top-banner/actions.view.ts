@@ -31,7 +31,6 @@ export class FaIconToggleView<TEnum> implements VirtualDOM {
         classes: string
     }) {
         Object.assign(this, params)
-        this.value = this.value
         this.class = attr$(this.selection$, (selection: TEnum) => {
             const selectionClass =
                 selection == this.value ? ' fv-text-focus' : ' fv-text-primary'
@@ -50,7 +49,7 @@ export class FaIconToggleView<TEnum> implements VirtualDOM {
  * @template TEnum enum from which the combo is constructed
  * @template TState optional: a state that can be forwarded to individual toggle view factory
  */
-export class ComboTogglesView<TEnum, TState = {}> implements VirtualDOM {
+export class ComboTogglesView<TEnum, TState> implements VirtualDOM {
     public readonly class = 'd-flex'
     public readonly children: VirtualDOM[]
     public readonly selected$: BehaviorSubject<TEnum>

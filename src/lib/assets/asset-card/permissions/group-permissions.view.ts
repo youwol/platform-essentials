@@ -25,8 +25,8 @@ export class ExposedGroupState {
         this.loading$.next(true)
         new AssetsGatewayClient().assets
             .updateAccess$(this.assetId, this.groupId, body)
-            .subscribe((groupAccess) => {
-                //this.groupAccess$.next(groupAccess)
+            // XXX:  Why groupAccess is not used ?
+            .subscribe((_groupAccess) => {
                 this.loading$.next(false)
             })
     }
@@ -99,13 +99,12 @@ export class ExposedGroupView implements VirtualDOM {
         ]).pipe(
             skip(1),
             map(([initial, read, share, parameters]) => {
-                const body = {
+                return {
                     ...initial,
                     ...{ read: read.id },
                     ...{ share: share.id },
                     ...{ parameters },
                 }
-                return body
             }),
         )
 

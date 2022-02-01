@@ -1,4 +1,4 @@
-import { attr$, VirtualDOM } from '@youwol/flux-view'
+import { attr$, Stream$, VirtualDOM } from '@youwol/flux-view'
 import { Observable } from 'rxjs'
 import { Asset } from '../clients/assets-gateway'
 
@@ -24,7 +24,7 @@ const assetFaClasses: Record<AssetType, string> = {
 export class AssetSnippetView implements VirtualDOM {
     static ClassSelector = 'asset-card-view'
     public readonly baseClasses = `${AssetSnippetView.ClassSelector} fv-bg-background d-flex overflow-hidden flex-column text-center rounded fv-pointer fv-color-primary fv-hover-color-focus position-relative my-2`
-    public readonly class: any
+    public readonly class: Stream$<string, string>
     public readonly style = { width: '250px', height: '250px' }
 
     public readonly children: Array<VirtualDOM>

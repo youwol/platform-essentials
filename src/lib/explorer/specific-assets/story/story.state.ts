@@ -20,7 +20,7 @@ export class StoryState {
             name: 'new story',
             icon: 'fas fa-book',
             request: StoryState.newStory$(parentNode),
-            onResponse: (resp, node) => {
+            onResponse: (resp, targetNode) => {
                 parentNode.removeStatus({ type: 'request-pending', id: uid })
                 const storyNode = new ItemNode({
                     treeId: resp.treeId,
@@ -32,7 +32,7 @@ export class StoryState {
                     rawId: resp.rawId,
                     borrowed: false,
                 })
-                this.userTree.replaceNode(node, storyNode)
+                this.userTree.replaceNode(targetNode, storyNode)
             },
         })
         this.userTree.addChild(parentNode.id, node)

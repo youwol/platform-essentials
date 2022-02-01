@@ -95,7 +95,7 @@ export class UserPermissionsView implements VirtualDOM {
                         ],
                     },
                     permissions.expiration
-                        ? { innertText: permissions.expiration }
+                        ? { innerText: permissions.expiration }
                         : undefined,
                 ],
             },
@@ -121,11 +121,9 @@ export class GroupsPermissionsView implements VirtualDOM {
         const exposedGroups = this.accessInfo.ownerInfo.exposingGroups
             .filter((group) => group.name != 'private')
             .map((group) => {
-                const expState = new ExposedGroupState(
-                    this.asset.assetId,
-                    group,
+                return new ExposedGroupView(
+                    new ExposedGroupState(this.asset.assetId, group),
                 )
-                return new ExposedGroupView(expState)
             })
         const expState = new ExposedGroupState(this.asset.assetId, {
             groupId: '*',

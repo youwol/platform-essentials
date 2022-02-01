@@ -1,4 +1,4 @@
-import { attr$, child$, VirtualDOM } from '@youwol/flux-view'
+import { attr$, child$, Stream$, VirtualDOM } from '@youwol/flux-view'
 import { Button } from '@youwol/fv-button'
 import { BehaviorSubject } from 'rxjs'
 
@@ -11,7 +11,7 @@ export class IconButtonView {
     public readonly icon: string
 
     constructor(params: {
-        onclick: (ev: MouseEvent) => any
+        onclick: (ev: MouseEvent) => void
         icon: string
         withClasses?: string
         style?: { [key: string]: string }
@@ -70,7 +70,7 @@ export class TextEditableView implements VirtualDOM {
     public readonly editionMode$ = new BehaviorSubject(false)
 
     public readonly text$: BehaviorSubject<string>
-    public readonly attrText$: any
+    public readonly attrText$: Stream$<string, string>
     public readonly regularView: (text$) => VirtualDOM
     public readonly templateEditionView: VirtualDOM
 
@@ -78,6 +78,7 @@ export class TextEditableView implements VirtualDOM {
         text$: BehaviorSubject<string>
         regularView: (text$) => VirtualDOM
         templateEditionView?: VirtualDOM
+        [key: string]: unknown
     }) {
         Object.assign(this, params)
         this.templateEditionView = this.templateEditionView || {
@@ -101,9 +102,9 @@ export class TextEditableView implements VirtualDOM {
         ]
     }
 
-    editionView() {
+    editionView(): VirtualDOM {
         return {
-            ...(this.templateEditionView as any),
+            ...this.templateEditionView,
             placeholder: this.attrText$,
             value: this.attrText$,
             onkeypress: (ev: KeyboardEvent) => {

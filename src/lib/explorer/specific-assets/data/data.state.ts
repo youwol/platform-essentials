@@ -5,7 +5,7 @@ import { TreeGroup } from '../../explorer.state'
 import {
     AnyFolderNode,
     ItemNode,
-    progressMessage,
+    ProgressMessage,
     ProgressNode,
     UploadStep,
 } from '../../nodes'
@@ -16,7 +16,7 @@ export class DataState {
     static uploadFile$(node: AnyFolderNode, file: File) {
         const url = `/api/assets-gateway/assets/data/location/${node.id}?group-id=${node.groupId}`
         const progress$ = new BehaviorSubject(
-            new progressMessage(file.name, UploadStep.START),
+            new ProgressMessage(file.name, UploadStep.START),
         )
         const formData = new FormData()
         formData.append('file', file)
@@ -30,12 +30,12 @@ export class DataState {
             )
             const message =
                 event.loaded == event.total
-                    ? new progressMessage(
+                    ? new ProgressMessage(
                           file.name,
                           UploadStep.PROCESSING,
                           Math.floor((100 * event.loaded) / event.total),
                       )
-                    : new progressMessage(
+                    : new ProgressMessage(
                           file.name,
                           UploadStep.SENDING,
                           Math.floor((100 * event.loaded) / event.total),
@@ -45,14 +45,14 @@ export class DataState {
 
         request.open('PUT', url, true)
 
-        request.onload = (e) => {
+        request.onload = (_e) => {
             if (request.readyState === 4) {
                 if (request.status === 200) {
                     const resp = JSON.parse(request.responseText)
                     setTimeout(
                         () =>
                             progress$.next(
-                                new progressMessage(
+                                new ProgressMessage(
                                     file.name,
                                     UploadStep.FINISHED,
                                     100,

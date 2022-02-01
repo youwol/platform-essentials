@@ -98,6 +98,11 @@ export class TreeGroup extends ImmutableTree.State<BrowserNode> {
     }
 }
 
+export type OpenFolder = {
+    tree: TreeGroup
+    folder: AnyFolderNode | DriveNode
+}
+
 export class ExplorerState {
     public flux: FluxState
     public story: StoryState
@@ -107,10 +112,7 @@ export class ExplorerState {
 
     public readonly selectedItem$ = new BehaviorSubject<BrowserNode>(undefined)
 
-    public readonly openFolder$ = new ReplaySubject<{
-        tree: TreeGroup
-        folder: AnyFolderNode | DriveNode
-    }>(1)
+    public readonly openFolder$ = new ReplaySubject<OpenFolder>(1)
 
     public readonly currentFolder$ = this.openFolder$.pipe(
         mergeMap(({ tree, folder }) => {
@@ -211,7 +213,7 @@ export class ExplorerState {
         const os = ChildApplicationAPI.getOsInstance()
         if (os) {
             this.subscriptions.push(
-                os.broadcastedEvents$
+                os.broadcastEvents$
                     .pipe(
                         filter((event: PlatformEvent) =>
                             FileAddedEvent.isInstance(event),

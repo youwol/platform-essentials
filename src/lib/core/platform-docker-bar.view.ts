@@ -1,4 +1,10 @@
-import { attr$, child$, children$, VirtualDOM } from '@youwol/flux-view'
+import {
+    attr$,
+    child$,
+    children$,
+    Stream$,
+    VirtualDOM,
+} from '@youwol/flux-view'
 import { BehaviorSubject, combineLatest, Observable } from 'rxjs'
 import {
     Executable,
@@ -149,11 +155,14 @@ export class AppsDockerView implements VirtualDOM {
         maxWidth: '100%',
     }
 
-    public readonly children: any
+    public readonly children: Stream$<
+        [RunningApp[], Executable[]],
+        DockerItemView[]
+    >
 
     public readonly state: PlatformState
-    public readonly onmouseenter: any
-    public readonly onmouseleave: any
+    public readonly onmouseenter: () => void
+    public readonly onmouseleave: () => void
 
     constructor(params: { state: PlatformState }) {
         Object.assign(this, params)

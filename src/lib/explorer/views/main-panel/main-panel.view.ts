@@ -15,8 +15,6 @@ export class MainPanelView implements VirtualDOM {
 
     public readonly state: ExplorerState
 
-    cache = {}
-
     constructor(params: { state: ExplorerState }) {
         Object.assign(this, params)
 

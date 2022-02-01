@@ -86,11 +86,7 @@ export const GENERIC_ACTIONS = {
             state.newFolder(node as any)
         },
     }),
-    download: (
-        state: ExplorerState,
-        { node, selection }: SelectedItem,
-        permissions,
-    ) => ({
+    download: (state: ExplorerState, { node }: SelectedItem, permissions) => ({
         sourceEventNode: node,
         icon: 'fas fa-download',
         name: 'download file',
@@ -234,7 +230,7 @@ export const GENERIC_ACTIONS = {
     }),
     borrowItem: (
         state: ExplorerState,
-        { node, selection }: SelectedItem,
+        { node }: SelectedItem,
         permissions,
     ) => ({
         sourceEventNode: node,
@@ -269,7 +265,7 @@ export const GENERIC_ACTIONS = {
     }),
     deleteItem: (
         state: ExplorerState,
-        { node, selection }: SelectedItem,
+        { node }: SelectedItem,
         permissions,
     ) => ({
         sourceEventNode: node,
@@ -281,11 +277,7 @@ export const GENERIC_ACTIONS = {
             state.deleteItem(node as AnyItemNode)
         },
     }),
-    refresh: (
-        state: ExplorerState,
-        { node, selection }: SelectedItem,
-        permissions,
-    ) => ({
+    refresh: (state: ExplorerState, { node }: SelectedItem, permissions) => ({
         sourceEventNode: node,
         icon: 'fas fa-sync-alt',
         name: 'refresh',

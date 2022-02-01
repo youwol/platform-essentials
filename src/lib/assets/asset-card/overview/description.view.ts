@@ -49,7 +49,7 @@ export class AssetDescriptionView implements VirtualDOM {
     }
 }
 
-function fetchCodeMirror$(): Observable<any> {
+function fetchCodeMirror$(): Observable<Window> {
     return from(
         install({
             modules: ['codemirror'],

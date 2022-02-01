@@ -1,7 +1,5 @@
 import { VirtualDOM } from '@youwol/flux-view'
 
-//type ImplementationFunction = string
-
 export interface You {
     avatar: VirtualDOM
 }
