@@ -1,9 +1,7 @@
 const path = require('path')
-const webpack = require('webpack')
 const pkg = require('./package.json')
 const ROOT = path.resolve(__dirname, 'src')
 const DESTINATION = path.resolve(__dirname, 'dist')
-//const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin
 module.exports = {
     context: ROOT,
     entry: {
@@ -62,10 +60,4 @@ module.exports = {
         compress: true,
         port: 9000,
     },
-    /*contentBase: path.resolve(__dirname, './src'),
-    historyApiFallback: true,
-    inline: true,
-    open: false,
-    port: 4005,
-    */
 }
