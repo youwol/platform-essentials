@@ -1,3 +1,5 @@
+import { VirtualDOM } from '@youwol/flux-view'
+
 export function ywSpinnerView({
     classes,
     size,
@@ -6,10 +8,7 @@ export function ywSpinnerView({
     classes: string
     size: string
     duration: number
-}) {
-    const logoUrl =
-        '/api/assets-gateway/raw/package/QHlvdXdvbC9mbHV4LXlvdXdvbC1lc3NlbnRpYWxz/latest/assets/images/logo_YouWol_white.png'
-
+}): VirtualDOM {
     return {
         class: classes,
         style: {

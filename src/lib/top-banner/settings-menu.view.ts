@@ -117,7 +117,7 @@ export function modalView(state: YouwolBannerState) {
                                 classes: 'mx-auto',
                                 size: '50px',
                                 duration: 1.5,
-                            }) as any,
+                            }),
                         },
                     ),
                 ],
