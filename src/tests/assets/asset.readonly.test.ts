@@ -1,10 +1,10 @@
+import '../mock-requests'
 import { render } from '@youwol/flux-view'
 import { Subject } from 'rxjs'
 import { mergeMap } from 'rxjs/operators'
 import { AssetCardView } from '../../lib'
 import { Asset, AssetsGatewayClient } from '../../lib/clients/assets-gateway'
 import { getFromDocument, resetPyYouwolDbs$ } from '../common'
-import '../mock-requests'
 
 beforeAll(async (done) => {
     resetPyYouwolDbs$().subscribe(() => {

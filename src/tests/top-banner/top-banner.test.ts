@@ -1,3 +1,4 @@
+import '../mock-requests'
 import { render, VirtualDOM } from '@youwol/flux-view'
 import { BehaviorSubject, of } from 'rxjs'
 import { take } from 'rxjs/operators'
@@ -19,7 +20,6 @@ import {
     queryFromDocument,
     resetPyYouwolDbs$,
 } from '../common'
-import '../mock-requests'
 
 beforeAll(async (done) => {
     resetPyYouwolDbs$().subscribe(() => {

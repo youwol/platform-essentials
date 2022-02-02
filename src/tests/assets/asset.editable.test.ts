@@ -1,3 +1,4 @@
+import '../mock-requests'
 import { render } from '@youwol/flux-view'
 import { Subject } from 'rxjs'
 import { mergeMap, take } from 'rxjs/operators'
@@ -12,10 +13,9 @@ import {
     GroupsPermissionsView,
     UserPermissionsView,
 } from '../../lib/assets/asset-card/permissions/permissions.view'
-import { Asset, AssetsGatewayClient } from '../../lib/clients/assets-gateway'
 
+import { Asset, AssetsGatewayClient } from '../../lib/clients/assets-gateway'
 import { getFromDocument, resetPyYouwolDbs$ } from '../common'
-import '../mock-requests'
 
 beforeAll(async (done) => {
     resetPyYouwolDbs$().subscribe(() => {

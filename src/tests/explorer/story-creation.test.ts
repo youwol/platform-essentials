@@ -1,6 +1,6 @@
+import '../mock-requests'
 import { StoryNode } from '../../lib/explorer/nodes'
 import { resetPyYouwolDbs$ } from '../common'
-import '../mock-requests'
 import {
     expectSnapshot,
     mkStory,
