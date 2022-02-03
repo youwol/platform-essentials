@@ -52,7 +52,6 @@ export class FaIconToggleView<TEnum> implements VirtualDOM {
 export class ComboTogglesView<TEnum, TState> implements VirtualDOM {
     public readonly class = 'd-flex'
     public readonly children: VirtualDOM[]
-    public readonly selected$: BehaviorSubject<TEnum>
     public readonly state: TState
 
     /**

@@ -112,8 +112,6 @@ export class LoginView implements VirtualDOM {
         new ButtonView('register', 'mx-2 fv-text-primary'),
     ]
     style = { maxWidth: '250px' }
-
-    constructor() {}
 }
 
 export class ButtonView extends Button.View {

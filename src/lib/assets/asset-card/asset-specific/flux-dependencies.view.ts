@@ -85,7 +85,6 @@ export class FluxDependenciesState {
 
     requirements$ = new ReplaySubject<AssetsGateway.Requirements>()
     selectedPacks$ = new BehaviorSubject([])
-    selectedComponents$ = new BehaviorSubject([])
 
     // dependencies$ : the dependencies of the project (included explicit update): { $libName : $selectedVersion }
     // selectedVersion is : latest picked by the user or latest available
@@ -270,17 +269,6 @@ export class FluxDependenciesState {
             })
     }
 
-    disconnect() {
-        this.unsubscribe$.next()
-        this.unsubscribe$.complete()
-    }
-    togglePacks(packs) {
-        const selected = this.selectedPacks$.getValue()
-        packs.forEach((pack) => (selected[pack.name] = !selected[pack.name]))
-        this.selectedPacks$.next(selected)
-        this.refreshDependencies()
-    }
-
     selectVersion(library, version) {
         this.selectedVersion$.next([library, version])
     }
@@ -348,7 +336,6 @@ export class FluxDependenciesState {
 
 export class FluxDependenciesView implements VirtualDOM {
     public readonly versionAvailableSelect$ = new ReplaySubject(1)
-    public readonly output$
     public readonly subscriptions = []
     public readonly class = ' m-auto h-100 d-flex flex-column'
     public readonly onclick = (event) => event.stopPropagation()
@@ -356,7 +343,6 @@ export class FluxDependenciesView implements VirtualDOM {
 
     public readonly asset: AssetsGateway.Asset
     public readonly state: FluxDependenciesState
-    public readonly dataProject$ = new Subject()
 
     constructor(params: { asset: AssetsGateway.Asset }) {
         Object.assign(this, params)

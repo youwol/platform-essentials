@@ -66,7 +66,6 @@ class NoPlatformHandler implements IPlatformHandler {
         version,
         parameters,
         focus,
-        title,
     }: {
         cdnPackage: string
         version: string

@@ -6,8 +6,6 @@ import { Observable } from 'rxjs'
  */
 export class BadgeView implements VirtualDOM {
     static ClassSelector = 'LockerBadge'
-
-    constructor() {}
 }
 
 /**
