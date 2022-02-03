@@ -207,7 +207,6 @@ export class ItemNode<T extends ItemKind> extends BrowserNode {
 export type DataNode = ItemNode<'data'>
 export type FluxProjectNode = ItemNode<'flux-project'>
 export type StoryNode = ItemNode<'story'>
-export type PackageNode = ItemNode<'package'>
 export type AnyItemNode = ItemNode<ItemKind>
 
 export class FutureNode extends BrowserNode {

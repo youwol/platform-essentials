@@ -12,23 +12,6 @@ export interface Appearance {
     desktopStyle: { [_key: string]: string }
 }
 
-export interface ApplicationStandalone {
-    cdnPackage: string
-    version: string
-}
-
-/*
-export interface ApplicationAssociation extends ApplicationStandalone {
-
-    canOpen: ImplementationFunction | ((asset: Asset) => boolean)
-    parameters: ImplementationFunction | ((asset: Asset) => { [key: string]: string })
-}
-
-export interface Applications {
-
-    associations: ApplicationAssociation[]
-}*/
-
 export interface Parametrization {
     match: { [_key: string]: string }
     parameters: { [_key: string]: string }
