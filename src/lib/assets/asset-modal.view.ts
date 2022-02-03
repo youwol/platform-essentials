@@ -3,7 +3,7 @@ import { Modal } from '@youwol/fv-group'
 import { merge, ReplaySubject } from 'rxjs'
 import { take } from 'rxjs/operators'
 import { AssetsGateway } from '@youwol/http-clients'
-import { AssetCardView } from './asset-card/asset-card.view'
+import { AssetCardView } from './asset-card'
 
 /**
  *
