@@ -10,7 +10,10 @@ export class ExposedGroupState {
     public readonly groupAccess$: BehaviorSubject<AssetsGateway.ExposingGroup>
     public readonly loading$ = new BehaviorSubject<boolean>(false)
 
-    constructor(public readonly assetId, public readonly data: ExposingGroup) {
+    constructor(
+        public readonly assetId,
+        public readonly data: AssetsGateway.ExposingGroup,
+    ) {
         this.groupId = data.groupId
         this.groupName = data.name
         this.groupAccess$ = new BehaviorSubject<AssetsGateway.ExposingGroup>(

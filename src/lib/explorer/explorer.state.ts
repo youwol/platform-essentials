@@ -222,7 +222,7 @@ export class ExplorerState {
                             return RequestsExecutor.getItem(event.treeId)
                         }),
                     )
-                    .subscribe((response: ItemResponse) => {
+                    .subscribe((response: AssetsGateway.ItemResponse) => {
                         const tree = this.groupsTree[response.groupId]
 
                         const node = new ItemNode({
