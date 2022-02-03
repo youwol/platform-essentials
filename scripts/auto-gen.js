@@ -1,4 +1,4 @@
-fs = require('fs')
+const fs = require('fs')
 
 let package_json = JSON.parse(fs.readFileSync('./package.json', 'utf8'))
 
@@ -6,7 +6,7 @@ let namespace = package_json['name'].includes('/')
     ? package_json['name'].split('/')[0].replace('@', '')
     : ''
 
-let content = `export let AUTO_GENERATED = {
+let content = `export const AUTO_GENERATED = {
     name: "${package_json['name']}",
     namespace: "${namespace}",
     version: "${package_json['version']}",
