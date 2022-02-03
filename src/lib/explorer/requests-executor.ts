@@ -33,7 +33,7 @@ function isToProcess({ update, targetCmd }) {
     return !(update.command.metadata && !update.command.metadata.toBeSaved)
 }
 
-const databaseActionsFactory = {
+export const databaseActionsFactory = {
     renameFolder: (update: ImmutableTree.Updates<BrowserNode>) => ({
         when: () => {
             if (
