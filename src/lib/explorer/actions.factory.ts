@@ -291,31 +291,39 @@ export const GENERIC_ACTIONS = {
 
 export function getActions$(
     state: ExplorerState,
-    item: SelectedItem,
+    selectedItem: SelectedItem,
     actionsList: ActionConstructor[],
 ): Observable<Array<Action>> {
-    if (item.node instanceof FutureNode || item.node instanceof ProgressNode) {
+    if (
+        selectedItem.node instanceof FutureNode ||
+        selectedItem.node instanceof ProgressNode
+    ) {
         return of([])
     }
-    if (item.node instanceof DeletedNode) {
+    if (selectedItem.node instanceof DeletedNode) {
         return of([])
     } // restore at some point
 
-    if (item.node instanceof GroupNode) {
+    if (selectedItem.node instanceof GroupNode) {
         // a service should return permissions of the current user for the group
         // for now, everybody can do everything
         const actions = actionsList
             .map((action) =>
-                action(state, item, { read: true, write: true, share: true }),
+                action(state, selectedItem, {
+                    read: true,
+                    write: true,
+                    share: true,
+                }),
             )
             .filter((a) => a.applicable())
         return of(actions)
     }
 
     const id =
-        item.node instanceof FolderNode && item.node.kind == 'trash'
-            ? item.node.driveId
-            : item.node.id
+        selectedItem.node instanceof FolderNode &&
+        selectedItem.node.kind == 'trash'
+            ? selectedItem.node.driveId
+            : selectedItem.node.id
 
     return new Gtw.AssetsGatewayClient().explorer.getPermissions$(id).pipe(
         map((permissions) => ({ item: selectedItem, permissions })),

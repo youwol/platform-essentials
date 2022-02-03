@@ -69,8 +69,7 @@ class NoPlatformHandler implements IPlatformHandler {
     }: {
         cdnPackage: string
         version: string
-        title?: string
-        parameters?: { [key: string]: string }
+        parameters?: { [_key: string]: string }
         focus: boolean
     }) {
         const url = getExeUrl({ cdnPackage, version, parameters })
@@ -128,7 +127,7 @@ export class PlatformState implements IPlatformHandler {
         cdnPackage: string
         title?: string
         version: string
-        parameters?: { [key: string]: string }
+        parameters?: { [_key: string]: string }
         focus: boolean
     }) {
         return of({}).pipe(

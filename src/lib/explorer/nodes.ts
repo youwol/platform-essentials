@@ -166,7 +166,7 @@ export type TrashNode = FolderNode<'trash'>
 export type SystemNode = FolderNode<'system'>
 export type AnyFolderNode = FolderNode<FolderKind>
 
-type ItemKind = 'data' | 'story' | 'flux-project' | 'package'
+export type ItemKind = 'data' | 'story' | 'flux-project' | 'package'
 
 export class ItemNode<T extends ItemKind> extends BrowserNode {
     static iconsFactory: Record<ItemKind, string> = {
@@ -211,13 +211,14 @@ export type PackageNode = ItemNode<'package'>
 export type AnyItemNode = ItemNode<ItemKind>
 
 export class FutureNode extends BrowserNode {
-    onResponse: any
-    request: any
+    onResponse: (unknown, BrowserNode) => void
+    request: Observable<unknown>
+
     constructor(params: {
         icon: string
         name: string
-        onResponse: any
-        request: any
+        onResponse: (unknown, BrowserNode) => void
+        request: Observable<unknown>
     }) {
         super({ ...params, id: uuidv4() })
         Object.assign(this, params)

@@ -99,19 +99,7 @@ export class RunningApp implements Executable {
                     ? 'h-100 w-100 d-flex'
                     : 'd-none',
             ),
-            children: [
-                {
-                    tag: 'iframe',
-                    width: '100%',
-                    height: '100%',
-                    src: this.url,
-                    connectedCallback: (
-                        elem: HTMLElement$ & HTMLIFrameElement,
-                    ) => {
-                        this.iframe$.next(elem)
-                    },
-                },
-            ],
+            children: [new IframeAppView(this.url, this.iframe$)],
             connectedCallback: (elem: HTMLElement) => {
                 this.htmlElement = elem
             },

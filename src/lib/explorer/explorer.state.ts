@@ -124,7 +124,7 @@ export class ExplorerState {
             return serialize(a.folder) == serialize(b.folder)
         }),
         shareReplay(1),
-    ) as Observable<{ tree: TreeGroup; folder: FolderNode<any> }>
+    ) as Observable<{ tree: TreeGroup; folder: AnyFolderNode }>
 
     actions$ = combineLatest([this.selectedItem$, this.currentFolder$]).pipe(
         mergeMap(([item, { folder }]) => {
@@ -165,6 +165,7 @@ export class ExplorerState {
     public readonly userInfo$ = RequestsExecutor.getUserInfo().pipe(share())
 
     public readonly defaultUserDrive$ = this.userInfo$.pipe(
+        raiseHTTPErrors(),
         mergeMap(({ groups }) => {
             const privateGrp = groups.find((grp) => grp.path == 'private')
             return RequestsExecutor.getDefaultDrive(privateGrp.id)
@@ -173,6 +174,7 @@ export class ExplorerState {
     )
 
     public readonly userDrives$ = this.userInfo$.pipe(
+        raiseHTTPErrors(),
         mergeMap(({ groups }) => {
             const privateGrp = groups.find((grp) => grp.path == 'private')
             return RequestsExecutor.getDrivesChildren(privateGrp.id)
@@ -386,6 +388,7 @@ export class ExplorerState {
 
         if (
             nodeSelected instanceof FolderNode &&
+            nodeSelected.kind == 'regular' &&
             this.itemCut.cutType == 'move'
         ) {
             processMoveFolder(

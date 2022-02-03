@@ -30,9 +30,9 @@ export class ItemView {
         { [key: string]: string }
     >
     public readonly onclick: () => void
-    public readonly ondblclick: () => void
+
     public readonly state: ExplorerState
-    public readonly item: BrowserNode
+    public readonly item: RegularFolderNode | AnyItemNode
     public readonly hovered$: Observable<BrowserNode>
 
     constructor(params: {
@@ -133,7 +133,7 @@ export class ItemView {
             onclick: (ev) => ev.stopPropagation(),
             onkeydown: (ev) => {
                 if (ev.key === 'Enter') {
-                    this.state.rename(this.item as any, ev.target.value)
+                    this.state.rename(this.item, ev.target.value)
                 }
             },
         }
@@ -178,7 +178,7 @@ export class InfoBtnView implements VirtualDOM {
             })
             assetUpdate$
                 .pipe(
-                    map((asset) => asset.name),
+                    map(({ name }) => name),
                     distinct(),
                 )
                 .subscribe((name) => {

@@ -2,13 +2,14 @@ import { VirtualDOM } from '@youwol/flux-view'
 import { ExpandableMenu } from './menu.view'
 
 /**
- * Encapsulates YouWol's logo with optional badges & YouWol menu.
+ * Encapsulates YouWol logo with optional badges & YouWol menu.
  */
 export class YouwolMenuView implements VirtualDOM {
     static ClassSelector = 'youwol-menu-view'
 
-    static url =
-        '/api/assets-gateway/raw/package/QHlvdXdvbC9mbHV4LXlvdXdvbC1lc3NlbnRpYWxz/latest/assets/images/logo_YouWol_Platform_white.png'
+    static url = `/api/assets-gateway/raw/package/${btoa(
+        '@youwol/flux-youwol-essentials',
+    )}/latest/assets/images/logo_YouWol_Platform_white.png`
 
     public readonly class = `d-flex my-auto  fv-pointer ${YouwolMenuView.ClassSelector}`
 
@@ -18,6 +19,7 @@ export class YouwolMenuView implements VirtualDOM {
 
     onclick: () => void
     onmouseleave: () => void
+
     /**
      *
      * @param parameters Constructor's parameters

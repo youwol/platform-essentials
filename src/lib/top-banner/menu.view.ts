@@ -212,7 +212,7 @@ export function defaultUserMenu(state: YouwolBannerState): VirtualDOM {
     })
 }
 
-export function defaultYouWolMenu(state: YouwolBannerState): VirtualDOM {
+export function defaultYouWolMenu(_state: YouwolBannerState): VirtualDOM {
     return new Menu({
         id: 'expandable-youwol-menu',
         sections: [

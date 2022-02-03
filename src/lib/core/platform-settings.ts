@@ -201,9 +201,9 @@ export class PlatformSettingsStore {
         )
     }
 
-    static getOpeningApps$(asset: Asset): Observable<Executable[]> {
+    static getOpeningApps$(targetAsset: BrowserNode): Observable<Executable[]> {
         const parametrizationMatch = (
-            asset: Asset,
+            asset: BrowserNode,
             parametrization: Parametrization,
         ) =>
             Object.entries(parametrization.match).reduce(
@@ -219,13 +219,13 @@ export class PlatformSettingsStore {
                     .map((app) =>
                         (app.execution.parametrized || [])
                             .filter((parametrized) =>
-                                parametrizationMatch(asset, parametrized),
+                                parametrizationMatch(targetAsset, parametrized),
                             )
                             .map((parametrized) => {
                                 const params = Object.entries(
                                     parametrized.parameters,
                                 )
-                                    .map(([k, v]) => [k, asset[v]])
+                                    .map(([k, v]) => [k, targetAsset[v]])
                                     .reduce(
                                         (acc, [k, v]) => ({ ...acc, [k]: v }),
                                         {},
