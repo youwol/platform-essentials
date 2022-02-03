@@ -11,7 +11,7 @@ export class FaIconToggleView<TEnum> implements VirtualDOM {
     static ClassSelector = 'fa-icon-toggle-view'
 
     public readonly tag: 'i'
-    public readonly class: any
+    public readonly class: Stream$<TEnum, string>
 
     public readonly onclick: () => void
 

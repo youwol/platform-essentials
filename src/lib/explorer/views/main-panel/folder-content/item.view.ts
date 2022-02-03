@@ -154,16 +154,18 @@ export class InfoBtnView implements VirtualDOM {
 
     public readonly onclick = () => {
         const withTabs = {
-            Permissions: new AssetPermissionsView({ asset: this.node as any }),
+            Permissions: new AssetPermissionsView({
+                asset: this.node as unknown as AssetsGateway.Asset,
+            }),
         }
         if (this.node.kind == 'flux-project') {
             withTabs['Dependencies'] = new FluxDependenciesView({
-                asset: this.node as any,
+                asset: this.node as unknown as AssetsGateway.Asset,
             })
         }
         if (this.node.kind == 'package') {
             withTabs['Package Info'] = new PackageInfoView({
-                asset: this.node as any,
+                asset: this.node as unknown as AssetsGateway.Asset,
             })
         }
         this.asset$.pipe(take(1)).subscribe((asset) => {

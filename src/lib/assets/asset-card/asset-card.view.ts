@@ -105,6 +105,6 @@ export class AssetCardTabs extends Tabs.View {
                 innerText: tabData.name,
             }),
             class: `${AssetCardTabs.ClassSelector} d-flex flex-column h-100`,
-        } as any)
+        })
     }
 }

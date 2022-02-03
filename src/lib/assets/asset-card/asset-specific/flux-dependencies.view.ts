@@ -34,7 +34,7 @@ export function getActions(asset: AssetsGateway.Asset) {
         state: runButtonState,
         class: classes,
         contentView: () => ({ innerText: 'run' }),
-    } as any)
+    })
     runButtonState.click$.subscribe(
         () =>
             (window.location.href = `/applications/@youwol/flux-runner/?id=${asset.rawId}`),
@@ -45,7 +45,7 @@ export function getActions(asset: AssetsGateway.Asset) {
         state: constructButtonState,
         class: classes,
         contentView: () => ({ innerText: 'construct' }),
-    } as any)
+    })
     constructButtonState.click$.subscribe(
         () =>
             (window.location.href = `/applications/@youwol/flux-builder/?id=${asset.rawId}`),
@@ -56,7 +56,7 @@ export function getActions(asset: AssetsGateway.Asset) {
         state: editButtonState,
         class: classes,
         contentView: () => ({ innerText: 'edit' }),
-    } as any)
+    })
     editButtonState.click$.subscribe(
         () =>
             (window.location.href = `/applications/@youwol/assets-publish-ui?kind=flux-project&related_id=${asset.rawId}`),
@@ -73,6 +73,7 @@ class Lib {
     name: string
     version: string
 }
+
 export class FluxDependenciesState {
     error$ = new Subject<HTTPError>()
     accessInfo$ = new AssetsGateway.AssetsGatewayClient().assets
@@ -104,11 +105,11 @@ export class FluxDependenciesState {
     versionsState$ = new BehaviorSubject({})
 
     state$: Observable<{
-        fluxPacks: Array<unknown>
+        fluxPacks: string[]
         libraries: { [key: string]: Lib }
     }>
 
-    currentState: { fluxPacks: Array<any>; libraries: { [key: string]: Lib } }
+    currentState: { fluxPacks: string[]; libraries: { [key: string]: Lib } }
 
     // next is called by the UI part
     unsubscribe$ = new Subject()
@@ -169,7 +170,7 @@ export class FluxDependenciesState {
                     ),
                 ),
             )
-            .subscribe((resp: any) => {
+            .subscribe((resp: { name: string; versions: string[] }) => {
                 const newVersions = Object.assign(
                     {},
                     this.versions$.getValue(),
@@ -229,14 +230,20 @@ export class FluxDependenciesState {
             this.selectedPacks$,
         ]).pipe(
             takeUntil(this.unsubscribe$),
-            map(([deps, packs]: [{ [_key: string]: Lib }, Array<any>]) => ({
-                fluxPacks: Object.entries(packs)
-                    .filter(
-                        ([id, included]) => included && id != 'flux-pack-core',
-                    )
-                    .map(([p, _]) => p),
-                libraries: deps,
-            })),
+            map(
+                ([deps, packs]: [
+                    { [_key: string]: Lib },
+                    Array<{ [_k: string]: boolean }>,
+                ]) => ({
+                    fluxPacks: Object.entries(packs)
+                        .filter(
+                            ([id, included]) =>
+                                included && id != 'flux-pack-core',
+                        )
+                        .map(([p, _]) => p),
+                    libraries: deps,
+                }),
+            ),
         )
         this.state$.subscribe((state) => (this.currentState = state))
         this.requirements$
@@ -293,8 +300,10 @@ export class FluxDependenciesState {
 
     refreshDependencies(fromVersions = undefined) {
         fromVersions = fromVersions || this.dependencies$.getValue()
-        const librariesVersion = Object.entries(fromVersions).reduce(
-            (acc, [k, v]: [string, any]) =>
+        const librariesVersion: { [k: string]: string } = Object.entries(
+            fromVersions,
+        ).reduce(
+            (acc, [k, v]: [string, { version: string }]) =>
                 Object.assign({}, acc, {
                     [k]: typeof v == 'object' ? v.version : v,
                 }),
@@ -365,7 +374,7 @@ export class FluxDependenciesView implements VirtualDOM {
             {
                 class: 'py-2 h-100 overflow-auto flex-grow-1 px-4  d-flex justify-content-center',
                 children: [
-                    child$(this.state.accessInfo$, (info: any) =>
+                    child$(this.state.accessInfo$, (info) =>
                         info.consumerInfo.permissions.write
                             ? this.panelDependenciesReadWWrite(this.state)
                             : this.panelDependenciesReadOnly(this.state),
@@ -420,7 +429,7 @@ export class FluxDependenciesView implements VirtualDOM {
                     state: buttonState,
                     contentView: () => ({ innerText: 'Update' }),
                     class: 'fv-text-focus fv-bg-background ',
-                } as any)
+                })
             })
 
         const tableHeaders = ['name', 'version', '', 'versions available', '']

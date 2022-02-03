@@ -83,7 +83,7 @@ export const GENERIC_ACTIONS = {
             )
         },
         exe: () => {
-            state.newFolder(node as any)
+            state.newFolder(node as AnyFolderNode | DriveNode)
         },
     }),
     download: (state: ExplorerState, { node }: SelectedItem, permissions) => ({
@@ -171,7 +171,7 @@ export const GENERIC_ACTIONS = {
         enable: permissions.write,
         applicable: () => selection == 'indirect' && node instanceof FolderNode,
         exe: () => {
-            state.flux.new(node as any)
+            state.flux.new(node as AnyFolderNode)
         },
     }),
     newStory: (
@@ -185,7 +185,7 @@ export const GENERIC_ACTIONS = {
         enable: permissions.write,
         applicable: () => selection == 'indirect' && node instanceof FolderNode,
         exe: () => {
-            state.story.new(node as any)
+            state.story.new(node as AnyFolderNode)
         },
     }),
     paste: (

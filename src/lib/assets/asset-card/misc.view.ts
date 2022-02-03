@@ -50,7 +50,7 @@ export class ButtonView extends Button.View {
                 ],
             }),
             disabled: !enabled,
-        } as any)
+        })
         this.class = `${this.class} ${withClass}`
     }
 }

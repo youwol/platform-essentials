@@ -123,7 +123,7 @@ export function modalView(state: YouwolBannerState) {
                 ],
             }
         },
-    } as any)
+    })
     const modalDiv = render(view)
     document.querySelector('body').appendChild(modalDiv)
     return view

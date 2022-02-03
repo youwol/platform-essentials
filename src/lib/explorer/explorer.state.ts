@@ -136,12 +136,12 @@ export class ExplorerState {
             const a1 = item
                 ? getActions$(
                       this,
-                      { node: item as any, selection: 'direct' },
+                      { node: item, selection: 'direct' },
                       Object.values(GENERIC_ACTIONS),
                   )
                 : of([])
             const a2 = item
-                ? PlatformSettingsStore.getOpeningApps$(item as any).pipe(
+                ? PlatformSettingsStore.getOpeningApps$(item).pipe(
                       map((apps) =>
                           apps.map((app) => openWithActionFromExe(app)),
                       ),
@@ -183,7 +183,7 @@ export class ExplorerState {
 
     public itemCut: {
         cutType: 'borrow' | 'move'
-        node: ItemNode<any> | FolderNode<any>
+        node: AnyItemNode | AnyFolderNode
     }
 
     public readonly subscriptions: Subscription[] = []
@@ -191,7 +191,7 @@ export class ExplorerState {
     constructor() {
         this.subscriptions.push(
             combineLatest([this.userDrives$, this.defaultUserDrive$]).subscribe(
-                ([respUserDrives, respDefaultDrive]: [any, any]) => {
+                ([respUserDrives, respDefaultDrive]) => {
                     const tree = createTreeGroup(
                         'You',
                         respUserDrives,
@@ -246,7 +246,7 @@ export class ExplorerState {
         }
     }
 
-    openFolder(folder: FolderNode<any> | DriveNode) {
+    openFolder(folder: AnyFolderNode | DriveNode) {
         this.openFolder$.next({ tree: this.groupsTree[folder.groupId], folder })
     }
 
@@ -260,7 +260,7 @@ export class ExplorerState {
         combineLatest([
             RequestsExecutor.getDefaultDrive(group.id),
             RequestsExecutor.getDrivesChildren(group.id),
-        ]).subscribe(([defaultDrive, drives]: [any, any]) => {
+        ]).subscribe(([defaultDrive, drives]) => {
             const tree = createTreeGroup(
                 group.elements.slice(-1)[0],
                 drives,
@@ -274,7 +274,7 @@ export class ExplorerState {
         })
     }
 
-    newFolder(parentNode: DriveNode | FolderNode<any>) {
+    newFolder(parentNode: DriveNode | AnyFolderNode) {
         const tree = this.groupsTree[parentNode.groupId]
         const childFolder = new FutureNode({
             icon: 'fas fa-folder',
@@ -388,7 +388,11 @@ export class ExplorerState {
             nodeSelected instanceof FolderNode &&
             this.itemCut.cutType == 'move'
         ) {
-            processMoveFolder(nodeSelected, treeDestination, destination)
+            processMoveFolder(
+                nodeSelected as RegularFolderNode,
+                treeDestination,
+                destination,
+            )
         }
 
         nodeSelected.removeStatus({ type: 'cut' })

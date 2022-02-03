@@ -18,7 +18,7 @@ export class ButtonView extends Button.View {
             state: new Button.State(),
             contentView: () => ({ innerText: name }),
             disabled: !enabled,
-        } as any)
+        })
         this.class = `${this.class} ${withClass}`
     }
 }

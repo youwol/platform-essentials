@@ -67,7 +67,9 @@ export class OpenWithView implements VirtualDOM {
                             whiteSpace: 'nowrap',
                         },
                         children: children$(
-                            PlatformSettingsStore.getOpeningApps$(this.asset),
+                            PlatformSettingsStore.getOpeningApps$(
+                                this.asset as unknown as BrowserNode,
+                            ),
                             (openWithOptions) =>
                                 openWithOptions.length > 0
                                     ? openWithOptions.map((option) =>
@@ -178,24 +180,29 @@ class DownloadView implements VirtualDOM {
                     return option.download$(this.asset, drive)
                 }),
             )
-            .subscribe(([item, drive]: [any, DefaultDriveResponse]) => {
-                if (youwolOS) {
-                    youwolOS.broadcastEvent(
-                        new FileAddedEvent(
-                            {
-                                treeId: item.treeId,
-                                groupId: item.groupId,
-                                driveId: item.driveId,
-                                folderId: drive.downloadFolderId,
-                            },
-                            {
-                                originId:
-                                    ChildApplicationAPI.getAppInstanceId(),
-                            },
-                        ),
-                    )
-                }
-            })
+            .subscribe(
+                ([item, drive]: [
+                    AnyItemNode,
+                    AssetsGateway.DefaultDriveResponse,
+                ]) => {
+                    if (youwolOS) {
+                        youwolOS.broadcastEvent(
+                            new FileAddedEvent(
+                                {
+                                    treeId: item.treeId,
+                                    groupId: item.groupId,
+                                    driveId: item.driveId,
+                                    folderId: drive.downloadFolderId,
+                                },
+                                {
+                                    originId:
+                                        ChildApplicationAPI.getAppInstanceId(),
+                                },
+                            ),
+                        )
+                    }
+                },
+            )
         return btn
     }
 }

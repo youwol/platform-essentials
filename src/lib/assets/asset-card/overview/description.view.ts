@@ -81,7 +81,7 @@ class DescriptionEditableView implements VirtualDOM {
         lineWrapping: true,
         indentUnit: 4,
     }
-    editor: any
+    editor
 
     constructor(params: { description$: BehaviorSubject<string> }) {
         Object.assign(this, params)

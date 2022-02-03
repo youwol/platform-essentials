@@ -87,7 +87,7 @@ export class ExposedGroupView implements VirtualDOM {
         )
         const selectViewShare = new Select.View({ state: selectStateShare })
 
-        const parameters$ = new BehaviorSubject<any>({})
+        const parameters$ = new BehaviorSubject<{ [k: string]: unknown }>({})
 
         const bodyPost$ = combineLatest([
             state.groupAccess$.pipe(map((a) => a.access)),
@@ -158,8 +158,8 @@ export class ExposedGroupView implements VirtualDOM {
 }
 
 function expirationDateAccessView(
-    access: GroupAccess,
-    parameters$: Subject<any>,
+    access: AssetsGateway.GroupAccess,
+    parameters$: Subject<{ [k: string]: unknown }>,
 ) {
     const edition$ = new BehaviorSubject<boolean>(false)
     return {

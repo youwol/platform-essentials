@@ -78,7 +78,7 @@ export class RowView implements VirtualDOM {
             return
         }
 
-        PlatformSettingsStore.getOpeningApps$(this.item as any)
+        PlatformSettingsStore.getOpeningApps$(this.item)
             .pipe(
                 take(1),
                 filter((apps) => apps.length > 0),

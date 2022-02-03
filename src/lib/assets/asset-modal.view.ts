@@ -32,7 +32,7 @@ export function popupAssetModalView(parameters: {
                     modalDiv.remove()
                 })
         },
-    } as any)
+    })
     const modalDiv = render(view)
     document.querySelector('body').appendChild(modalDiv)
     return assetOutput$
