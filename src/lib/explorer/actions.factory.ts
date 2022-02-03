@@ -346,6 +346,7 @@ export function openWithActionFromExe(app: Executable) {
                     cdnPackage: app.cdnPackage,
                     parameters: app.parameters,
                     focus: true,
+                    version: app.version,
                 })
                 .subscribe()
         },

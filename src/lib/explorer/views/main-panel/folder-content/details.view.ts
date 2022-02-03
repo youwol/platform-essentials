@@ -85,6 +85,7 @@ export class RowView implements VirtualDOM {
                 map((apps) => apps[0]),
                 mergeMap((app) => {
                     return this.platformHandler.createInstance$({
+                        version: app.version,
                         cdnPackage: app.cdnPackage,
                         parameters: app.parameters,
                         title: this.item.name,

@@ -12,6 +12,7 @@ export interface IPlatformHandler {
 
     createInstance$({
         cdnPackage,
+        version,
         parameters,
         focus,
         title,
@@ -20,6 +21,7 @@ export interface IPlatformHandler {
         title?: string
         parameters?: { [key: string]: string }
         focus: boolean
+        version: string
     })
 
     broadcastEvent(event: PlatformEvent)
