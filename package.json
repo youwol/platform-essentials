@@ -22,7 +22,7 @@
         "test-coverage": "jest -c ./jest.config.js --rootDir . -i --collect-coverage --collectCoverageFrom=./src/lib/**/*.ts ",
         "start": "webpack serve",
         "publish-npm-public": "yarn build:prod && yarn test-coverage && yarn publish --access public",
-        "upgrade-youwol": "yarn upgrade @youwol/cdn-client @youwol/flux-core  @youwol/flux-files @youwol/flux-view @youwol/fv-button @youwol/fv-group @youwol/fv-tree"
+        "upgrade-youwol": "yarn upgrade @youwol/cdn-client @youwol/flux-files @youwol/flux-view @youwol/fv-button @youwol/fv-group @youwol/fv-tree"
     },
     "dependencies": {},
     "peerDependencies": {
@@ -97,6 +97,7 @@
             "@youwol/fv-button": "^0.0.4",
             "@youwol/fv-group": "^0.0.6",
             "@youwol/fv-tree": "^0.0.4",
+            "uuid": "8.1.0",
             "@youwol/fv-tabs": "^0.0.3",
             "@youwol/fv-input": "^0.0.5",
             "@youwol/http-clients": "^0.0.3"

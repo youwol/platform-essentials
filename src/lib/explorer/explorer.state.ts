@@ -1,4 +1,3 @@
-import { uuidv4 } from '@youwol/flux-core'
 import { ImmutableTree } from '@youwol/fv-tree'
 import {
     BehaviorSubject,
@@ -17,6 +16,7 @@ import {
     shareReplay,
     take,
 } from 'rxjs/operators'
+import { v4 as uuidv4 } from 'uuid'
 import { DisplayMode } from '.'
 import { YouwolBannerState } from '../top-banner'
 import { ChildApplicationAPI, PlatformSettingsStore } from '../core'
