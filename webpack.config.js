@@ -39,6 +39,7 @@ module.exports = {
             '@youwol/fv-tree': '@youwol/fv-tree',
             '@youwol/fv-tabs': '@youwol/fv-tabs',
             '@youwol/fv-inputs': '@youwol/fv-inputs',
+            '@youwol/http-clients': '@youwol/http-clients',
             js_beautify: 'js_beautify',
             lodash: '_',
         },

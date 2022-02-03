@@ -1,9 +1,9 @@
 import { attr$, child$ } from '@youwol/flux-view'
 import { Observable, of } from 'rxjs'
 import { map } from 'rxjs/operators'
-import { ChildApplicationAPI, Executable } from '..'
-import { AssetsGatewayClient } from '../clients/assets-gateway'
+import { ChildApplicationAPI, Executable } from '../core'
 import { ExplorerState, SelectedItem } from './explorer.state'
+import { AssetsGateway as Gtw } from '@youwol/http-clients'
 import {
     AnyFolderNode,
     AnyItemNode,
@@ -317,9 +317,9 @@ export function getActions$(
             ? item.node.driveId
             : item.node.id
 
-    return new AssetsGatewayClient().explorer.getPermissions$(id).pipe(
-        map((permissions) => ({ state, item: item, permissions })),
-        map(({ state, item, permissions }) => {
+    return new Gtw.AssetsGatewayClient().explorer.getPermissions$(id).pipe(
+        map((permissions) => ({ item: selectedItem, permissions })),
+        map(({ item, permissions }) => {
             return actionsList
                 .map((action) => action(state, item, permissions))
                 .filter((a) => a.applicable())

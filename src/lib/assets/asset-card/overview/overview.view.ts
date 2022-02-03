@@ -1,12 +1,14 @@
 import { HTMLElement$, VirtualDOM } from '@youwol/flux-view'
 import { BehaviorSubject, combineLatest, Subject } from 'rxjs'
 import { mergeMap, shareReplay } from 'rxjs/operators'
-import { Asset, AssetsGatewayClient } from '../../../clients/assets-gateway'
+import { AssetsGateway } from '@youwol/http-clients'
 import { sectionTitleView } from '../misc.view'
 import { AssetDescriptionView } from './description.view'
 import { AssetScreenShotsView } from './screenshots.view'
 import { AssetTagsView } from './tags.view'
 import { AssetTitleView } from './title.view'
+
+type Asset = AssetsGateway.Asset
 
 export class AssetOverview implements VirtualDOM {
     static ClassSelector = 'asset-overview'
@@ -28,7 +30,7 @@ export class AssetOverview implements VirtualDOM {
 
     public readonly assetOutput$: Subject<Asset>
 
-    public readonly assetsGtwClient = new AssetsGatewayClient()
+    public readonly assetsGtwClient = new AssetsGateway.AssetsGatewayClient()
 
     constructor(params: {
         asset: Asset
@@ -103,7 +105,8 @@ export class AssetOverview implements VirtualDOM {
                                 file.name.split('.').slice(-1)
                             return this.assetsGtwClient.assets.addPicture$(
                                 this.asset.assetId,
-                                { id, file: file },
+                                id,
+                                file,
                             )
                         }),
                     )

@@ -1,12 +1,12 @@
 import { uuidv4 } from '@youwol/flux-core'
-import { AssetsGatewayClient } from '../../../clients/assets-gateway'
+import { AssetsGateway } from '@youwol/http-clients'
 import { TreeGroup } from '../../explorer.state'
 import { AnyFolderNode, FutureNode, ItemNode } from '../../nodes'
 
 export class FluxState {
     constructor(public readonly userTree: TreeGroup) {}
     static newFluxProject$(node: AnyFolderNode) {
-        const assetsGtwClient = new AssetsGatewayClient()
+        const assetsGtwClient = new AssetsGateway.AssetsGatewayClient()
         return assetsGtwClient.assets.fluxProject.create$(node.id, {
             name: 'new project',
             description: '',

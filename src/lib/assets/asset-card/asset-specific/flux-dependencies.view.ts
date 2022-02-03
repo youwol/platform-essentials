@@ -21,12 +21,12 @@ import {
     tap,
 } from 'rxjs/operators'
 import {
-    Asset,
-    AssetsGatewayClient,
-    Requirements,
-} from '../../../clients/assets-gateway'
+    AssetsGateway,
+    dispatchHTTPErrors,
+    HTTPError,
+} from '@youwol/http-clients'
 
-export function getActions(asset: Asset) {
+export function getActions(asset: AssetsGateway.Asset) {
     const classes = 'fv-btn fv-btn-secondary mx-1 '
 
     const runButtonState = new Button.State()
@@ -74,14 +74,15 @@ class Lib {
     version: string
 }
 export class FluxDependenciesState {
-    accessInfo$ = new AssetsGatewayClient().assets
+    error$ = new Subject<HTTPError>()
+    accessInfo$ = new AssetsGateway.AssetsGatewayClient().assets
         .getAccess$(this.asset.assetId)
         .pipe(share())
 
     userPicks = {}
     libsVersionsCache = {}
 
-    requirements$ = new ReplaySubject<Requirements>()
+    requirements$ = new ReplaySubject<AssetsGateway.Requirements>()
     selectedPacks$ = new BehaviorSubject([])
     selectedComponents$ = new BehaviorSubject([])
 
@@ -112,14 +113,15 @@ export class FluxDependenciesState {
     // next is called by the UI part
     unsubscribe$ = new Subject()
 
-    assetsGtwClient = new AssetsGatewayClient()
+    assetsGtwClient = new AssetsGateway.AssetsGatewayClient()
 
-    constructor(public readonly asset: Asset) {
+    constructor(public readonly asset: AssetsGateway.Asset) {
         this.userPicks = {}
         this.libsVersionsCache = {}
 
         this.assetsGtwClient.raw.fluxProject
-            .queryProject$(asset.rawId)
+            .getProject$(asset.rawId)
+            .pipe(dispatchHTTPErrors(this.error$))
             .subscribe((project) => {
                 this.requirements$.next(project.requirements)
                 this.selectedPacks$.next(project.requirements.fluxPacks)
@@ -132,7 +134,7 @@ export class FluxDependenciesState {
                 return this.libsVersionsCache[lib.id]
                     ? of(this.libsVersionsCache[lib.id])
                     : this.assetsGtwClient.raw.package
-                          .queryMetadata$(lib.id)
+                          .getMetadata$(lib.id)
                           .pipe(
                               tap(
                                   (library) =>
@@ -300,18 +302,17 @@ export class FluxDependenciesState {
         )
 
         const body = {
-            fluxPacks: this.selectedPacks$.getValue(),
-            fluxComponents: this.selectedComponents$.getValue(),
             libraries: librariesVersion,
         }
 
         this.assetsGtwClient.raw.fluxProject
             .updateMetadata$(this.asset.rawId, body)
             .pipe(
+                dispatchHTTPErrors(this.error$),
                 mergeMap(() =>
-                    this.assetsGtwClient.raw.fluxProject.queryProject$(
-                        this.asset.rawId,
-                    ),
+                    this.assetsGtwClient.raw.fluxProject
+                        .getProject$(this.asset.rawId)
+                        .pipe(dispatchHTTPErrors(this.error$)),
                 ),
             )
             .subscribe((project) => {
@@ -344,11 +345,11 @@ export class FluxDependenciesView implements VirtualDOM {
     public readonly onclick = (event) => event.stopPropagation()
     public readonly children: Array<VirtualDOM>
 
-    public readonly asset: Asset
+    public readonly asset: AssetsGateway.Asset
     public readonly state: FluxDependenciesState
     public readonly dataProject$ = new Subject()
 
-    constructor(params: { asset: Asset }) {
+    constructor(params: { asset: AssetsGateway.Asset }) {
         Object.assign(this, params)
         this.state = new FluxDependenciesState(this.asset)
         this.state.versions$.subscribe((d) => {

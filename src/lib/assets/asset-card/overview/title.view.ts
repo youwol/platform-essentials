@@ -1,13 +1,13 @@
 import { attr$, VirtualDOM } from '@youwol/flux-view'
 import { BehaviorSubject } from 'rxjs'
-import { Asset } from '../../../clients/assets-gateway'
+import { AssetsGateway } from '@youwol/http-clients'
 import { TextEditableView } from '../misc.view'
 
 export class AssetTitleView implements VirtualDOM {
     static ClassSelector = 'asset-title-view'
 
     public readonly class = `${AssetTitleView.ClassSelector} w-100`
-    public readonly asset: Asset
+    public readonly asset: AssetsGateway.Asset
     public readonly children: VirtualDOM[]
     public readonly name$: BehaviorSubject<string>
 
@@ -15,7 +15,7 @@ export class AssetTitleView implements VirtualDOM {
 
     constructor(params: {
         name$: BehaviorSubject<string>
-        asset: Asset
+        asset: AssetsGateway.Asset
         forceReadonly?: boolean
     }) {
         Object.assign(this, params)

@@ -1,16 +1,18 @@
 import { attr$, child$, children$, VirtualDOM } from '@youwol/flux-view'
 import { BehaviorSubject } from 'rxjs'
 import { map, mergeMap, take } from 'rxjs/operators'
-import { Executable, PlatformSettingsStore } from '../..'
 import {
-    Asset,
-    AssetsGatewayClient,
-    DefaultDriveResponse,
-} from '../../clients/assets-gateway'
-import { ChildApplicationAPI } from '../../core'
+    ChildApplicationAPI,
+    Executable,
+    PlatformSettingsStore,
+} from '../../core'
+
 import { getExeUrl } from '../../core/platform-settings'
 import { FileAddedEvent } from '../../core/platform.events'
 import { ButtonView } from './misc.view'
+import { AnyItemNode, BrowserNode } from '../../explorer/nodes'
+
+import { AssetsGateway } from '@youwol/http-clients'
 
 export function runApplication(instance: Executable, title) {
     const youwolOS = ChildApplicationAPI.getOsInstance()
@@ -41,9 +43,9 @@ export class OpenWithView implements VirtualDOM {
     public readonly onclick: (ev: MouseEvent) => void
     public readonly onmouseleave: (ev: MouseEvent) => void
     public readonly expanded$ = new BehaviorSubject(false)
-    public readonly asset: Asset
+    public readonly asset: AssetsGateway.Asset
 
-    constructor(params: { asset: Asset }) {
+    constructor(params: { asset: AssetsGateway.Asset }) {
         Object.assign(this, params)
 
         this.children = [
@@ -107,9 +109,9 @@ class DownloadView implements VirtualDOM {
     public readonly onclick: (ev: MouseEvent) => void
     public readonly onmouseleave: (ev: MouseEvent) => void
     public readonly expanded$ = new BehaviorSubject(false)
-    public readonly asset: Asset
+    public readonly asset: AssetsGateway.Asset
 
-    constructor(params: { asset: Asset }) {
+    constructor(params: { asset: AssetsGateway.Asset }) {
         Object.assign(this, params)
 
         const options = [
@@ -117,7 +119,7 @@ class DownloadView implements VirtualDOM {
                 icon: 'fas fa-link',
                 name: 'Symbolic link',
                 download$: (asset, drive) => {
-                    return new AssetsGatewayClient().explorer
+                    return new AssetsGateway.AssetsGatewayClient().explorer
                         .borrowItem$(asset.assetId, {
                             destinationFolderId: drive.downloadFolderId,
                         })
@@ -170,9 +172,9 @@ class DownloadView implements VirtualDOM {
             .pipe(
                 take(1),
                 mergeMap(() => {
-                    return new AssetsGatewayClient().explorer.getDefaultUserDrive$()
+                    return new AssetsGateway.AssetsGatewayClient().explorer.getDefaultUserDrive$()
                 }),
-                mergeMap((drive: DefaultDriveResponse) => {
+                mergeMap((drive: AssetsGateway.DefaultDriveResponse) => {
                     return option.download$(this.asset, drive)
                 }),
             )
@@ -202,9 +204,9 @@ export class AssetActionsView implements VirtualDOM {
     static ClassSelector = 'asset-actions-view'
     public readonly class = `${AssetActionsView.ClassSelector} d-flex w-100 justify-content-around`
     public readonly children: VirtualDOM
-    public readonly asset: Asset
+    public readonly asset: AssetsGateway.Asset
 
-    constructor(params: { asset: Asset }) {
+    constructor(params: { asset: AssetsGateway.Asset }) {
         Object.assign(this, params)
         const openWithView = new OpenWithView({ asset: this.asset })
         const downloadView = new DownloadView({ asset: this.asset })

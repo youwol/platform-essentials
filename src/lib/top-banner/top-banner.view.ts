@@ -1,16 +1,23 @@
 import { child$, VirtualDOM } from '@youwol/flux-view'
 import { Button } from '@youwol/fv-button'
-import { map } from 'rxjs/operators'
-import { AssetsGatewayClient } from '../clients/assets-gateway'
+import { map, shareReplay } from 'rxjs/operators'
+import { AssetsGateway, HTTPError } from '@youwol/http-clients'
 import { PlatformSettingsStore } from '../core/platform-settings'
 import { ChildApplicationAPI, isPlatformInstance } from '../core/platform.state'
 import { UserMenuView } from './user-menu.view'
 import { YouwolMenuView } from './youwol-menu.view'
 
 export class YouwolBannerState {
-    static signedIn$ = new AssetsGatewayClient()
-        .getHealthz()
-        .pipe(map((resp) => resp.status == 'assets-gateway ok'))
+    static signedIn$ = new AssetsGateway.AssetsGatewayClient()
+        .getHealthz$()
+        .pipe(
+            map(
+                (resp) =>
+                    !(resp instanceof HTTPError) &&
+                    resp.status == 'assets-gateway ok',
+            ),
+            shareReplay(1),
+        )
 
     constructor(params = {}) {
         Object.assign(this, params)

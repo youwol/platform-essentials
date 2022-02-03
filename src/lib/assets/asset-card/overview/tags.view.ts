@@ -7,20 +7,20 @@ import {
 } from '@youwol/flux-view'
 import { BehaviorSubject, Observable, of } from 'rxjs'
 import { skip } from 'rxjs/operators'
-import { Asset } from '../../../clients/assets-gateway'
+import { AssetsGateway } from '@youwol/http-clients'
 import { IconButtonView, TextEditableView } from '../misc.view'
 
 export class AssetTagsView implements VirtualDOM {
     static ClassSelector = 'asset-tags-view'
 
     public readonly class = `${AssetTagsView.ClassSelector} w-100`
-    public readonly asset: Asset
+    public readonly asset: AssetsGateway.Asset
     public readonly children: VirtualDOM[]
     public readonly tags$: BehaviorSubject<string[]>
     public readonly forceReadonly: boolean
     constructor(params: {
         tags$: BehaviorSubject<string[]>
-        asset: Asset
+        asset: AssetsGateway.Asset
         forceReadonly?: boolean
     }) {
         Object.assign(this, params)

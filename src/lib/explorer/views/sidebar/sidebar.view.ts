@@ -7,7 +7,6 @@ import {
 } from '@youwol/flux-view'
 import { BehaviorSubject, merge, Observable } from 'rxjs'
 import { delay, mapTo, take } from 'rxjs/operators'
-import { GroupResponse } from '../../../clients/assets-gateway'
 import { ExplorerState } from '../../explorer.state'
 import {
     AnyFolderNode,
@@ -16,6 +15,7 @@ import {
     HomeNode,
     TrashNode,
 } from '../../nodes'
+import { AssetsGateway } from '@youwol/http-clients'
 
 class PredefinedFolderView implements VirtualDOM {
     class = 'd-flex align-items-center w-100 fv-text-primary'
@@ -111,7 +111,7 @@ export class PredefinedFoldersView implements VirtualDOM {
     }
 }
 
-function formatGroups(groups: GroupResponse[]) {
+function formatGroups(groups: AssetsGateway.GroupResponse[]) {
     const isDirectParent = (child, maybeParent) => {
         return child.elements
             .slice(0, -1)
@@ -173,12 +173,12 @@ export class GroupsView implements VirtualDOM {
 
     public readonly groupsExpanded$ = new BehaviorSubject(false)
     public readonly extended$: Observable<boolean>
-    public readonly groups: GroupResponse[]
+    public readonly groups: AssetsGateway.GroupResponse[]
     public readonly state: ExplorerState
 
     constructor(params: {
         state: ExplorerState
-        groups: GroupResponse[]
+        groups: AssetsGateway.GroupResponse[]
         extended$: Observable<boolean>
     }) {
         Object.assign(this, params)

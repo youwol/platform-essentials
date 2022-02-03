@@ -1,15 +1,14 @@
 import { uuidv4 } from '@youwol/flux-core'
 import { ImmutableTree } from '@youwol/fv-tree'
-import { Observable, of } from 'rxjs'
+import { Observable, of, Subject } from 'rxjs'
 import { delay, map, tap } from 'rxjs/operators'
 import {
-    Asset,
-    AssetsGatewayClient,
-    DriveResponse,
-    FolderResponse,
-    ItemResponse,
-} from '../clients/assets-gateway'
-import { send$ } from '../clients/utils'
+    AssetsGateway,
+    dispatchHTTPErrors,
+    HTTPError,
+    send$,
+} from '@youwol/http-clients'
+
 import {
     AnyFolderNode,
     AnyItemNode,
@@ -19,6 +18,7 @@ import {
     DriveNode,
     FolderNode,
     FutureNode,
+    ItemKind,
     ItemNode,
     RegularFolderNode,
 } from './nodes'
@@ -213,7 +213,7 @@ const databaseActionsFactory = {
             const uid = uuidv4()
             node.addStatus({ type: 'request-pending', id: uid })
             parentNode.addStatus({ type: 'request-pending', id: uid })
-            node.request.pipe(delay(debugDelay)).subscribe((resp: any) => {
+            node.request.pipe(delay(debugDelay)).subscribe((resp) => {
                 parentNode.removeStatus({ type: 'request-pending', id: uid })
                 node.removeStatus({ type: 'request-pending', id: uid })
                 node.onResponse(resp, node)
@@ -223,7 +223,8 @@ const databaseActionsFactory = {
 }
 
 export class RequestsExecutor {
-    static assetsGtwClient = new AssetsGatewayClient()
+    static error$ = new Subject<HTTPError>()
+    static assetsGtwClient = new AssetsGateway.AssetsGatewayClient()
 
     static execute(update: ImmutableTree.Updates<BrowserNode>) {
         const command = Object.values(databaseActionsFactory)
@@ -268,81 +269,76 @@ export class RequestsExecutor {
     }
 
     static getUserInfo() {
-        return RequestsExecutor.assetsGtwClient.getUserInfo()
+        return RequestsExecutor.assetsGtwClient.getUserInfo$()
     }
 
     static getDefaultDrive(groupId: string) {
-        return RequestsExecutor.assetsGtwClient.explorer.groups.getDefaultDrive$(
-            groupId,
-        )
+        return RequestsExecutor.assetsGtwClient.explorer.groups
+            .getDefaultDrive$(groupId)
+            .pipe(dispatchHTTPErrors(this.error$))
     }
 
     static purgeDrive(driveId: string) {
-        return RequestsExecutor.assetsGtwClient.explorer.drives.purge$(driveId)
+        return RequestsExecutor.assetsGtwClient.explorer.drives
+            .purge$(driveId)
+            .pipe(dispatchHTTPErrors(this.error$))
     }
 
     static createFolder(
         node: DriveNode | AnyFolderNode,
         body: { name: string; folderId: string },
     ) {
-        return RequestsExecutor.assetsGtwClient.explorer.folders.create$(
-            node.id,
-            body,
-        )
+        return RequestsExecutor.assetsGtwClient.explorer.folders
+            .create$(node.id, body)
+            .pipe(dispatchHTTPErrors(this.error$))
     }
 
     static move(
         target: AnyItemNode | RegularFolderNode,
         folder: AnyFolderNode | DriveNode,
     ) {
-        return RequestsExecutor.assetsGtwClient.explorer.move$(target.id, {
-            destinationFolderId: folder.id,
-        })
+        return RequestsExecutor.assetsGtwClient.explorer
+            .move$(target.id, {
+                destinationFolderId: folder.id,
+            })
+            .pipe(dispatchHTTPErrors(this.error$))
     }
 
     static borrow(
         target: AnyItemNode | AnyFolderNode,
         folder: AnyFolderNode | DriveNode,
     ) {
-        return RequestsExecutor.assetsGtwClient.explorer.borrowItem$(
-            target.id,
-            { destinationFolderId: folder.id },
-        )
+        return RequestsExecutor.assetsGtwClient.explorer
+            .borrowItem$(target.id, { destinationFolderId: folder.id })
+            .pipe(dispatchHTTPErrors(this.error$))
     }
 
     static getDeletedItems(driveId: string) {
         return RequestsExecutor.assetsGtwClient.explorer.drives
             .queryDeletedItems$(driveId)
             .pipe(
-                map(
-                    ({
-                        items,
-                        folders,
-                    }: {
-                        items: Array<any>
-                        folders: Array<any>
-                    }) => {
-                        return [
-                            ...folders.map(
-                                (folder: any) =>
-                                    new DeletedFolderNode({
-                                        id: folder.folderId,
-                                        name: folder.name,
-                                        driveId,
-                                    }),
-                            ),
-                            ...items.map(
-                                (item: any) =>
-                                    new DeletedItemNode({
-                                        id: item.itemId,
-                                        name: item.name,
-                                        driveId,
-                                        type: item.type,
-                                    }),
-                            ),
-                        ]
-                    },
-                ),
+                dispatchHTTPErrors(this.error$),
+                map(({ items, folders }) => {
+                    return [
+                        ...folders.map(
+                            (folder) =>
+                                new DeletedFolderNode({
+                                    id: folder.folderId,
+                                    name: folder.name,
+                                    driveId,
+                                }),
+                        ),
+                        ...items.map(
+                            (item) =>
+                                new DeletedItemNode({
+                                    id: item.itemId,
+                                    name: item.name,
+                                    driveId,
+                                    type: item.type,
+                                }),
+                        ),
+                    ]
+                }),
             ) as Observable<Array<BrowserNode>>
     }
 
@@ -354,16 +350,11 @@ export class RequestsExecutor {
         return RequestsExecutor.assetsGtwClient.explorer.folders
             .queryChildren$(folderId)
             .pipe(
-                map(
-                    ({
-                        items,
-                        folders,
-                    }: {
-                        items: Array<any>
-                        folders: Array<any>
-                    }) => {
-                        return [
-                            ...folders.map((folder: FolderResponse) => {
+                dispatchHTTPErrors(this.error$),
+                map(({ items, folders }) => {
+                    return [
+                        ...folders.map(
+                            (folder: AssetsGateway.FolderResponse) => {
                                 return new FolderNode({
                                     folderId: folder.folderId,
                                     kind: 'regular',
@@ -379,35 +370,36 @@ export class RequestsExecutor {
                                             folder.folderId,
                                         ),
                                 })
-                            }),
-                            ...items.map((item: ItemResponse) => {
-                                const assetData = {
-                                    id: item.treeId,
-                                    groupId,
-                                    driveId,
-                                    ...item,
-                                }
-                                return new ItemNode(assetData as any)
-                            }),
-                            ...(driveId == folderId
-                                ? [
-                                      new FolderNode<'trash'>({
-                                          groupId: groupId,
-                                          parentFolderId: driveId,
-                                          driveId: driveId,
-                                          kind: 'trash',
-                                          name: 'Trash',
-                                          folderId: 'trash',
-                                          children:
-                                              RequestsExecutor.getDeletedItems(
-                                                  driveId,
-                                              ),
-                                      }),
-                                  ]
-                                : []),
-                        ]
-                    },
-                ),
+                            },
+                        ),
+                        ...items.map((item: AssetsGateway.ItemResponse) => {
+                            const assetData = {
+                                id: item.treeId,
+                                groupId,
+                                driveId,
+                                ...item,
+                                kind: item.kind as ItemKind,
+                            }
+                            return new ItemNode(assetData)
+                        }),
+                        ...(driveId == folderId
+                            ? [
+                                  new FolderNode<'trash'>({
+                                      groupId: groupId,
+                                      parentFolderId: driveId,
+                                      driveId: driveId,
+                                      kind: 'trash',
+                                      name: 'Trash',
+                                      folderId: 'trash',
+                                      children:
+                                          RequestsExecutor.getDeletedItems(
+                                              driveId,
+                                          ),
+                                  }),
+                              ]
+                            : []),
+                    ]
+                }),
             ) as Observable<Array<BrowserNode>>
     }
 
@@ -415,8 +407,9 @@ export class RequestsExecutor {
         return RequestsExecutor.assetsGtwClient.explorer.groups
             .queryDrives$(groupId)
             .pipe(
+                dispatchHTTPErrors(this.error$),
                 map(({ drives }) => {
-                    return drives.map((drive: DriveResponse) => {
+                    return drives.map((drive: AssetsGateway.DriveResponse) => {
                         return new DriveNode({
                             groupId: groupId,
                             name: drive.name,
@@ -432,8 +425,10 @@ export class RequestsExecutor {
             )
     }
 
-    static getAsset(assetId: string): Observable<Asset> {
-        return RequestsExecutor.assetsGtwClient.assets.get$(assetId)
+    static getAsset(assetId: string): Observable<AssetsGateway.Asset> {
+        return RequestsExecutor.assetsGtwClient.assets
+            .get$(assetId)
+            .pipe(dispatchHTTPErrors(this.error$))
     }
 
     static uploadLocalAsset(assetId: string, node?: BrowserNode) {

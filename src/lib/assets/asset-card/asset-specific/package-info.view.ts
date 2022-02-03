@@ -1,5 +1,7 @@
 import { child$, VirtualDOM } from '@youwol/flux-view'
-import { Asset, AssetsGatewayClient } from '../../../clients/assets-gateway'
+import { AssetsGateway } from '@youwol/http-clients'
+
+type Asset = AssetsGateway.Asset
 
 export function getActions(_asset: Asset) {
     return {
@@ -18,10 +20,10 @@ export class PackageInfoView {
 
         this.children = [
             child$(
-                new AssetsGatewayClient().raw.package.queryMetadata$(
+                new AssetsGateway.AssetsGatewayClient().raw.package.getMetadata$(
                     this.asset.rawId,
                 ),
-                (metadata: any) => {
+                (metadata) => {
                     return {
                         class: 'h-100 fv-text-primary',
                         children: [

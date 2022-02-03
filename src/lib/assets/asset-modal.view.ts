@@ -2,7 +2,7 @@ import { HTMLElement$, render, VirtualDOM } from '@youwol/flux-view'
 import { Modal } from '@youwol/fv-group'
 import { merge, ReplaySubject } from 'rxjs'
 import { take } from 'rxjs/operators'
-import { Asset } from '../clients/assets-gateway'
+import { AssetsGateway } from '@youwol/http-clients'
 import { AssetCardView } from './asset-card/asset-card.view'
 
 /**
@@ -12,13 +12,13 @@ import { AssetCardView } from './asset-card/asset-card.view'
  * @returns
  */
 export function popupAssetModalView(parameters: {
-    asset: Asset
-    actionsFactory: (asset: Asset) => VirtualDOM
+    asset: AssetsGateway.Asset
+    actionsFactory: (asset: AssetsGateway.Asset) => VirtualDOM
     withTabs?: { [key: string]: VirtualDOM }
     forceReadonly?: boolean
 }) {
     const modalState = new Modal.State()
-    const assetOutput$ = new ReplaySubject<Asset>(1)
+    const assetOutput$ = new ReplaySubject<AssetsGateway.Asset>(1)
 
     const view = new Modal.View({
         state: modalState,

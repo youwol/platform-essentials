@@ -1,5 +1,5 @@
 import { uuidv4 } from '@youwol/flux-core'
-import { AssetsGatewayClient } from '../../../clients/assets-gateway'
+import { AssetsGateway } from '@youwol/http-clients'
 import { TreeGroup } from '../../explorer.state'
 import { AnyFolderNode, FutureNode, ItemNode } from '../../nodes'
 
@@ -7,7 +7,7 @@ export class StoryState {
     constructor(public readonly userTree: TreeGroup) {}
 
     static newStory$(node: AnyFolderNode) {
-        const assetsGtwClient = new AssetsGatewayClient()
+        const assetsGtwClient = new AssetsGateway.AssetsGatewayClient()
         return assetsGtwClient.assets.story.create$(node.id, {
             title: 'new story',
         })

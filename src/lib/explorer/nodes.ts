@@ -2,7 +2,7 @@ import { uuidv4 } from '@youwol/flux-core'
 import { ImmutableTree } from '@youwol/fv-tree'
 import { BehaviorSubject, Observable, Subject } from 'rxjs'
 import { delay, tap } from 'rxjs/operators'
-import { Origin } from '../clients/assets-gateway'
+import { AssetsGateway } from '@youwol/http-clients'
 import { debugDelay } from './requests-executor'
 
 export const UploadStep = {
@@ -29,14 +29,14 @@ export class BrowserNode extends ImmutableTree.Node {
     status$ = new BehaviorSubject<Array<{ type: string; id: string }>>([])
     icon: string
 
-    origin?: Origin
+    origin?: AssetsGateway.Origin
 
     constructor(params: {
         id: string
         name: string
         icon?: string
         children?: Array<BrowserNode> | Observable<Array<BrowserNode>>
-        origin?: Origin
+        origin?: AssetsGateway.Origin
     }) {
         super(params)
         Object.assign(this, params)
@@ -148,7 +148,7 @@ export class FolderNode<T extends FolderKind> extends BrowserNode {
         name: string
         children?: Array<BrowserNode> | Observable<Array<BrowserNode>>
         kind: T
-        origin?: Origin
+        origin?: AssetsGateway.Origin
     }) {
         super({
             ...params,
@@ -195,7 +195,7 @@ export class ItemNode<T extends ItemKind> extends BrowserNode {
         treeId: string
         borrowed: boolean
         kind: T
-        origin?: Origin
+        origin?: AssetsGateway.Origin
     }) {
         super({ ...params, children: undefined, id: params.treeId })
 

@@ -1,9 +1,24 @@
 import { uuidv4 } from '@youwol/flux-core'
 import { attr$, HTMLElement$, VirtualDOM } from '@youwol/flux-view'
 import { ReplaySubject } from 'rxjs'
-import { AssetsGatewayClient } from '../clients/assets-gateway'
-import { Executable } from '../index'
+import { AssetsGateway } from '@youwol/http-clients'
 import { PlatformState } from './platform.state'
+import { Executable } from './platform-settings'
+
+class IframeAppView implements VirtualDOM {
+    tag = 'iframe'
+    width = '100%'
+    height = '100%'
+    src: string
+    connectedCallback: (HTMLElement$) => void
+
+    constructor(src: string, iframe$: ReplaySubject<HTMLIFrameElement>) {
+        this.src = src
+        this.connectedCallback = (elem: HTMLElement$ & HTMLIFrameElement) => {
+            iframe$.next(elem)
+        }
+    }
+}
 
 export class RunningApp implements Executable {
     public readonly state: PlatformState
@@ -51,13 +66,13 @@ export class RunningApp implements Executable {
             this.header$.next(new HeaderView({ title: params.title }))
         }
         if (!params.title || !params.metadata) {
-            new AssetsGatewayClient().raw.package
+            new AssetsGateway.AssetsGatewayClient().raw.package
                 .getResource$(rawId, `${this.version}/.yw_metadata.json`)
-                .subscribe((resp: any) => {
-                    const title = resp.displayName || this.cdnPackage
+                .subscribe((resp) => {
+                    const title = resp['displayName'] || this.cdnPackage
                     const appMetadata = {
                         name: title,
-                        icon: resp.icon || {},
+                        icon: resp['icon'] || {},
                     }
                     if (!params.title) {
                         this.snippet$.next({ innerText: title })

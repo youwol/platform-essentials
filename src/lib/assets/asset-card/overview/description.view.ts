@@ -2,22 +2,22 @@ import { install } from '@youwol/cdn-client'
 import { attr$, child$, HTMLElement$, VirtualDOM } from '@youwol/flux-view'
 import { BehaviorSubject, from, Observable, of } from 'rxjs'
 import { mapTo, mergeMap } from 'rxjs/operators'
-import { Asset } from '../../../clients/assets-gateway'
 
+import { AssetsGateway } from '@youwol/http-clients'
 import { IconButtonView } from '../misc.view'
 
 export class AssetDescriptionView implements VirtualDOM {
     static ClassSelector = 'asset-description-view'
 
     public readonly class = `${AssetDescriptionView.ClassSelector} w-100`
-    public readonly asset: Asset
+    public readonly asset: AssetsGateway.Asset
     public readonly children: VirtualDOM[]
     public readonly description$: BehaviorSubject<string>
     public readonly forceReadonly: boolean
 
     constructor(params: {
         description$: BehaviorSubject<string>
-        asset: Asset
+        asset: AssetsGateway.Asset
         forceReadonly?: boolean
     }) {
         Object.assign(this, params)

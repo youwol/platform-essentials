@@ -3,7 +3,7 @@ import { VirtualDOM } from '@youwol/flux-view'
 
 import { Tabs } from '@youwol/fv-tabs'
 import { Subject } from 'rxjs'
-import { Asset } from '../../clients/assets-gateway'
+import { AssetsGateway } from '@youwol/http-clients'
 
 import { AssetOverview } from './overview/overview.view'
 
@@ -24,18 +24,18 @@ export class AssetCardView implements VirtualDOM {
         height: '75vh',
     }
     public readonly children: VirtualDOM[]
-    public readonly asset: Asset
-    public readonly actionsFactory: (asset: Asset) => VirtualDOM
+    public readonly asset: AssetsGateway.Asset
+    public readonly actionsFactory: (asset: AssetsGateway.Asset) => VirtualDOM
 
     public readonly withTabs: { [key: string]: VirtualDOM } = {}
     public readonly forceReadonly: boolean = false
 
-    public readonly assetOutput$: Subject<Asset>
+    public readonly assetOutput$: Subject<AssetsGateway.Asset>
 
     constructor(params: {
-        asset: Asset
-        actionsFactory: (asset: Asset) => VirtualDOM
-        assetOutput$: Subject<Asset>
+        asset: AssetsGateway.Asset
+        actionsFactory: (asset: AssetsGateway.Asset) => VirtualDOM
+        assetOutput$: Subject<AssetsGateway.Asset>
         withTabs?: { [key: string]: VirtualDOM }
         forceReadonly?: boolean
     }) {
@@ -63,10 +63,10 @@ export class AssetCardView implements VirtualDOM {
 
 export class AssetCardTabs extends Tabs.View {
     static ClassSelector = 'asset-card-tabs'
-    public readonly asset: Asset
+    public readonly asset: AssetsGateway.Asset
 
     constructor(params: {
-        asset: Asset
+        asset: AssetsGateway.Asset
         actionsFactory
         assetOutput$
         forceReadonly

@@ -2,9 +2,11 @@ import { VirtualDOM } from '@youwol/flux-view'
 import { Observable, of, ReplaySubject } from 'rxjs'
 import { map } from 'rxjs/operators'
 import { AUTO_GENERATED } from '../../auto_generated'
-import { Asset } from '../clients/assets-gateway'
-import { CdnSessionsStorageClient } from '../clients/cdn-sessions-storage'
+
+import { CdnSessionsStorage, raiseHTTPErrors } from '@youwol/http-clients'
+
 import { Parametrization, PlatformSettings } from './platform-settings.models'
+import { BrowserNode } from '../explorer/nodes'
 
 export interface Executable {
     cdnPackage: string
@@ -139,10 +141,11 @@ export class PlatformSettingsStore {
         /*
         Called at least when the file is loaded, see below
          */
-        const sessionStorage = new CdnSessionsStorageClient()
+        const sessionStorage = new CdnSessionsStorage.CdnSessionsStorageClient()
         sessionStorage.applications
-            .getData(AUTO_GENERATED.name, 'settings')
+            .getData$(AUTO_GENERATED.name, 'settings')
             .pipe(
+                raiseHTTPErrors(),
                 map((savedData) => {
                     const settings = savedData as unknown as PlatformSettings
                     const you =

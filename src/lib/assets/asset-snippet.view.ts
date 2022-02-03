@@ -1,6 +1,6 @@
 import { attr$, Stream$, VirtualDOM } from '@youwol/flux-view'
 import { Observable } from 'rxjs'
-import { Asset } from '../clients/assets-gateway'
+import { AssetsGateway } from '@youwol/http-clients'
 
 export interface AssetPresenterTrait {
     selectAsset: (assetId: string) => void
@@ -31,10 +31,13 @@ export class AssetSnippetView implements VirtualDOM {
 
     public readonly onclick: () => void
 
-    public readonly asset: Asset
+    public readonly asset: AssetsGateway.Asset
     public readonly state: AssetPresenterTrait
 
-    constructor(parameters: { asset: Asset; state: AssetPresenterTrait }) {
+    constructor(parameters: {
+        asset: AssetsGateway.Asset
+        state: AssetPresenterTrait
+    }) {
         Object.assign(this, parameters)
 
         this.class = attr$(

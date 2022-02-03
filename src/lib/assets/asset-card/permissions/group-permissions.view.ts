@@ -2,28 +2,25 @@ import { child$, HTMLElement$, VirtualDOM } from '@youwol/flux-view'
 import { Select } from '@youwol/fv-input'
 import { BehaviorSubject, combineLatest, Subject } from 'rxjs'
 import { distinct, map, skip } from 'rxjs/operators'
-import {
-    AccessPolicyBody,
-    AssetsGatewayClient,
-    ExposingGroup,
-    GroupAccess,
-} from '../../../clients/assets-gateway'
+import { AssetsGateway, raiseHTTPErrors } from '@youwol/http-clients'
 
 export class ExposedGroupState {
     public readonly groupName: string
     public readonly groupId: string
-    public readonly groupAccess$: BehaviorSubject<ExposingGroup>
+    public readonly groupAccess$: BehaviorSubject<AssetsGateway.ExposingGroup>
     public readonly loading$ = new BehaviorSubject<boolean>(false)
 
     constructor(public readonly assetId, public readonly data: ExposingGroup) {
         this.groupId = data.groupId
         this.groupName = data.name
-        this.groupAccess$ = new BehaviorSubject<ExposingGroup>(data)
+        this.groupAccess$ = new BehaviorSubject<AssetsGateway.ExposingGroup>(
+            data,
+        )
     }
 
-    update(body: AccessPolicyBody) {
+    update(body: AssetsGateway.AccessPolicyBody) {
         this.loading$.next(true)
-        new AssetsGatewayClient().assets
+        new AssetsGateway.AssetsGatewayClient().assets
             .updateAccess$(this.assetId, this.groupId, body)
             // XXX:  Why groupAccess is not used ?
             .subscribe((_groupAccess) => {
@@ -33,8 +30,9 @@ export class ExposedGroupState {
 
     refresh() {
         this.loading$.next(true)
-        new AssetsGatewayClient().assets
+        new AssetsGateway.AssetsGatewayClient().assets
             .getAccess$(this.assetId)
+            .pipe(raiseHTTPErrors())
             .subscribe((info) => {
                 const groupAccess =
                     this.groupId == '*'
@@ -152,7 +150,7 @@ export class ExposedGroupView implements VirtualDOM {
         this.connectedCallback = (elem) => {
             elem.ownSubscriptions(
                 bodyPost$.subscribe((body) =>
-                    state.update(body as AccessPolicyBody),
+                    state.update(body as AssetsGateway.AccessPolicyBody),
                 ),
             )
         }

@@ -1,6 +1,7 @@
 import { child$, childrenAppendOnly$, VirtualDOM } from '@youwol/flux-view'
 import { Observable, ReplaySubject } from 'rxjs'
-import { Asset } from '../clients/assets-gateway'
+
+import { AssetsGateway } from '@youwol/http-clients'
 import { ywSpinnerView } from '../misc-views/youwol-spinner.view'
 import { AssetPresenterTrait, AssetSnippetView } from './asset-snippet.view'
 
@@ -13,11 +14,11 @@ export class AssetsListView implements VirtualDOM {
     public readonly style = { minHeight: '0px' }
     public readonly children: VirtualDOM
 
-    public readonly assets$: Observable<Asset[]>
+    public readonly assets$: Observable<AssetsGateway.Asset[]>
     public readonly state: AssetPresenterTrait
 
     constructor(parameters: {
-        assets$: Observable<Asset[]>
+        assets$: Observable<AssetsGateway.Asset[]>
         state: AssetPresenterTrait
     }) {
         Object.assign(this, parameters)
@@ -28,7 +29,7 @@ export class AssetsListView implements VirtualDOM {
                 class: 'w-100 d-flex flex-wrap justify-content-around ',
                 children: childrenAppendOnly$(
                     this.assets$,
-                    (asset: Asset) =>
+                    (asset: AssetsGateway.Asset) =>
                         new AssetSnippetView({ asset, state: this.state }),
                     { sideEffects: () => elementInDoc$.next(true) },
                 ),

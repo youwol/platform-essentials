@@ -1,12 +1,12 @@
 import { child$, VirtualDOM } from '@youwol/flux-view'
 import { Observable } from 'rxjs'
 import { share } from 'rxjs/operators'
-import {
-    AccessInfo,
-    Asset,
-    AssetsGatewayClient,
-} from '../../../clients/assets-gateway'
+
+import { AssetsGateway, raiseHTTPErrors } from '@youwol/http-clients'
 import { ExposedGroupState, ExposedGroupView } from './group-permissions.view'
+
+type AccessInfo = AssetsGateway.AccessInfo
+type Asset = AssetsGateway.Asset
 
 export class AssetPermissionsView implements VirtualDOM {
     static ClassSelector = 'asset-permissions-view'
