@@ -17,9 +17,8 @@ import {
     shareReplay,
 } from 'rxjs/operators'
 import { DisplayMode } from '.'
-import { PlatformSettingsStore, YouwolBannerState } from '..'
-import { ItemResponse } from '../clients/assets-gateway'
-import { ChildApplicationAPI } from '../core'
+import { YouwolBannerState } from '../top-banner'
+import { ChildApplicationAPI, PlatformSettingsStore } from '../core'
 import { FileAddedEvent, PlatformEvent } from '../core/platform.events'
 import {
     Action,
@@ -52,6 +51,8 @@ import {
     processMoveFolder,
     processMoveItem,
 } from './utils'
+
+import { AssetsGateway, raiseHTTPErrors } from '@youwol/http-clients'
 
 /**
  * Ideally this concept should not exist.

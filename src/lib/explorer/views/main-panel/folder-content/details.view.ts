@@ -1,7 +1,7 @@
 import { attr$, child$, Stream$, VirtualDOM } from '@youwol/flux-view'
 import { BehaviorSubject, Observable } from 'rxjs'
 import { filter, map, mergeMap, take } from 'rxjs/operators'
-import { ChildApplicationAPI, PlatformSettingsStore } from '../../../..'
+import { ChildApplicationAPI, PlatformSettingsStore } from '../../../../core'
 import { IPlatformHandler } from '../../../../core/platform.state'
 import { ExplorerState } from '../../../explorer.state'
 import { BrowserNode, DriveNode, FolderNode, ItemNode } from '../../../nodes'

@@ -1,4 +1,4 @@
-import { attr$, VirtualDOM } from '@youwol/flux-view'
+import { attr$, Stream$, VirtualDOM } from '@youwol/flux-view'
 import { BehaviorSubject } from 'rxjs'
 
 /**
