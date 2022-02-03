@@ -1,3 +1,6 @@
+// eslint-disable-next-line eslint-comments/disable-enable-pair -- to not have problem
+/* eslint-disable jest/no-done-callback -- eslint-comment It is required because */
+
 import '../mock-requests'
 import { FluxProjectNode } from '../../lib/explorer/nodes'
 import { resetPyYouwolDbs$ } from '../common'

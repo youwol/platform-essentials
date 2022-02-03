@@ -1,49 +1,38 @@
+// eslint-disable-next-line eslint-comments/disable-enable-pair -- to not have problem
+/* eslint-disable jest/no-done-callback -- eslint-comment It is required because */
+
 import '../mock-requests'
 import { render } from '@youwol/flux-view'
 import { Subject } from 'rxjs'
-import { mergeMap, take } from 'rxjs/operators'
+import { take } from 'rxjs/operators'
 import {
     AssetActionsView,
     AssetCardView,
     AssetOverview,
     AssetPermissionsView,
-} from '../../lib/'
+} from '../../lib/assets'
 import { AssetCardTabs } from '../../lib/assets/asset-card/asset-card.view'
 import {
     GroupsPermissionsView,
     UserPermissionsView,
 } from '../../lib/assets/asset-card/permissions/permissions.view'
 
-import { Asset, AssetsGatewayClient } from '../../lib/clients/assets-gateway'
-import { getFromDocument, resetPyYouwolDbs$ } from '../common'
+import { AssetsGateway } from '@youwol/http-clients'
+import { createStory, getFromDocument, resetPyYouwolDbs$ } from '../common'
+
+let asset: AssetsGateway.Asset
 
 beforeAll(async (done) => {
-    resetPyYouwolDbs$().subscribe(() => {
-        done()
-    })
-})
-
-let asset: Asset
-
-test('create story', (done) => {
-    const client = new AssetsGatewayClient()
-    client.explorer
-        .getDefaultUserDrive$()
-        .pipe(
-            mergeMap((drive) =>
-                client.assets.story.create$(drive.homeFolderId, {
-                    title: 'test',
-                }),
-            ),
-        )
-        .subscribe((resp) => {
-            asset = resp
+    resetPyYouwolDbs$()
+        .pipe(createStory('test'))
+        .subscribe((a) => {
+            asset = a
             done()
         })
 })
 
 test('create asset card view', (done) => {
-    const assetOutput$ = new Subject<Asset>()
+    const assetOutput$ = new Subject<AssetsGateway.Asset>()
     const view = new AssetCardView({
         asset,
         actionsFactory: (asset) => {

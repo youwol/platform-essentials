@@ -1,3 +1,6 @@
+// eslint-disable-next-line eslint-comments/disable-enable-pair -- to not have problem
+/* eslint-disable jest/no-done-callback -- eslint-comment It is required because */
+
 import '../mock-requests'
 import { render, VirtualDOM } from '@youwol/flux-view'
 import { BehaviorSubject, of } from 'rxjs'
@@ -14,7 +17,8 @@ import {
     YouwolBannerState,
     YouwolBannerView,
     YouwolMenuView,
-} from '../../lib'
+} from '../../lib/top-banner'
+
 import {
     getFromDocument,
     queryFromDocument,
@@ -27,23 +31,24 @@ beforeAll(async (done) => {
     })
 })
 
-export enum ViewMode {
+enum ViewMode {
     renderOnly = 'renderOnly',
     editOnly = 'editOnly',
     simultaneous = 'simultaneous',
 }
 
-export class TopBannerState extends YouwolBannerState {
+class TopBannerState extends YouwolBannerState {
     public readonly viewMode$ = new BehaviorSubject<ViewMode>(
         ViewMode.renderOnly,
     )
     public readonly readonly = true
+
     constructor() {
         super()
     }
 }
 
-export class CustomActionsView implements VirtualDOM {
+class CustomActionsView implements VirtualDOM {
     static ClassSelector = 'custom-actions-view'
     public readonly state: TopBannerState
 
@@ -82,7 +87,7 @@ export class CustomActionsView implements VirtualDOM {
     }
 }
 
-export class BannerView extends YouwolBannerView {
+class BannerView extends YouwolBannerView {
     constructor({ state }: { state: TopBannerState }) {
         super({
             state,

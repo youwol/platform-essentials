@@ -10,13 +10,13 @@ import {
     take,
     tap,
 } from 'rxjs/operators'
+import { AssetCardView } from '../../lib/assets'
 import {
-    AssetCardView,
+    ExplorerState,
     FolderContentView,
     MainPanelView,
     SideBarView,
-} from '../../lib'
-import { ExplorerState } from '../../lib/explorer'
+} from '../../lib/explorer'
 import { Action } from '../../lib/explorer/actions.factory'
 import { OpenFolder } from '../../lib/explorer/explorer.state'
 import {
@@ -27,6 +27,7 @@ import {
     FolderNode,
     FutureNode,
     GroupNode,
+    RegularFolderNode,
 } from '../../lib/explorer/nodes'
 import {
     ActionBtnView,
@@ -48,6 +49,7 @@ import {
     GroupView,
 } from '../../lib/explorer/views/sidebar/sidebar.view'
 import { expectAttributes, getFromDocument, queryFromDocument } from '../common'
+import { raiseHTTPErrors } from '@youwol/http-clients'
 
 export class Shell {
     folder: AnyFolderNode | DriveNode | GroupNode
@@ -71,9 +73,9 @@ export function shell$() {
     const state = new ExplorerState()
     document.body.innerHTML = ''
     return combineLatest([
-        state.userInfo$,
-        state.userDrives$,
-        state.defaultUserDrive$,
+        state.userInfo$.pipe(raiseHTTPErrors()),
+        state.userDrives$.pipe(raiseHTTPErrors()),
+        state.defaultUserDrive$.pipe(raiseHTTPErrors()),
     ]).pipe(
         tap(([userInfo, drives, defaults]) => {
             expect(userInfo.name).toEqual('int_tests_yw-users@test-user')
@@ -99,7 +101,7 @@ export function shell$() {
         tap(({ folder }) => {
             expect(folder.name).toEqual('Home')
         }),
-        mergeMap(({ folder }) => {
+        mergeMap(() => {
             document.body.appendChild(
                 render({
                     children: [
@@ -197,28 +199,31 @@ export function rename(fromName: string, toName: string) {
                     ]),
                 )
             }),
-            mergeMap(([target, shell]: [BrowserNode, Shell]) => {
-                shell.explorerState.rename(target as any, toName)
+            mergeMap(
+                ([target, shell]: [RegularFolderNode | AnyItemNode, Shell]) => {
+                    shell.explorerState.rename(target, toName)
 
-                const folderContentView = getFromDocument<FolderContentView>(
-                    `.${FolderContentView.ClassSelector}`,
-                )
-                return folderContentView.items$.pipe(
-                    take(1),
-                    tap((items) => {
-                        const target = items.find((item) => item.name == toName)
-                        expect(target).toBeTruthy()
-                    }),
-                    map(() => {
-                        return new Shell({
-                            explorerState: shell.explorerState,
-                            folder: shell.folder,
-                            item: shell.explorerState.selectedItem$.getValue(),
-                            actions: [],
-                        })
-                    }),
-                )
-            }),
+                    const folderContentView =
+                        getFromDocument<FolderContentView>(
+                            `.${FolderContentView.ClassSelector}`,
+                        )
+                    return folderContentView.items$.pipe(
+                        take(1),
+                        tap((items) => {
+                            const t = items.find((item) => item.name == toName)
+                            expect(t).toBeTruthy()
+                        }),
+                        map(() => {
+                            return new Shell({
+                                explorerState: shell.explorerState,
+                                folder: shell.folder,
+                                item: shell.explorerState.selectedItem$.getValue(),
+                                actions: [],
+                            })
+                        }),
+                    )
+                },
+            ),
         )
 }
 
@@ -434,7 +439,7 @@ export function navigateStepBack() {
                     skipWhile(({ actions, targetFolder }) => {
                         /**
                          * The next is a hack: when selecting a GroupNode =>
-                         * displayedActions$ never fire with actions.folder == groupNode.
+                         * displayedActions$ never fire with 'actions.folder == groupNode'.
                          */
                         if (targetFolder instanceof GroupNode) {
                             return false
@@ -447,7 +452,7 @@ export function navigateStepBack() {
                         )
                     }),
                     take(1),
-                    map(({ actions, targetFolder }) => {
+                    map(({ targetFolder }) => {
                         return new Shell({ ...shell, folder: targetFolder })
                     }),
                 )
@@ -511,10 +516,6 @@ export function cd(folderName: string) {
                     }),
                     take(1),
                     map(({ item, folder, actions }) => {
-                        /*let actionBtnsView = queryFromDocument<ActionBtnView>(`.${ActionBtnView.ClassSelector}`)
-                        actionBtnsView.forEach(node => {
-                            expect(node.action.sourceEventNode.name).toEqual(folderName)
-                        })*/
                         return new Shell({
                             explorerState: shell.explorerState,
                             item,
@@ -541,11 +542,11 @@ export function cdGroup(name: string) {
                 )
                 expect(sidebar).toBeTruthy()
                 sidebar.extended$.next(true)
-                const grpContaineView = getFromDocument<GroupsView>(
+                const grpContainerView = getFromDocument<GroupsView>(
                     `.${GroupsView.ClassSelector}`,
                 )
-                expect(grpContaineView).toBeTruthy()
-                grpContaineView.groupsExpanded$.next(true)
+                expect(grpContainerView).toBeTruthy()
+                grpContainerView.groupsExpanded$.next(true)
                 const groupsView = queryFromDocument<GroupView>(
                     `.${GroupView.ClassSelector}`,
                 )
@@ -746,6 +747,23 @@ export function popupInfo() {
         )
 }
 
+function resolveFolder(shell: Shell) {
+    const folderContentView = getFromDocument<FolderContentView>(
+        `.${FolderContentView.ClassSelector}`,
+    )
+    expect(folderContentView).toBeTruthy()
+    return folderContentView.items$.pipe(
+        skipWhile((items) => {
+            return items.length != 0
+        }),
+        take(1),
+        mergeMap((items) => {
+            expect(items.length).toEqual(0)
+            return of(new Shell({ ...shell }))
+        }),
+    )
+}
+
 export function purgeTrash() {
     return (source$: Observable<Shell>) =>
         source$.pipe(
@@ -759,20 +777,7 @@ export function purgeTrash() {
                 actionPurge.dispatchEvent(
                     new MouseEvent('click', { bubbles: true }),
                 )
-                const folderContentView = getFromDocument<FolderContentView>(
-                    `.${FolderContentView.ClassSelector}`,
-                )
-                expect(folderContentView).toBeTruthy()
-                return folderContentView.items$.pipe(
-                    skipWhile((items) => {
-                        return items.length != 0
-                    }),
-                    take(1),
-                    mergeMap((items) => {
-                        expect(items.length).toEqual(0)
-                        return of(new Shell({ ...shell }))
-                    }),
-                )
+                return resolveFolder(shell)
             }),
         )
 }
@@ -790,21 +795,8 @@ export function deleteDrive() {
                 actionDelete.dispatchEvent(
                     new MouseEvent('click', { bubbles: true }),
                 )
-                const folderContentView = getFromDocument<FolderContentView>(
-                    `.${FolderContentView.ClassSelector}`,
-                )
-                expect(folderContentView).toBeTruthy()
 
-                return folderContentView.items$.pipe(
-                    skipWhile((items) => {
-                        return items.length != 0
-                    }),
-                    take(1),
-                    mergeMap((items) => {
-                        expect(items.length).toEqual(0)
-                        return of(new Shell({ ...shell }))
-                    }),
-                )
+                return resolveFolder(shell)
             }),
         )
 }

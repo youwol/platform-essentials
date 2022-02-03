@@ -1,3 +1,6 @@
+// eslint-disable-next-line eslint-comments/disable-enable-pair -- to not have problem
+/* eslint-disable jest/no-done-callback -- eslint-comment It is required because */
+
 import '../mock-requests'
 import { resetPyYouwolDbs$ } from '../common'
 
@@ -19,6 +22,7 @@ beforeEach(async (done) => {
     })
 })
 
+// eslint-disable-next-line jest/expect-expect -- eslint-comment there are tests in each step
 test('delete drive', (done) => {
     shell$()
         .pipe(cd('..'), cd('..'), selectItem('Default drive'), deleteDrive())
@@ -27,6 +31,7 @@ test('delete drive', (done) => {
         })
 })
 
+// eslint-disable-next-line jest/expect-expect -- eslint-comment there are tests in each step
 test('Create, delete, clear trash & purge drive', (done) => {
     const projectName = 'my flux-app'
     shell$()

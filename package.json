@@ -48,6 +48,7 @@
         "@typescript-eslint/eslint-plugin": "^5.0.0",
         "@typescript-eslint/parser": "^5.0.0",
         "@youwol/logging": "^0.0.2",
+        "isomorphic-fetch": "^3.0.0",
         "@youwol/cdn-client": "^0.0.10",
         "@youwol/flux-core": "^0.0.21",
         "@youwol/flux-files": "^0.0.5",

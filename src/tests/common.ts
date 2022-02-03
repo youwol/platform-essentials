@@ -1,20 +1,37 @@
-import { PyYouwolClient } from '../lib/clients/py-youwol'
-import { RootRouter } from '../lib/clients/router'
-
-RootRouter.HostName = getPyYouwolBasePath()
-RootRouter.Headers = { 'py-youwol-local-only': 'true' }
+import { AssetsGateway, PyYouwol, raiseHTTPErrors } from '@youwol/http-clients'
+import { mergeMap } from 'rxjs/operators'
+import { Observable } from 'rxjs'
 
 export function getPyYouwolBasePath() {
     return 'http://localhost:2001'
 }
 
 export function resetPyYouwolDbs$() {
-    return new PyYouwolClient().admin.customCommands.doGet$('reset')
+    return new PyYouwol.PyYouwolClient().admin.customCommands.doGet$('reset')
+}
+
+export function createStory(
+    title: string,
+): (src: Observable<unknown>) => Observable<AssetsGateway.Asset> {
+    const client = new AssetsGateway.AssetsGatewayClient()
+    return (source$: Observable<unknown>) => {
+        return source$.pipe(
+            mergeMap(() => client.explorer.getDefaultUserDrive$()),
+            raiseHTTPErrors(),
+            mergeMap((drive: AssetsGateway.DefaultDriveResponse) =>
+                client.assets.story
+                    .create$(drive.homeFolderId, {
+                        title,
+                    })
+                    .pipe(raiseHTTPErrors()),
+            ),
+        )
+    }
 }
 
 export function expectAttributes(
     resp,
-    attributes: Array<string | [string, any]>,
+    attributes: Array<string | [string, unknown]>,
 ) {
     attributes.forEach((att) => {
         if (Array.isArray(att)) {
@@ -31,7 +48,10 @@ export function getFromDocument<T, U = HTMLDivElement>(
     selector: string,
     findFct: (d: VDomType<U, T>) => boolean = () => true,
 ): VDomType<U, T> {
-    const views = document.querySelectorAll(selector) as any as VDomType<U, T>[]
+    const views = document.querySelectorAll(selector) as unknown as VDomType<
+        U,
+        T
+    >[]
     return Array.from(views).find((t) => findFct(t)) as unknown as VDomType<
         U,
         T
@@ -42,7 +62,10 @@ export function queryFromDocument<T, U = HTMLDivElement>(
     selector: string,
     filterFct: (d: VDomType<U, T>) => boolean = () => true,
 ): VDomType<U, T>[] {
-    const views = document.querySelectorAll(selector) as any as VDomType<U, T>[]
+    const views = document.querySelectorAll(selector) as unknown as VDomType<
+        U,
+        T
+    >[]
     return Array.from(views).filter((v: VDomType<U, T>) =>
         filterFct(v),
     ) as unknown as VDomType<U, T>[]
