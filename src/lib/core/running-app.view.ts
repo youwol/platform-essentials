@@ -1,6 +1,6 @@
-import { uuidv4 } from '@youwol/flux-core'
 import { attr$, HTMLElement$, VirtualDOM } from '@youwol/flux-view'
 import { ReplaySubject } from 'rxjs'
+import { v4 as uuidv4 } from 'uuid'
 import { AssetsGateway } from '@youwol/http-clients'
 import { PlatformState } from './platform.state'
 import { Executable } from './platform-settings'

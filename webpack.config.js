@@ -42,6 +42,7 @@ module.exports = {
             '@youwol/http-clients': '@youwol/http-clients',
             'js-beautify': 'js_beautify',
             lodash: '_',
+            uuid: 'uuid',
         },
     ],
     module: {

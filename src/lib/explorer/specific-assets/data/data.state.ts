@@ -1,6 +1,6 @@
-import { uuidv4 } from '@youwol/flux-core'
 import { BehaviorSubject } from 'rxjs'
 import { filter } from 'rxjs/operators'
+import { v4 as uuidv4 } from 'uuid'
 import { TreeGroup } from '../../explorer.state'
 import {
     AnyFolderNode,

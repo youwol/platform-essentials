@@ -1,7 +1,7 @@
-import { uuidv4 } from '@youwol/flux-core'
 import { ImmutableTree } from '@youwol/fv-tree'
 import { Observable, of, Subject } from 'rxjs'
 import { delay, map, tap } from 'rxjs/operators'
+import { v4 as uuidv4 } from 'uuid'
 import {
     AssetsGateway,
     dispatchHTTPErrors,

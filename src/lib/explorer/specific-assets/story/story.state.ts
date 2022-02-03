@@ -1,4 +1,4 @@
-import { uuidv4 } from '@youwol/flux-core'
+import { v4 as uuidv4 } from 'uuid'
 import { AssetsGateway } from '@youwol/http-clients'
 import { TreeGroup } from '../../explorer.state'
 import { AnyFolderNode, FutureNode, ItemNode } from '../../nodes'

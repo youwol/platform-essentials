@@ -1,8 +1,8 @@
-import { uuidv4 } from '@youwol/flux-core'
 import { ImmutableTree } from '@youwol/fv-tree'
 import { BehaviorSubject, Observable, Subject } from 'rxjs'
 import { delay, tap } from 'rxjs/operators'
 import { AssetsGateway } from '@youwol/http-clients'
+import { v4 as uuidv4 } from 'uuid'
 import { debugDelay } from './requests-executor'
 
 export const UploadStep = {

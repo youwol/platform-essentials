@@ -1,9 +1,9 @@
-import { uuidv4 } from '@youwol/flux-core'
 import { VirtualDOM } from '@youwol/flux-view'
 
 import { Tabs } from '@youwol/fv-tabs'
-import { Subject } from 'rxjs'
 import { AssetsGateway } from '@youwol/http-clients'
+import { Subject } from 'rxjs'
+import { v4 as uuidv4 } from 'uuid'
 
 import { AssetOverview } from './overview/overview.view'
 
