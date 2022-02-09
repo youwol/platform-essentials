@@ -7,7 +7,10 @@ export function getPyYouwolBasePath() {
 }
 
 export function resetPyYouwolDbs$() {
-    return new PyYouwol.PyYouwolClient().admin.customCommands.doGet$('reset')
+    const client = new PyYouwol.PyYouwolClient()
+    return client.admin.environment
+        .login$({ email: 'int_tests_yw-users@test-user' })
+        .pipe(mergeMap(() => client.admin.customCommands.doGet$('reset')))
 }
 
 export function createStory(
