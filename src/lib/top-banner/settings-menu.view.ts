@@ -50,17 +50,14 @@ function fetchCDN$() {
         'js-beautify#1.14.0~lang/html.min.js',
     ]
     return from(
-        install(
-            {
-                modules: ['codemirror', 'js-beautify'],
-                scripts: urls,
-                css: [
-                    'codemirror#5.52.0~codemirror.min.css',
-                    'codemirror#5.52.0~theme/blackboard.min.css',
-                ],
-            },
-            window,
-        ),
+        install({
+            modules: ['codemirror', 'js-beautify'],
+            scripts: urls,
+            css: [
+                'codemirror#5.52.0~codemirror.min.css',
+                'codemirror#5.52.0~theme/blackboard.min.css',
+            ],
+        }),
     )
 }
 

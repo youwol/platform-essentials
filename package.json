@@ -37,7 +37,7 @@
         "@youwol/fv-tabs": "^0.0.3",
         "@youwol/fv-tree": "^0.0.4",
         "@youwol/fv-widgets": "^0.0.4",
-        "@youwol/http-clients": "^0.0.1",
+        "@youwol/http-clients": "^0.0.2",
         "lodash": "4.x",
         "reflect-metadata": "0.x",
         "rxjs": "6.x"
@@ -59,7 +59,7 @@
         "@youwol/fv-tabs": "^0.0.3",
         "@youwol/fv-tree": "^0.0.4",
         "@youwol/fv-widgets": "^0.0.4",
-        "@youwol/http-clients": "^0.0.1",
+        "@youwol/http-clients": "^0.0.2",
         "js-beautify": "^1.14.0",
         "eslint": "7.23.0",
         "eslint-config-prettier": "^8.3.0",
