@@ -122,7 +122,6 @@ export const GENERIC_ACTIONS = {
         },
         exe: () => {
             state.uploadAsset(node as AnyItemNode)
-            console.log('Upload node!', node)
         },
     }),
     deleteFolder: (
