@@ -444,6 +444,7 @@ export class RequestsExecutor {
             `${window.location.origin}/admin/environment/upload/${assetId}`,
             { method: 'POST' },
         ).pipe(
+            dispatchHTTPErrors(this.error$),
             delay(debugDelay),
             tap(
                 () =>
