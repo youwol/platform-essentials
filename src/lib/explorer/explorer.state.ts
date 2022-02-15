@@ -129,19 +129,19 @@ export class ExplorerState {
 
     actions$ = combineLatest([this.selectedItem$, this.currentFolder$]).pipe(
         mergeMap(([item, { folder }]) => {
-            const a0 = getActions$(
+            const a0$ = getActions$(
                 this,
                 { node: folder, selection: 'indirect' },
                 Object.values(GENERIC_ACTIONS),
             )
-            const a1 = item
+            const a1$ = item
                 ? getActions$(
                       this,
                       { node: item, selection: 'direct' },
                       Object.values(GENERIC_ACTIONS),
                   )
                 : of([])
-            const a2 = item
+            const a2$ = item
                 ? PlatformSettingsStore.getOpeningApps$(item).pipe(
                       map((apps) =>
                           apps.map((app) => openWithActionFromExe(app)),
@@ -149,7 +149,7 @@ export class ExplorerState {
                   )
                 : of([])
 
-            return combineLatest([a0, a1, a2]).pipe(
+            return combineLatest([a0$, a1$, a2$]).pipe(
                 map(([a0, a1, a2]) => {
                     return {
                         item: item,
