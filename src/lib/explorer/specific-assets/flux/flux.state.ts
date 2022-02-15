@@ -30,6 +30,7 @@ export class FluxState {
                     assetId: resp.assetId,
                     rawId: resp.rawId,
                     borrowed: false,
+                    origin: resp.origin,
                 })
                 this.userTree.replaceNode(targetNode, projectNode)
             },

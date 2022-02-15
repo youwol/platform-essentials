@@ -31,6 +31,7 @@ export class StoryState {
                     assetId: resp.assetId,
                     rawId: resp.rawId,
                     borrowed: false,
+                    origin: resp.origin,
                 })
                 this.userTree.replaceNode(targetNode, storyNode)
             },

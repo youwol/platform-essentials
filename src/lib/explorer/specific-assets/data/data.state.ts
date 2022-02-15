@@ -104,6 +104,7 @@ export class DataState {
                         assetId: progress.result.assetId,
                         rawId: progress.result.rawId,
                         borrowed: progress.result.borrowed,
+                        origin: progress.result.origin,
                     })
                     this.userTree.addChild(folder.id, child)
                 })
