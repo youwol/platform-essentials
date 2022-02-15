@@ -1,16 +1,27 @@
 import { AssetsGateway, PyYouwol, raiseHTTPErrors } from '@youwol/http-clients'
-import { mergeMap } from 'rxjs/operators'
-import { Observable } from 'rxjs'
+import { map, mergeMap } from 'rxjs/operators'
+import { forkJoin, Observable } from 'rxjs'
 
 export function getPyYouwolBasePath() {
     return 'http://localhost:2001'
 }
 
 export function resetPyYouwolDbs$() {
-    const client = new PyYouwol.PyYouwolClient()
-    return client.admin.environment
+    const youwol = new PyYouwol.PyYouwolClient()
+    const gtw = new AssetsGateway.AssetsGatewayClient()
+    return youwol.admin.environment
         .login$({ email: 'int_tests_yw-users@test-user' })
-        .pipe(mergeMap(() => client.admin.customCommands.doGet$('reset')))
+        .pipe(
+            mergeMap(() =>
+                forkJoin([
+                    youwol.admin.customCommands.doGet$('reset'),
+                    gtw.explorer.getDefaultUserDrive$().pipe(raiseHTTPErrors()),
+                ]),
+            ),
+            map(([_, userDrive]) => {
+                return userDrive
+            }),
+        )
 }
 
 export function createStory(
@@ -72,4 +83,12 @@ export function queryFromDocument<T, U = HTMLDivElement>(
     return Array.from(views).filter((v: VDomType<U, T>) =>
         filterFct(v),
     ) as unknown as VDomType<U, T>[]
+}
+
+export function createRemoteFolder$(youwolClient, parentFolderId, name) {
+    return youwolClient.admin.customCommands.doPost$('create-remote-folder', {
+        parentFolderId: parentFolderId,
+        name: name,
+        folderId: name,
+    })
 }

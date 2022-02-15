@@ -77,9 +77,9 @@ export function shell$() {
         state.userDrives$.pipe(raiseHTTPErrors()),
         state.defaultUserDrive$.pipe(raiseHTTPErrors()),
     ]).pipe(
-        tap(([userInfo, drives, defaults]) => {
+        tap(([userInfo, _drives, defaults]) => {
             expect(userInfo.name).toEqual('int_tests_yw-users@test-user')
-            expect(drives.length).toEqual(0)
+            // expect(drives.length).toEqual(0)
             expectAttributes(defaults, [
                 'driveId',
                 'driveName',
@@ -362,9 +362,12 @@ export function mkAsset({
                 )
 
                 folderContentView.items$.pipe(take(1)).subscribe((items) => {
-                    expect(items.length).toEqual(1)
-                    expect(items[0]).toBeInstanceOf(FutureNode)
-                    expect(items[0].name).toEqual(defaultInstanceName)
+                    const item = items.find(
+                        (it) =>
+                            it instanceof FutureNode &&
+                            it.name == defaultInstanceName,
+                    )
+                    expect(item).toBeTruthy()
                 })
 
                 return folderContentView.items$.pipe(
@@ -602,7 +605,7 @@ export function selectItem(itemName: string) {
                     tap((item) => {
                         expect(item.id).toEqual(rowView.item.id)
                     }),
-                    mergeMap((item) => {
+                    mergeMap((selectedItem) => {
                         const actionsContainer = getFromDocument<ActionsView>(
                             `.${ActionsView.ClassSelector}`,
                         )
@@ -614,7 +617,7 @@ export function selectItem(itemName: string) {
                             map(() => {
                                 return new Shell({
                                     ...shell,
-                                    item: item,
+                                    item: selectedItem,
                                 })
                             }),
                         )
@@ -708,6 +711,75 @@ export function paste() {
                         )
                         expect(target).toBeTruthy()
                     }),
+                    map(() => {
+                        return new Shell({ ...shell })
+                    }),
+                )
+            }),
+        )
+}
+
+export function uploadAsset(itemName: string) {
+    return (source$: Observable<Shell>) =>
+        source$.pipe(
+            take(1),
+            selectItem(itemName),
+            mergeMap((shell) => {
+                const actionUpload = getFromDocument<ActionBtnView>(
+                    `.${ActionBtnView.ClassSelector}`,
+                    (view) => view.action.name == 'upload asset',
+                )
+                expect(actionUpload).toBeDefined()
+
+                actionUpload.dispatchEvent(
+                    new MouseEvent('click', { bubbles: true }),
+                )
+                actionUpload.action.sourceEventNode.status$
+                    .pipe(take(1))
+                    .subscribe((status) => {
+                        expect(status).toHaveLength(1)
+                        expect(status[0].type).toBe('request-pending')
+                    })
+                return actionUpload.action.sourceEventNode.status$.pipe(
+                    skip(1),
+                    take(1),
+                    // Upload is done
+                    tap((status) => {
+                        expect(status).toHaveLength(0)
+                    }),
+                    // Wait for refresh to finish
+                    mergeMap(() => {
+                        return shell.explorerState.currentFolder$.pipe(
+                            skip(1),
+                            take(1),
+                        )
+                    }),
+                    take(1),
+                    map(() => {
+                        return new Shell({ ...shell })
+                    }),
+                )
+            }),
+        )
+}
+
+export function refresh() {
+    return (source$: Observable<Shell>) =>
+        source$.pipe(
+            take(1),
+            mergeMap((shell) => {
+                const actionRefresh = getFromDocument<ActionBtnView>(
+                    `.${ActionBtnView.ClassSelector}`,
+                    (view) => view.action.name == 'refresh',
+                )
+                expect(actionRefresh).toBeDefined()
+
+                actionRefresh.dispatchEvent(
+                    new MouseEvent('click', { bubbles: true }),
+                )
+                return shell.explorerState.currentFolder$.pipe(
+                    skip(1),
+                    take(1),
                     map(() => {
                         return new Shell({ ...shell })
                     }),
@@ -836,11 +908,11 @@ export function expectSnapshot({
                     actionsContainer.displayedActions$,
                 ]).pipe(
                     take(1),
-                    tap(([items, { actions }]) => {
+                    tap(([itemsFolderView, displayedActions]) => {
                         expectExplorerState &&
                             expectExplorerState(shell.explorerState)
-                        expectItems && expectItems(items)
-                        expectActions && expectActions(actions)
+                        expectItems && expectItems(itemsFolderView)
+                        expectActions && expectActions(displayedActions.actions)
                         expectAssetCardView &&
                             expectAssetCardView(shell.assetCardView)
                     }),
