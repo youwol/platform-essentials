@@ -15,6 +15,7 @@ import {
     mergeMap,
     share,
     shareReplay,
+    take,
 } from 'rxjs/operators'
 import { DisplayMode } from '.'
 import { YouwolBannerState } from '../top-banner'
@@ -421,6 +422,15 @@ export class ExplorerState {
     }
 
     uploadAsset(node: AnyItemNode) {
-        RequestsExecutor.uploadLocalAsset(node.assetId, node).subscribe()
+        RequestsExecutor.uploadLocalAsset(node.assetId, node)
+            .pipe(
+                mergeMap(() => this.openFolder$),
+                take(1),
+            )
+            .subscribe(({ folder }) => {
+                if (folder instanceof FolderNode) {
+                    this.refresh(folder)
+                }
+            })
     }
 }
