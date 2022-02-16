@@ -40,7 +40,7 @@ module.exports = {
             '@youwol/fv-tabs': '@youwol/fv-tabs',
             '@youwol/fv-inputs': '@youwol/fv-inputs',
             '@youwol/http-clients': '@youwol/http-clients',
-            js_beautify: 'js_beautify',
+            'js-beautify': 'js_beautify',
             lodash: '_',
         },
     ],
