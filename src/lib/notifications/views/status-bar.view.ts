@@ -229,7 +229,7 @@ export class ProgressBarView implements VirtualDOM {
             {
                 class: attr$(
                     presenter.progress$,
-                    (progress: ProgressValue) =>
+                    (progress: ProgressValue): string =>
                         progress === 'indeterminate'
                             ? 'progress-bar-animated progress-bar-striped'
                             : '',

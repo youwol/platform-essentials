@@ -84,7 +84,11 @@ export class ActionsView implements VirtualDOM {
                         return new ActionBtnView({ action })
                     }),
                     connectedCallback: () => {
-                        this.displayedActions$.next({ item, folder, actions })
+                        this.displayedActions$.next({
+                            item: item as AnyItemNode, // XXX : Review Type
+                            folder,
+                            actions,
+                        })
                     },
                 }
             }),

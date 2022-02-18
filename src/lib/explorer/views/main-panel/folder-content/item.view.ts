@@ -10,6 +10,7 @@ import {
     PackageInfoView,
     popupAssetModalView,
 } from '../../../../assets'
+import { ywSpinnerView } from '../../../../misc-views/youwol-spinner.view'
 import { ExplorerState } from '../../../explorer.state'
 import {
     AnyItemNode,
@@ -18,7 +19,6 @@ import {
     RegularFolderNode,
 } from '../../../nodes'
 import { RequestsExecutor } from '../../../requests-executor'
-import { ywSpinnerView } from '../../../../misc-views/youwol-spinner.view'
 
 export class ItemView {
     static ClassSelector = 'item-view'
@@ -60,7 +60,7 @@ export class ItemView {
             this.item.status$,
             (statuses: { type; id }[]) =>
                 statuses.find((s) => s.type == 'cut') != undefined
-                    ? { opacity: 0.3 }
+                    ? { opacity: '0.3' }
                     : {},
             {
                 wrapper: (d) => ({ ...d, userSelect: 'none' }),
