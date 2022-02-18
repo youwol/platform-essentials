@@ -1,8 +1,6 @@
-/** @format */
-import 'isomorphic-fetch'
 import { RootRouter } from '@youwol/http-clients'
+import 'isomorphic-fetch'
 import { getPyYouwolBasePath } from './common'
-
 ;(window as unknown)['@youwol/cdn-client'] = {}
 
 if (!globalThis.fetch) {
