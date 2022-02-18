@@ -5,6 +5,7 @@ import {
     Stream$,
     VirtualDOM,
 } from '@youwol/flux-view'
+import { AssetsGateway } from '@youwol/http-clients'
 import { BehaviorSubject, merge, Observable } from 'rxjs'
 import { delay, mapTo, take } from 'rxjs/operators'
 import { ExplorerState } from '../../explorer.state'
@@ -15,7 +16,6 @@ import {
     HomeNode,
     TrashNode,
 } from '../../nodes'
-import { AssetsGateway } from '@youwol/http-clients'
 
 class PredefinedFolderView implements VirtualDOM {
     class = 'd-flex align-items-center w-100 fv-text-primary'
@@ -186,7 +186,8 @@ export class GroupsView implements VirtualDOM {
             {
                 class: attr$(
                     this.extended$,
-                    (extended) => (extended ? 'd-flex flex-column' : 'd-none'),
+                    (extended): string =>
+                        extended ? 'd-flex flex-column' : 'd-none',
                     { wrapper: (d) => `${d} fv-text-primary w-100` },
                 ),
                 children: [
@@ -222,7 +223,7 @@ export class GroupsView implements VirtualDOM {
                         {
                             class: attr$(
                                 this.groupsExpanded$,
-                                (expanded) =>
+                                (expanded): string =>
                                     expanded
                                         ? 'fa-chevron-circle-down'
                                         : 'fa-chevron-circle-right',

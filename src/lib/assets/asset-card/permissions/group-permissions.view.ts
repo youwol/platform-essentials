@@ -1,8 +1,8 @@
 import { child$, HTMLElement$, VirtualDOM } from '@youwol/flux-view'
 import { Select } from '@youwol/fv-input'
+import { AssetsGateway, raiseHTTPErrors } from '@youwol/http-clients'
 import { BehaviorSubject, combineLatest, Subject } from 'rxjs'
 import { distinct, map, skip } from 'rxjs/operators'
-import { AssetsGateway, raiseHTTPErrors } from '@youwol/http-clients'
 
 export class ExposedGroupState {
     public readonly groupName: string
@@ -47,7 +47,7 @@ export class ExposedGroupState {
                 this.groupAccess$.next({
                     name: this.groupName,
                     groupId: this.groupId,
-                    access: groupAccess,
+                    access: groupAccess, // XXX : Type Problem
                 } as any)
                 this.loading$.next(false)
             })

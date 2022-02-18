@@ -61,7 +61,7 @@ class DockerItemDetailsView implements VirtualDOM {
                         {
                             class: attr$(
                                 this.state.runningApplication$,
-                                (selected: RunningApp) => {
+                                (selected: RunningApp): string => {
                                     return selected &&
                                         selected.instanceId == app.instanceId
                                         ? 'fv-text-focus'
@@ -121,7 +121,7 @@ export class DockerItemView implements VirtualDOM {
         return {
             class: attr$(
                 this.state.runningApplication$,
-                (runningApp) =>
+                (runningApp): string =>
                     runningApp &&
                     runningApp.cdnPackage == this.executable.cdnPackage
                         ? 'fv-text-focus'

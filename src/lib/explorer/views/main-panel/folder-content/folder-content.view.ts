@@ -45,13 +45,16 @@ export class FolderContentView implements VirtualDOM {
         this.children = [
             child$(
                 combineLatest([this.state.displayMode$, this.items$]),
-                ([mode, items]: [DisplayMode, BrowserNode[]]) =>
-                    mode === 'details'
-                        ? new DetailsContentView({
-                              state: this.state,
-                              items,
-                          })
-                        : unreachable(mode),
+                ([mode, items]: [DisplayMode, BrowserNode[]]) => {
+                    if (mode === 'details') {
+                        return new DetailsContentView({
+                            state: this.state,
+                            items,
+                        })
+                    } else {
+                        unreachable(mode)
+                    }
+                },
             ),
         ]
     }

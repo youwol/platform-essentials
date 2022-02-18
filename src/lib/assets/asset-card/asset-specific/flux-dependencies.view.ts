@@ -1,6 +1,12 @@
 import { child$, VirtualDOM } from '@youwol/flux-view'
 import { Button } from '@youwol/fv-button'
 import {
+    AssetsGateway,
+    dispatchHTTPErrors,
+    HTTPError,
+    raiseHTTPErrors,
+} from '@youwol/http-clients'
+import {
     BehaviorSubject,
     combineLatest,
     from,
@@ -20,11 +26,6 @@ import {
     takeUntil,
     tap,
 } from 'rxjs/operators'
-import {
-    AssetsGateway,
-    dispatchHTTPErrors,
-    HTTPError,
-} from '@youwol/http-clients'
 
 export function getActions(asset: AssetsGateway.Asset) {
     const classes = 'fv-btn fv-btn-secondary mx-1 '
@@ -78,7 +79,7 @@ export class FluxDependenciesState {
     error$ = new Subject<HTTPError>()
     accessInfo$ = new AssetsGateway.AssetsGatewayClient().assets
         .getAccess$(this.asset.assetId)
-        .pipe(share())
+        .pipe(raiseHTTPErrors(), share())
 
     userPicks = {}
     libsVersionsCache = {}

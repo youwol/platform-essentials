@@ -71,7 +71,7 @@ export class HeaderPathView implements VirtualDOM {
                         const items: VirtualDOM[] = path.map((node) => [
                             new PathElementView({
                                 state: this.state,
-                                node,
+                                node: node as AnyFolderNode, // XXX : Review Type
                                 selectedNode: folder,
                             }),
                             { class: 'px-2 my-auto', innerText: '/' },

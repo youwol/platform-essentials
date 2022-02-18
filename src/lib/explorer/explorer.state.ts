@@ -1,4 +1,6 @@
 import { ImmutableTree } from '@youwol/fv-tree'
+
+import { AssetsGateway, raiseHTTPErrors } from '@youwol/http-clients'
 import {
     BehaviorSubject,
     combineLatest,
@@ -18,9 +20,9 @@ import {
 } from 'rxjs/operators'
 import { v4 as uuidv4 } from 'uuid'
 import { DisplayMode } from '.'
-import { YouwolBannerState } from '../top-banner'
 import { ChildApplicationAPI, PlatformSettingsStore } from '../core'
 import { FileAddedEvent, PlatformEvent } from '../core/platform.events'
+import { YouwolBannerState } from '../top-banner'
 import {
     Action,
     GENERIC_ACTIONS,
@@ -52,8 +54,6 @@ import {
     processMoveFolder,
     processMoveItem,
 } from './utils'
-
-import { AssetsGateway, raiseHTTPErrors } from '@youwol/http-clients'
 
 /**
  * Ideally this concept should not exist.
@@ -164,7 +164,10 @@ export class ExplorerState {
 
     public readonly displayMode$ = new BehaviorSubject<DisplayMode>('details')
 
-    public readonly userInfo$ = RequestsExecutor.getUserInfo().pipe(share())
+    public readonly userInfo$ = RequestsExecutor.getUserInfo().pipe(
+        share(),
+        raiseHTTPErrors(),
+    )
 
     public readonly defaultUserDrive$ = this.userInfo$.pipe(
         raiseHTTPErrors(),
