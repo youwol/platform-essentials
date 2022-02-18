@@ -6,6 +6,8 @@ junit.xml
 src/auto_generated.ts
 cdn.zip
 src/tests/databases
+*.iml
+yarn-error.log
 .yw_test_env
 src/tests/yw_config/databases/**
 __pycache__
