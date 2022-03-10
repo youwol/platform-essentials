@@ -1,8 +1,14 @@
+import { VirtualDOM } from '@youwol/flux-view'
 
-
-export function ywSpinnerView({ classes, size, duration }: { classes: string, size: string, duration: number }) {
-    let logoUrl = '/api/assets-gateway/raw/package/QHlvdXdvbC9mbHV4LXlvdXdvbC1lc3NlbnRpYWxz/latest/assets/images/logo_YouWol_white.png'
-
+export function ywSpinnerView({
+    classes,
+    size,
+    duration,
+}: {
+    classes: string
+    size: string
+    duration: number
+}): VirtualDOM {
     return {
         class: classes,
         style: {
@@ -26,8 +32,8 @@ export function ywSpinnerView({ classes, size, duration }: { classes: string, si
                     width: size,
                     height: size,
                     animation: `spin ${duration}s linear infinite`,
-                }
-            }
-        ]
+                },
+            },
+        ],
     }
 }

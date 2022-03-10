@@ -1,44 +1,36 @@
+// eslint-disable-next-line eslint-comments/disable-enable-pair -- to not have problem
+/* eslint-disable jest/no-done-callback -- eslint-comment It is required because */
+
 import '../mock-requests'
-import {getFromDocument, resetPyYouwolDbs$} from '../common'
+import { render } from '@youwol/flux-view'
+import { Subject } from 'rxjs'
+import { AssetCardView } from '../../lib/assets'
+import { AssetsGateway } from '@youwol/http-clients'
+import { createStory, getFromDocument, resetPyYouwolDbs$ } from '../common'
 
-import {render} from "@youwol/flux-view"
-import {Subject} from "rxjs"
-import {mergeMap} from "rxjs/operators"
-import {AssetCardView} from "../../lib"
-import {Asset, AssetsGatewayClient} from "../../lib/clients/assets-gateway";
-
+let asset: AssetsGateway.Asset
 
 beforeAll(async (done) => {
-    resetPyYouwolDbs$().subscribe(() => {
-        done()
-    })
+    resetPyYouwolDbs$()
+        .pipe(createStory('test'))
+        .subscribe((a) => {
+            asset = a
+            done()
+        })
 })
 
-let asset: Asset
-
-
-test('create story', (done) => {
-
-    let client = new AssetsGatewayClient()
-    client.explorer.getDefaultUserDrive$().pipe(
-        mergeMap((drive) => client.assets.story.create$(drive.homeFolderId, { title: 'test' }))
-    ).subscribe((resp) => {
-        asset = resp
-        done()
-    })
-})
-
-test("create asset card view", (done) => {
-
-    let assetOutput$ = new Subject<Asset>()
-    let view = new AssetCardView({
+test('create asset card view', (done) => {
+    const assetOutput$ = new Subject<AssetsGateway.Asset>()
+    const view = new AssetCardView({
         asset,
         actionsFactory: () => ({}),
         assetOutput$,
-        forceReadonly: true
+        forceReadonly: true,
     })
     document.body.appendChild(render(view))
-    let elem = getFromDocument<AssetCardView>(`.${AssetCardView.ClassSelector}`)
+    const elem = getFromDocument<AssetCardView>(
+        `.${AssetCardView.ClassSelector}`,
+    )
     expect(elem).toBeTruthy()
     done()
 })

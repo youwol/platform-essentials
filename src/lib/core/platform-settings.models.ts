@@ -1,41 +1,16 @@
-import {VirtualDOM} from "@youwol/flux-view";
-
-
-//type ImplementationFunction = string
+import { VirtualDOM } from '@youwol/flux-view'
 
 export interface You {
-
     avatar: VirtualDOM
 }
 
-
 export interface Appearance {
-
     theme: string
     /**
      * style properties of the desktop background
      */
     desktopStyle: { [_key: string]: string }
 }
-
-
-export interface ApplicationStandalone {
-
-    cdnPackage: string
-    version: string
-}
-
-/*
-export interface ApplicationAssociation extends ApplicationStandalone {
-
-    canOpen: ImplementationFunction | ((asset: Asset) => boolean)
-    parameters: ImplementationFunction | ((asset: Asset) => { [key: string]: string })
-}
-
-export interface Applications {
-
-    associations: ApplicationAssociation[]
-}*/
 
 export interface Parametrization {
     match: { [_key: string]: string }
@@ -56,7 +31,6 @@ export interface BrowserApplication {
 }
 
 export interface PlatformSettings {
-
     you: You
     appearance: Appearance
     browserApplications: BrowserApplication[]

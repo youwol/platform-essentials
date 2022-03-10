@@ -1,18 +1,16 @@
-import {child$, VirtualDOM} from '@youwol/flux-view'
-import {Asset, AssetsGatewayClient} from '../../../clients/assets-gateway'
+import { child$, VirtualDOM } from '@youwol/flux-view'
+import { AssetsGateway, raiseHTTPErrors } from '@youwol/http-clients'
 
+type Asset = AssetsGateway.Asset
 
 export function getActions(_asset: Asset) {
-
     return {
-        class: "w-100 d-flex flex-wrap",
-        children: {}
+        class: 'w-100 d-flex flex-wrap',
+        children: {},
     }
 }
 
-
 export class PackageInfoView {
-
     public readonly class = 'd-flex flex-column p-5 h-100'
     public readonly children: VirtualDOM[]
     public readonly asset: Asset
@@ -22,9 +20,10 @@ export class PackageInfoView {
 
         this.children = [
             child$(
-                new AssetsGatewayClient().raw.package.queryMetadata$(this.asset.rawId),
-                (metadata: any) => {
-
+                new AssetsGateway.AssetsGatewayClient().raw.package
+                    .getMetadata$(this.asset.rawId)
+                    .pipe(raiseHTTPErrors()),
+                (metadata) => {
                     return {
                         class: 'h-100 fv-text-primary',
                         children: [
@@ -34,52 +33,53 @@ export class PackageInfoView {
                                     {
                                         class: 'd-flex align-items-center my-3',
                                         children: [
-                                            { innerText: "namespace:" },
+                                            { innerText: 'namespace:' },
                                             {
                                                 class: 'mx-2',
                                                 style: {
-                                                    fontWeight: 'bold'
+                                                    fontWeight: 'bold',
                                                 },
-                                                innerText: `${metadata.namespace}`
-                                            }
-                                        ]
+                                                innerText: `${metadata.namespace}`,
+                                            },
+                                        ],
                                     },
                                     {
                                         class: 'd-flex align-items-center my-3',
                                         children: [
-                                            { innerText: "name:" },
+                                            { innerText: 'name:' },
                                             {
                                                 class: 'mx-2',
                                                 style: {
-                                                    fontWeight: 'bold'
+                                                    fontWeight: 'bold',
                                                 },
-                                                innerText: `${metadata.name}`
-                                            }
-                                        ]
+                                                innerText: `${metadata.name}`,
+                                            },
+                                        ],
                                     },
                                     {
                                         class: 'my-3',
                                         children: [
-                                            { innerText: "versions:" },
+                                            { innerText: 'versions:' },
                                             {
                                                 class: 'overflow-auto mx-1',
                                                 style: {
                                                     maxHeight: '25vh',
-                                                    fontWeight: 'bold'
+                                                    fontWeight: 'bold',
                                                 },
-                                                children: metadata.versions.map(v => ({
-                                                    innerText: v
-                                                }
-                                                ))
-                                            }
-                                        ]
-                                    }
-                                ]
+                                                children: metadata.version.map(
+                                                    (v) => ({
+                                                        innerText: v,
+                                                    }),
+                                                ),
+                                            },
+                                        ],
+                                    },
+                                ],
                             },
-                        ]
+                        ],
                     }
-                }
-            )
+                },
+            ),
         ]
     }
 }

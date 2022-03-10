@@ -1,8 +1,9 @@
 /*
  * Public API Surface of @youwol/flux-code-mirror
  */
-export * from './top-banner/index'
-export * from './assets/index'
-export * from './explorer/index'
+export * as TopBanner from './top-banner'
+export * as Assets from './assets'
+export * as Explorer from './explorer'
 export * from './misc-views/youwol-spinner.view'
-export * from './core/index'
+export * as Core from './core'
+export * as Notifications from './notifications'

@@ -1,5 +1,3 @@
-
-
 export { ExplorerState } from './explorer.state'
 export { SideBarView } from './views/sidebar/sidebar.view'
 export { MainPanelView, DisplayMode } from './views/main-panel/main-panel.view'

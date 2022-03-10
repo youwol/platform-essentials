@@ -1,41 +1,34 @@
-import {child$, VirtualDOM} from '@youwol/flux-view'
-import {RunningApp} from './running-app.view'
-import {PlatformState} from './platform.state'
-import {defaultUserMenu, YouwolBannerView} from "../top-banner";
-import {AppsDockerView} from './platform-docker-bar.view'
+import { child$, VirtualDOM } from '@youwol/flux-view'
+import { defaultUserMenu, YouwolBannerView } from '../top-banner'
+import { AppsDockerView } from './platform-docker-bar.view'
+import { PlatformState } from './platform.state'
+import { RunningApp } from './running-app.view'
 
 /**
  * Regular top banner of the application (no application running)
  */
 class RegularBannerView extends YouwolBannerView {
-
     constructor(state: PlatformState) {
         super({
             state: state.topBannerState,
             customActionsView: {},
             userMenuView: defaultUserMenu(state.topBannerState),
             //youwolMenuView: defaultYouWolMenu(state.topBannerState)
-            youwolMenuView: new AppsDockerView({ state })
+            youwolMenuView: new AppsDockerView({ state }),
         })
     }
 }
 
-
 class RunningAppTitleView implements VirtualDOM {
-
     public readonly class = 'd-flex align-items-center mx-3'
 
     public readonly children: VirtualDOM[]
 
     constructor(state: PlatformState, app: RunningApp) {
-
-        let baseClass = 'fas my-auto fv-pointer fv-hover-text-secondary mx-2'
+        const baseClass = 'fas my-auto fv-pointer fv-hover-text-secondary mx-2'
 
         this.children = [
-            child$(
-                app.header$,
-                (view) => view
-            ),
+            child$(app.header$, (view) => view),
             {
                 class: 'd-flex align-items-center',
                 children: [
@@ -53,11 +46,12 @@ class RunningAppTitleView implements VirtualDOM {
                             {
                                 class: `${baseClass} fa-minus-square`,
                                 onclick: () => state.minimize(app.instanceId),
-                            }
-                        ]
-                    }
-                ]
-            }]
+                            },
+                        ],
+                    },
+                ],
+            },
+        ]
     }
 }
 
@@ -65,9 +59,7 @@ class RunningAppTitleView implements VirtualDOM {
  * Top banner when an application is running
  */
 class RunningAppBannerView extends YouwolBannerView {
-
     constructor(state: PlatformState, app: RunningApp) {
-
         super({
             state: state.topBannerState,
             customActionsView: {
@@ -79,23 +71,17 @@ class RunningAppBannerView extends YouwolBannerView {
                         class: 'flex-grow-1 my-auto',
                         style: { minWidth: '0px' },
                         children: [
-                            child$(
-                                app.topBannerActions$,
-                                (vDOM) => {
-                                    return vDOM
-                                }
-                            )
-                        ]
-                    }
-                ]
+                            child$(app.topBannerActions$, (vDOM) => {
+                                return vDOM
+                            }),
+                        ],
+                    },
+                ],
             },
-            userMenuView: child$(
-                app.topBannerUserMenu$,
-                (vDOM) => {
-                    return vDOM
-                }
-            ),
-            youwolMenuView: new AppsDockerView({ state })
+            userMenuView: child$(app.topBannerUserMenu$, (vDOM) => {
+                return vDOM
+            }),
+            youwolMenuView: new AppsDockerView({ state }),
             /*
             youwolMenuView: child$(
                 app.topBannerYouwolMenu$,
@@ -107,21 +93,18 @@ class RunningAppBannerView extends YouwolBannerView {
     }
 }
 
-
 export class PlatformBannerView implements VirtualDOM {
-
     public readonly state: PlatformState
     public readonly children: VirtualDOM[]
 
-    constructor(params: { state: PlatformState }) {
+    constructor(params: { state: PlatformState; [key: string]: unknown }) {
         Object.assign(this, params)
         this.children = [
-            child$(
-                this.state.runningApplication$,
-                (app) => app == undefined
+            child$(this.state.runningApplication$, (app) =>
+                app == undefined
                     ? new RegularBannerView(this.state)
-                    : new RunningAppBannerView(this.state, app)
-            )
+                    : new RunningAppBannerView(this.state, app),
+            ),
         ]
     }
 }

@@ -1,30 +1,28 @@
-import { createObservableFromFetch, uuidv4 } from "@youwol/flux-core"
-import { AssetsGatewayClient } from "../../../clients/assets-gateway"
-import { TreeGroup } from "../../explorer.state"
-import { AnyFolderNode, DataNode, FutureNode, ItemNode } from "../../nodes"
-
+import { v4 as uuidv4 } from 'uuid'
+import { AssetsGateway } from '@youwol/http-clients'
+import { TreeGroup } from '../../explorer.state'
+import { AnyFolderNode, FutureNode, ItemNode } from '../../nodes'
 
 export class StoryState {
-
-    constructor(public readonly userTree: TreeGroup) {
-    }
+    constructor(public readonly userTree: TreeGroup) {}
 
     static newStory$(node: AnyFolderNode) {
-
-        let assetsGtwClient = new AssetsGatewayClient()
-        return assetsGtwClient.assets.story.create$(node.id, { title: "new story" })
+        const assetsGtwClient = new AssetsGateway.AssetsGatewayClient()
+        return assetsGtwClient.assets.story.create$(node.id, {
+            title: 'new story',
+        })
     }
 
     new(parentNode: AnyFolderNode) {
-        let uid = uuidv4()
+        const uid = uuidv4()
         parentNode.addStatus({ type: 'request-pending', id: uid })
-        let node = new FutureNode({
-            name: "new story",
-            icon: "fas fa-book",
+        const node = new FutureNode({
+            name: 'new story',
+            icon: 'fas fa-book',
             request: StoryState.newStory$(parentNode),
-            onResponse: (resp, node) => {
+            onResponse: (resp, targetNode) => {
                 parentNode.removeStatus({ type: 'request-pending', id: uid })
-                let storyNode = new ItemNode({
+                const storyNode = new ItemNode({
                     treeId: resp.treeId,
                     kind: 'story',
                     groupId: parentNode.groupId,
@@ -33,11 +31,11 @@ export class StoryState {
                     assetId: resp.assetId,
                     rawId: resp.rawId,
                     borrowed: false,
+                    origin: resp.origin,
                 })
-                this.userTree.replaceNode(node, storyNode)
-            }
+                this.userTree.replaceNode(targetNode, storyNode)
+            },
         })
         this.userTree.addChild(parentNode.id, node)
     }
-
 }

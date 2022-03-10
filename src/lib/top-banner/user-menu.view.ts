@@ -1,24 +1,22 @@
-import {child$, VirtualDOM} from "@youwol/flux-view"
-import {BehaviorSubject} from "rxjs"
-import {PlatformSettingsStore} from "../core/platform-settings"
-import {ExpandableMenu} from "./menu.view"
-import {YouwolBannerState} from "./top-banner.view"
-import {PlatformSettings} from "../core/platform-settings.models";
-
+import { child$, VirtualDOM } from '@youwol/flux-view'
+import { BehaviorSubject } from 'rxjs'
+import { PlatformSettingsStore } from '../core/platform-settings'
+import { PlatformSettings } from '../core/platform-settings.models'
+import { ExpandableMenu } from './menu.view'
+import { YouwolBannerState } from './top-banner.view'
 
 /**
  * Define the burger menu of [[YouwolBannerView]]
  */
 export class UserMenuView implements VirtualDOM {
-
-    static ClassSelector = "user-menu-view"
+    static ClassSelector = 'user-menu-view'
 
     public readonly state: YouwolBannerState
     public readonly showMenu$ = new BehaviorSubject(false)
 
     public readonly class = `my-auto burger-menu-icon-view ${UserMenuView.ClassSelector}`
     public readonly style = {
-        zIndex: 10
+        zIndex: 10,
     }
     children: VirtualDOM[]
 
@@ -27,23 +25,26 @@ export class UserMenuView implements VirtualDOM {
 
     public readonly contentView: VirtualDOM
     /**
-     * 
+     *
      * @param parameters Constructor's parameters
      * @param parameters.contentView View displayed when the burger menu is expanded (see [[BurgerMenu]])
-     * 
+     *
      */
-    constructor(parameters: { state: YouwolBannerState, contentView: VirtualDOM }) {
-
+    constructor(parameters: {
+        state: YouwolBannerState
+        contentView: VirtualDOM
+    }) {
         Object.assign(this, parameters)
 
-        let expandableMenu = new ExpandableMenu({
+        const expandableMenu = new ExpandableMenu({
             contentView: this.contentView,
             style: {
                 top: '0px',
-                right: '0px'
-            }
+                right: '0px',
+            },
         })
-        this.onclick = () => expandableMenu.showMenu$.next(!expandableMenu.showMenu$.getValue())
+        this.onclick = () =>
+            expandableMenu.showMenu$.next(!expandableMenu.showMenu$.getValue())
         this.onmouseleave = () => expandableMenu.showMenu$.next(false)
 
         this.children = [
@@ -52,22 +53,23 @@ export class UserMenuView implements VirtualDOM {
                 children: [
                     child$(
                         PlatformSettingsStore.settings$,
-                        (settings: PlatformSettings) => settings.you.avatar
+                        (settings: PlatformSettings) => settings.you.avatar,
                     ),
                     {
                         class: 'd-flex flex-column h-100 px-1 fv-text-secondary',
                         children: [
                             {
-                                class: 'fas fa-caret-down h-50', style: { opacity: '0' }
+                                class: 'fas fa-caret-down h-50',
+                                style: { opacity: '0' },
                             },
                             {
-                                class: 'fas fa-caret-down h-50'
-                            }
-                        ]
-                    }
-                ]
+                                class: 'fas fa-caret-down h-50',
+                            },
+                        ],
+                    },
+                ],
             },
-            expandableMenu
+            expandableMenu,
         ]
     }
 }

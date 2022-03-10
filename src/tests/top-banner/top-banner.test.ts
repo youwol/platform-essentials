@@ -1,8 +1,10 @@
-import '../mock-requests'
-import {getFromDocument, queryFromDocument, resetPyYouwolDbs$} from '../common'
+// eslint-disable-next-line eslint-comments/disable-enable-pair -- to not have problem
+/* eslint-disable jest/no-done-callback -- eslint-comment It is required because */
 
-import {render, VirtualDOM} from "@youwol/flux-view"
-import {BehaviorSubject, of} from "rxjs"
+import '../mock-requests'
+import { render, VirtualDOM } from '@youwol/flux-view'
+import { BehaviorSubject, of } from 'rxjs'
+import { take } from 'rxjs/operators'
 import {
     ComboTogglesView,
     defaultUserMenu,
@@ -14,10 +16,14 @@ import {
     UserMenuView,
     YouwolBannerState,
     YouwolBannerView,
-    YouwolMenuView
-} from "../../lib"
-import {take} from 'rxjs/operators'
+    YouwolMenuView,
+} from '../../lib/top-banner'
 
+import {
+    getFromDocument,
+    queryFromDocument,
+    resetPyYouwolDbs$,
+} from '../common'
 
 beforeAll(async (done) => {
     resetPyYouwolDbs$().subscribe(() => {
@@ -25,25 +31,25 @@ beforeAll(async (done) => {
     })
 })
 
-
-export enum ViewMode {
+enum ViewMode {
     renderOnly = 'renderOnly',
     editOnly = 'editOnly',
-    simultaneous = 'simultaneous'
+    simultaneous = 'simultaneous',
 }
 
-export class TopBannerState extends YouwolBannerState {
-
-    public readonly viewMode$ = new BehaviorSubject<ViewMode>(ViewMode.renderOnly)
+class TopBannerState extends YouwolBannerState {
+    public readonly viewMode$ = new BehaviorSubject<ViewMode>(
+        ViewMode.renderOnly,
+    )
     public readonly readonly = true
+
     constructor() {
         super()
     }
 }
 
-export class CustomActionsView implements VirtualDOM {
-
-    static ClassSelector = "custom-actions-view"
+class CustomActionsView implements VirtualDOM {
+    static ClassSelector = 'custom-actions-view'
     public readonly state: TopBannerState
 
     public readonly class = `d-flex justify-content-around my-auto custom-actions-view ${CustomActionsView.ClassSelector}`
@@ -52,140 +58,147 @@ export class CustomActionsView implements VirtualDOM {
     static iconsFactory = {
         [ViewMode.simultaneous]: 'fa-columns',
         [ViewMode.editOnly]: 'fa-pen',
-        [ViewMode.renderOnly]: 'fa-eye'
+        [ViewMode.renderOnly]: 'fa-eye',
     }
 
     constructor(params: { state: YouwolBannerState }) {
-
         Object.assign(this, params)
-        let viewModeCombo = new ComboTogglesView<ViewMode, YouwolBannerState>({
-            selection$: this.state.viewMode$,
-            state: this.state,
-            values: [ViewMode.simultaneous, ViewMode.editOnly, ViewMode.renderOnly],
-            viewFactory: (mode: ViewMode) => {
-                return new FaIconToggleView<ViewMode>({
-                    value: mode,
-                    selection$: this.state.viewMode$,
-                    classes: CustomActionsView.iconsFactory[mode] + ` ${mode}`
-                })
-            }
-        })
+        const viewModeCombo = new ComboTogglesView<ViewMode, YouwolBannerState>(
+            {
+                selection$: this.state.viewMode$,
+                state: this.state,
+                values: [
+                    ViewMode.simultaneous,
+                    ViewMode.editOnly,
+                    ViewMode.renderOnly,
+                ],
+                viewFactory: (mode: ViewMode) => {
+                    return new FaIconToggleView<ViewMode>({
+                        value: mode,
+                        selection$: this.state.viewMode$,
+                        classes:
+                            CustomActionsView.iconsFactory[mode] + ` ${mode}`,
+                    })
+                },
+            },
+        )
 
-        this.children = [
-            viewModeCombo
-        ]
+        this.children = [viewModeCombo]
     }
 }
 
-
-export class BannerView extends YouwolBannerView {
-
+class BannerView extends YouwolBannerView {
     constructor({ state }: { state: TopBannerState }) {
         super({
             state,
             badgesView: new LockerBadge({
-                locked$: of(state.readonly)
+                locked$: of(state.readonly),
             }),
             customActionsView: new CustomActionsView({ state }),
             userMenuView: defaultUserMenu(state),
-            youwolMenuView: defaultYouWolMenu(state)
+            youwolMenuView: defaultYouWolMenu(state),
         })
     }
 }
 
-
 test('rendering: what should be displayed is displayed', (done) => {
+    document.body.innerHTML = ''
 
-    document.body.innerHTML = ""
-
-    let state = new TopBannerState()
-    let bannerView = new BannerView({ state })
+    const state = new TopBannerState()
+    const bannerView = new BannerView({ state })
     document.body.appendChild(render(bannerView))
 
-    let expectedDisplayed = [
+    const expectedDisplayed = [
         YouwolBannerView.ClassSelector,
         CustomActionsView.ClassSelector,
         ViewMode.editOnly,
         ViewMode.renderOnly,
         ViewMode.simultaneous,
         YouwolMenuView.ClassSelector,
-        LockerBadge.ClassSelector
+        LockerBadge.ClassSelector,
     ]
-    expectedDisplayed.forEach(selector => {
-
-        let elem = document.querySelector("." + selector)
+    expectedDisplayed.forEach((selector) => {
+        const elem = document.querySelector('.' + selector)
         expect(elem).toBeTruthy()
         done()
     })
 })
 
-
 test('rendering: open user menu', (done) => {
+    document.body.innerHTML = ''
 
-    document.body.innerHTML = ""
-
-    let state = new TopBannerState()
-    let bannerView = new BannerView({ state })
+    const state = new TopBannerState()
+    const bannerView = new BannerView({ state })
     document.body.appendChild(render(bannerView))
 
-    YouwolBannerState.signedIn$.pipe(
-        take(1)
-    ).subscribe(() => {
-        let userMenuView = getFromDocument<UserMenuView>("." + UserMenuView.ClassSelector)
+    YouwolBannerState.signedIn$.pipe(take(1)).subscribe(() => {
+        const userMenuView = getFromDocument<UserMenuView>(
+            '.' + UserMenuView.ClassSelector,
+        )
 
-        userMenuView.dispatchEvent(new Event("click", { bubbles: true }))
-        let sections = queryFromDocument<MenuSection>("." + MenuSection.ClassSelector)
-        expect(sections.length).toEqual(2)
+        userMenuView.dispatchEvent(new Event('click', { bubbles: true }))
+        let sections = queryFromDocument<MenuSection>(
+            '.' + MenuSection.ClassSelector,
+        )
+        expect(sections).toHaveLength(2)
 
-        let burgerItems = queryFromDocument<MenuItem>("." + MenuItem.ClassSelector)
+        const burgerItems = queryFromDocument<MenuItem>(
+            '.' + MenuItem.ClassSelector,
+        )
 
-        expect(burgerItems.length).toEqual(3);
+        expect(burgerItems).toHaveLength(3)
         userMenuView.onmouseleave()
-        sections = queryFromDocument<MenuSection>("." + MenuSection.ClassSelector)
+        sections = queryFromDocument<MenuSection>(
+            '.' + MenuSection.ClassSelector,
+        )
 
-        expect(sections.length).toEqual(0)
+        expect(sections).toHaveLength(0)
         done()
     })
 })
 
-
 test('rendering: open youwol menu', (done) => {
+    document.body.innerHTML = ''
 
-    document.body.innerHTML = ""
-
-    let state = new TopBannerState()
-    let bannerView = new BannerView({ state })
+    const state = new TopBannerState()
+    const bannerView = new BannerView({ state })
     document.body.appendChild(render(bannerView))
 
-    let youwolMenuView = getFromDocument<YouwolMenuView>("." + YouwolMenuView.ClassSelector)
+    const youwolMenuView = getFromDocument<YouwolMenuView>(
+        '.' + YouwolMenuView.ClassSelector,
+    )
 
-    youwolMenuView.dispatchEvent(new Event("click", { bubbles: true }))
-    let sections = Array.from(document.querySelectorAll("." + MenuSection.ClassSelector))
-    expect(sections.length).toEqual(2)
+    youwolMenuView.dispatchEvent(new Event('click', { bubbles: true }))
+    let sections = Array.from(
+        document.querySelectorAll('.' + MenuSection.ClassSelector),
+    )
+    expect(sections).toHaveLength(2)
 
-    let burgerItems = queryFromDocument<MenuItem>("." + MenuItem.ClassSelector)
+    const burgerItems = queryFromDocument<MenuItem>(
+        '.' + MenuItem.ClassSelector,
+    )
 
-    expect(burgerItems.length).toEqual(3);
+    expect(burgerItems).toHaveLength(3)
     youwolMenuView.onmouseleave()
-    sections = queryFromDocument<MenuSection>("." + MenuSection.ClassSelector)
+    sections = queryFromDocument<MenuSection>('.' + MenuSection.ClassSelector)
 
-    expect(sections.length).toEqual(0)
+    expect(sections).toHaveLength(0)
     done()
 })
 
-
 test('combo toggle', (done) => {
+    document.body.innerHTML = ''
 
-    document.body.innerHTML = ""
-
-    let state = new TopBannerState()
-    let bannerView = new BannerView({ state })
+    const state = new TopBannerState()
+    const bannerView = new BannerView({ state })
     document.body.appendChild(render(bannerView))
 
-    let toggles = queryFromDocument<FaIconToggleView<ViewMode>>("." + FaIconToggleView.ClassSelector)
-    expect(toggles.length).toEqual(3);
+    const toggles = queryFromDocument<FaIconToggleView<ViewMode>>(
+        '.' + FaIconToggleView.ClassSelector,
+    )
+    expect(toggles).toHaveLength(3)
     toggles[0].dispatchEvent(new Event('click'))
-    state.viewMode$.subscribe(mode => {
+    state.viewMode$.subscribe((mode) => {
         expect(mode).toEqual(toggles[0].value)
         done()
     })
