@@ -25,7 +25,7 @@ import {
     resetPyYouwolDbs$,
 } from '../common'
 
-beforeAll(async (done) => {
+beforeAll((done) => {
     resetPyYouwolDbs$().subscribe(() => {
         done()
     })
@@ -120,8 +120,8 @@ test('rendering: what should be displayed is displayed', (done) => {
     expectedDisplayed.forEach((selector) => {
         const elem = document.querySelector('.' + selector)
         expect(elem).toBeTruthy()
-        done()
     })
+    done()
 })
 
 test('rendering: open user menu', (done) => {

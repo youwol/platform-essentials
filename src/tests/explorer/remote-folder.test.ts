@@ -23,7 +23,7 @@ import {
 import { forkJoin } from 'rxjs'
 import { RequestsExecutor } from '../../lib/explorer/requests-executor'
 
-beforeEach(async (done) => {
+beforeEach((done) => {
     jest.setTimeout(90 * 1000)
 
     const youwolClient = new PyYouwol.PyYouwolClient()

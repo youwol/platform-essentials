@@ -15,7 +15,7 @@ import {
     shell$,
 } from './shell'
 
-beforeEach(async (done) => {
+beforeEach((done) => {
     jest.setTimeout(900 * 1000)
     resetPyYouwolDbs$().subscribe(() => {
         done()

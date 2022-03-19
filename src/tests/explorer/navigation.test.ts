@@ -27,7 +27,7 @@ const FolderSelectedActions = [
     'refresh',
 ]
 
-beforeEach(async (done) => {
+beforeEach((done) => {
     jest.setTimeout(90 * 1000)
     resetPyYouwolDbs$().subscribe(() => {
         done()
