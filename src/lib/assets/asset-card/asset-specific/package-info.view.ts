@@ -15,6 +15,7 @@ import {
 } from 'rxjs/operators'
 import { getUrlBase } from '@youwol/cdn-client'
 import { Select } from '@youwol/fv-input'
+import { ExplorerView } from './package-explorer.view'
 
 type Asset = AssetsGateway.Asset
 type MetadataResponse = AssetsGateway.MetadataResponse
@@ -96,15 +97,20 @@ interface Link {
 }
 
 export class PackageInfoState {
+    static nativeExplorerId = 'native-explorer'
+
     public readonly asset: Asset
     public readonly metadata$: Observable<MetadataResponse>
     public readonly selectedVersion$ = new BehaviorSubject<string>(undefined)
     public readonly links$: Observable<Link[]>
-    public readonly selectedLink$ = new BehaviorSubject<string>(undefined)
+    public readonly selectedLink$ = new BehaviorSubject<string>(
+        PackageInfoState.nativeExplorerId,
+    )
     public readonly client = new AssetsGateway.AssetsGatewayClient().raw.package
 
     constructor(params: { asset: Asset }) {
         Object.assign(this, params)
+
         this.metadata$ = this.client.getMetadata$(this.asset.rawId).pipe(
             raiseHTTPErrors(),
             tap((metadata) => {
@@ -134,12 +140,20 @@ export class PackageInfoState {
                                 ? links.map((l) => ({ ...l, version }))
                                 : []
                         }),
+                        map((links) => {
+                            return [
+                                {
+                                    name: 'Explorer',
+                                    url: PackageInfoState.nativeExplorerId,
+                                    version,
+                                },
+                                ...links,
+                            ]
+                        }),
                     )
             }),
-            tap((links) => {
-                if (links.length > 0) {
-                    this.selectedLink$.next(links[0].url)
-                }
+            tap(() => {
+                this.selectedLink$.next(PackageInfoState.nativeExplorerId)
             }),
         )
     }
@@ -158,6 +172,12 @@ export class PackageInfoContent {
                 combineLatest([this.state.selectedLink$, this.state.links$]),
                 ([url, links]) => {
                     const link = links.find((l) => l.url == url)
+                    if (url == PackageInfoState.nativeExplorerId) {
+                        return new ExplorerView({
+                            asset: this.state.asset,
+                            version: link.version,
+                        })
+                    }
                     if (link == undefined) {
                         return {}
                     }

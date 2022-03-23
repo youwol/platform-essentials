@@ -32,6 +32,7 @@ import {
     PackageLinkSelect,
     PackageVersionSelect,
 } from '../../lib/assets/asset-card/asset-specific/package-info.view'
+import { ExplorerView } from '../../lib/assets/asset-card/asset-specific/package-explorer.view'
 
 let asset: AssetsGateway.Asset
 jest.setTimeout(90 * 100000)
@@ -135,16 +136,23 @@ test('packages & version tab', (done) => {
                         { name: '1.0.0', selected: false },
                     ])
                     expectReports(parent, [
-                        { name: 'coverage', selected: true },
+                        { name: 'Explorer', selected: true },
+                        { name: 'coverage', selected: false },
                         { name: 'bundle-analysis', selected: false },
                     ])
-                    expectContent(parent, 'reports/coverage.html')
+                    const explorer = getFromDocument(
+                        `.${ExplorerView.ClassSelector}`,
+                        () => true,
+                        parent,
+                    )
+                    expect(explorer).toBeTruthy()
                 },
             }),
             click(`.${PackageLinkSelect.ClassSelector} option:last-child`),
             expectSnapshot({
                 content: (parent: AssetCardTabsContent & HTMLDivElement) => {
                     expectReports(parent, [
+                        { name: 'Explorer', selected: false },
                         { name: 'coverage', selected: false },
                         { name: 'bundle-analysis', selected: true },
                     ])
@@ -163,7 +171,9 @@ test('packages & version tab', (done) => {
             wait('links$'),
             expectSnapshot({
                 content: (parent: AssetCardTabsContent & HTMLDivElement) => {
-                    expectReports(parent, [])
+                    expectReports(parent, [
+                        { name: 'Explorer', selected: true },
+                    ])
                     const iframe = getFromDocument<HTMLIFrameElement>(
                         `iframe`,
                         () => true,
