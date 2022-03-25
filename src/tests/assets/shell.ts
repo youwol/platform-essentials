@@ -8,14 +8,10 @@ import {
     skip,
     skipWhile,
     delay,
+    mapTo,
 } from 'rxjs/operators'
 import { readFileSync } from 'fs'
 import path from 'path'
-import {
-    Asset,
-    AssetsGatewayClient,
-    DefaultDriveResponse,
-} from '@youwol/http-clients/dist/lib/assets-gateway'
 import { AssetCardView } from '../../lib/assets'
 import { render, VirtualDOM } from '@youwol/flux-view'
 import { getFromDocument, queryFromDocument } from '../common'
@@ -23,17 +19,22 @@ import {
     AssetCardTabsContent,
     AssetCardTabsHeader,
 } from '../../lib/assets/asset-card/asset-card.view'
+import {
+    ExplorerView,
+    FolderView,
+    PathElementView,
+} from '../../lib/assets/asset-card/asset-specific/package-explorer.view'
 
 export class Shell {
-    public readonly defaultUserDrive: DefaultDriveResponse
-    public readonly assetsGtw: AssetsGatewayClient
+    public readonly defaultUserDrive: AssetsGateway.DefaultDriveResponse
+    public readonly assetsGtw: AssetsGateway.AssetsGatewayClient
     public readonly assetId?: string
     public readonly assetOutput$ = new Subject<AssetsGateway.Asset>()
     public readonly schedulers?: { [k: string]: Observable<unknown> }
 
     constructor(params: {
-        defaultUserDrive: DefaultDriveResponse
-        assetsGtw: AssetsGatewayClient
+        defaultUserDrive: AssetsGateway.DefaultDriveResponse
+        assetsGtw: AssetsGateway.AssetsGatewayClient
         assetId?: string
         schedulers?: { [k: string]: Observable<unknown> }
     }) {
@@ -94,7 +95,7 @@ export function installPackage({ zipPath }: { zipPath: string }) {
                         map((asset) => [asset, shell]),
                     )
             }),
-            map(([asset, shell]: [Asset, Shell]) => {
+            map(([asset, shell]: [AssetsGateway.Asset, Shell]) => {
                 return new Shell({
                     defaultUserDrive: shell.defaultUserDrive,
                     assetsGtw: shell.assetsGtw,
@@ -108,7 +109,7 @@ export function installPackage({ zipPath }: { zipPath: string }) {
 export function popupAssetCardView({
     withTabs,
 }: {
-    withTabs: { [_key: string]: (asset: Asset) => VirtualDOM }
+    withTabs: { [_key: string]: (asset: AssetsGateway.Asset) => VirtualDOM }
 }) {
     return (source$: Observable<Shell>) => {
         return source$.pipe(
@@ -119,7 +120,7 @@ export function popupAssetCardView({
                     map((asset) => [asset, shell]),
                 )
             }),
-            map(([assetResp, shell]: [Asset, Shell]) => {
+            map(([assetResp, shell]: [AssetsGateway.Asset, Shell]) => {
                 const view = new AssetCardView({
                     asset: assetResp,
                     actionsFactory: () => ({}),
@@ -208,6 +209,42 @@ export function click(selector: string) {
                 const elem = document.querySelector(selector)
                 elem.dispatchEvent(new MouseEvent('click', { bubbles: true }))
             }),
+        )
+    }
+}
+
+export function navigateCdnFolder(params: { path: string }) {
+    return (source$: Observable<Shell>) => {
+        return source$.pipe(
+            mergeMap((shell: Shell) => {
+                const explorerView = getFromDocument<ExplorerView>(
+                    `.${ExplorerView.ClassSelector}`,
+                )
+                expect(explorerView).toBeTruthy()
+                const folders = queryFromDocument<FolderView>(
+                    `.${FolderView.ClassSelector}`,
+                )
+                if (params.path == '..') {
+                    const pathElements = queryFromDocument<PathElementView>(
+                        `.${PathElementView.ClassSelector}`,
+                    )
+                    const pathView = pathElements[pathElements.length - 2]
+                    pathView.dispatchEvent(
+                        new MouseEvent('click', { bubbles: true }),
+                    )
+                    return explorerView.state.items$.pipe(take(1), mapTo(shell))
+                }
+                const folderView = folders.find(
+                    (f) => f.folder.path == params.path,
+                )
+
+                expect(folderView).toBeTruthy()
+                folderView.dispatchEvent(
+                    new MouseEvent('dblclick', { bubbles: true }),
+                )
+                return explorerView.state.items$.pipe(take(1), mapTo(shell))
+            }),
+            delay(0),
         )
     }
 }
