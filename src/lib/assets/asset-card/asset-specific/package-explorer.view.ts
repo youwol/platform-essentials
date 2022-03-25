@@ -1,20 +1,25 @@
 import { BehaviorSubject, Observable } from 'rxjs'
-import { AssetsGateway, raiseHTTPErrors } from '@youwol/http-clients'
+import {
+    AssetsGateway,
+    CdnBackend,
+    raiseHTTPErrors,
+} from '@youwol/http-clients'
 import { mergeMap } from 'rxjs/operators'
-import { Asset } from '@youwol/http-clients/dist/lib/assets-gateway'
+
 import { child$, VirtualDOM } from '@youwol/flux-view'
 import { getUrlBase } from '@youwol/cdn-client'
 
 export class ExplorerState {
-    public readonly asset: Asset
+    public readonly asset: AssetsGateway.Asset
     public readonly version: string
-    public readonly items$: Observable<AssetsGateway.Cdn.ExplorerResponse>
+    public readonly items$: Observable<CdnBackend.ExplorerResponse>
     public readonly selectedFolder$ = new BehaviorSubject<string>('')
 
     public readonly client = new AssetsGateway.AssetsGatewayClient().cdn
 
-    constructor(params: { asset: Asset; version: string }) {
+    constructor(params: { asset: AssetsGateway.Asset; version: string }) {
         Object.assign(this, params)
+
         this.items$ = this.selectedFolder$.pipe(
             mergeMap((folder) => {
                 return this.client.queryExplorer$(
@@ -36,13 +41,13 @@ export class FolderView {
     static ClassSelector = 'folder-view'
     public readonly class = `${FolderView.ClassSelector} d-flex align-items-center fv-pointer fv-hover-text-focus`
     public readonly children: VirtualDOM[]
-    public readonly folder: AssetsGateway.Cdn.FolderResponse
+    public readonly folder: CdnBackend.FolderResponse
     public readonly state: ExplorerState
     public readonly ondblclick: () => void
 
     constructor(params: {
         state: ExplorerState
-        folder: AssetsGateway.Cdn.FolderResponse
+        folder: CdnBackend.FolderResponse
     }) {
         Object.assign(this, params)
         this.children = [
@@ -67,11 +72,11 @@ export class FileView {
     static ClassSelector = 'file-view'
     public readonly class = `${FileView.ClassSelector} d-flex align-items-center fv-pointer fv-hover-text-focus`
     public readonly children: VirtualDOM[]
-    public readonly file: AssetsGateway.Cdn.FileResponse
+    public readonly file: CdnBackend.FileResponse
     public readonly state: ExplorerState
 
     constructor(params: {
-        file: AssetsGateway.Cdn.FileResponse
+        file: CdnBackend.FileResponse
         state: ExplorerState
     }) {
         Object.assign(this, params)
@@ -103,9 +108,10 @@ export class ExplorerView {
     public readonly state: ExplorerState
     public readonly children: VirtualDOM[]
 
-    constructor(params: { asset: Asset; version: string }) {
+    constructor(params: { asset: AssetsGateway.Asset; version: string }) {
         Object.assign(this, params)
         this.state = new ExplorerState(params)
+
         this.children = [
             child$(
                 this.state.selectedFolder$,
@@ -168,9 +174,6 @@ export class PathElementView {
             {
                 class: 'border rounded p-1 mx-1 fv-pointer fv-hover-text-focus',
                 innerText: this.name,
-                onclick: () => {
-                    this.state.openFolder(this.folderPath)
-                },
             },
             {
                 innerText: '/',
