@@ -13,7 +13,7 @@ import {
     shell$,
 } from './shell'
 
-beforeEach(async (done) => {
+beforeEach((done) => {
     resetPyYouwolDbs$().subscribe(() => {
         done()
     })

@@ -96,15 +96,42 @@ export class AssetCardTabs extends Tabs.View {
         super({
             state,
             contentView: (_, tabData: AssetTab) => {
-                return tabData.id == overViewUid ? mainView : tabData.view
+                let view = tabData.id == overViewUid ? mainView : tabData.view
+                return new AssetCardTabsContent({ view, id: tabData.id })
             },
-            headerView: (_, tabData) => ({
-                class: `px-2 rounded border ${
-                    tabData.id == overViewUid ? 'overview' : 'default-app'
-                }`,
-                innerText: tabData.name,
-            }),
+            headerView: (_, tabData) =>
+                new AssetCardTabsHeader({
+                    name: tabData.name,
+                    id: tabData.id,
+                }),
             class: `${AssetCardTabs.ClassSelector} d-flex flex-column h-100`,
         })
+    }
+}
+
+export class AssetCardTabsContent implements VirtualDOM {
+    static ClassSelector = 'asset-card-tabs-content'
+    public readonly class = `${AssetCardTabsContent.ClassSelector} h-100 w-100`
+    public readonly children: VirtualDOM[]
+    public readonly view: VirtualDOM
+    constructor(params: { view: VirtualDOM; id: string }) {
+        Object.assign(this, params)
+        this.children = [this.view]
+    }
+}
+
+export class AssetCardTabsHeader implements VirtualDOM {
+    static ClassSelector = 'asset-card-tabs-header'
+    public readonly class: string = `${AssetCardTabsHeader.ClassSelector} px-2 rounded border`
+    public readonly children: VirtualDOM[]
+    public readonly name: string
+    public readonly id: string
+    constructor(params: { name: string; id: string }) {
+        Object.assign(this, params)
+        this.children = [
+            {
+                innerText: this.name,
+            },
+        ]
     }
 }

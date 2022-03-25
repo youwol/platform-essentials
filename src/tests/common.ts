@@ -61,8 +61,10 @@ type VDomType<U, T> = U & T & { vDom: T }
 export function getFromDocument<T, U = HTMLDivElement>(
     selector: string,
     findFct: (d: VDomType<U, T>) => boolean = () => true,
+    parent?: HTMLElement | Document,
 ): VDomType<U, T> {
-    const views = document.querySelectorAll(selector) as unknown as VDomType<
+    parent = parent || document
+    const views = parent.querySelectorAll(selector) as unknown as VDomType<
         U,
         T
     >[]
@@ -75,8 +77,10 @@ export function getFromDocument<T, U = HTMLDivElement>(
 export function queryFromDocument<T, U = HTMLDivElement>(
     selector: string,
     filterFct: (d: VDomType<U, T>) => boolean = () => true,
+    parent?: HTMLElement | Document,
 ): VDomType<U, T>[] {
-    const views = document.querySelectorAll(selector) as unknown as VDomType<
+    parent = parent || document
+    const views = parent.querySelectorAll(selector) as unknown as VDomType<
         U,
         T
     >[]

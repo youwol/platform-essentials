@@ -23,9 +23,9 @@ import {
 import { forkJoin } from 'rxjs'
 import { RequestsExecutor } from '../../lib/explorer/requests-executor'
 
-beforeEach(async (done) => {
-    jest.setTimeout(90 * 1000)
+jest.setTimeout(20 * 1000)
 
+beforeEach((done) => {
     const youwolClient = new PyYouwol.PyYouwolClient()
     resetPyYouwolDbs$()
         .pipe(

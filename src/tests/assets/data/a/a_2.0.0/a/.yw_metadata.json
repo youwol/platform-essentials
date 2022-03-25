@@ -1,0 +1,12 @@
+{
+    "links": [
+        {
+            "name": "coverage",
+            "url": "reports/coverage.html"
+        },
+        {
+            "name": "bundle-analysis",
+            "url": "reports/bundle-analysis.html"
+        }
+    ]
+}

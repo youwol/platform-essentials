@@ -22,7 +22,7 @@ import { createStory, getFromDocument, resetPyYouwolDbs$ } from '../common'
 
 let asset: AssetsGateway.Asset
 
-beforeAll(async (done) => {
+beforeAll((done) => {
     resetPyYouwolDbs$()
         .pipe(createStory('test'))
         .subscribe((a) => {
