@@ -33,8 +33,6 @@ import {
     PathElementView,
 } from '../../lib/assets/asset-card/asset-specific/package-explorer.view'
 
-jest.setTimeout(90 * 100000)
-
 beforeEach((done) => {
     resetPyYouwolDbs$().subscribe(() => {
         document.body.innerHTML = ''
