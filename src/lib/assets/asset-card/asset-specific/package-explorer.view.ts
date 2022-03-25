@@ -156,7 +156,7 @@ export class PathElementView {
     public readonly name: string
     public readonly folderPath: string
     public readonly children: VirtualDOM[]
-
+    public readonly onclick: () => void
     constructor(params: {
         folderPath: string
         name: string
@@ -176,6 +176,10 @@ export class PathElementView {
                 innerText: '/',
             },
         ]
+
+        this.onclick = () => {
+            this.state.openFolder(this.folderPath)
+        }
     }
 }
 
