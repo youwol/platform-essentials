@@ -169,7 +169,12 @@ export class PackageInfoContent {
         Object.assign(this, params)
         this.children = [
             child$(
-                combineLatest([this.state.selectedLink$, this.state.links$]),
+                combineLatest([
+                    this.state.selectedLink$.pipe(
+                        filter((l) => l != undefined),
+                    ),
+                    this.state.links$,
+                ]),
                 ([url, links]) => {
                     const link = links.find((l) => l.url == url)
                     if (url == PackageInfoState.nativeExplorerId) {
@@ -177,9 +182,6 @@ export class PackageInfoContent {
                             asset: this.state.asset,
                             version: link.version,
                         })
-                    }
-                    if (link == undefined) {
-                        return {}
                     }
                     return {
                         tag: 'iframe',
