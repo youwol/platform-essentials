@@ -4,7 +4,7 @@ import {
     CdnBackend,
     raiseHTTPErrors,
 } from '@youwol/http-clients'
-import { mergeMap } from 'rxjs/operators'
+import { mergeMap, share } from 'rxjs/operators'
 
 import { child$, VirtualDOM } from '@youwol/flux-view'
 import { getUrlBase } from '@youwol/cdn-client'
@@ -29,6 +29,7 @@ export class ExplorerState {
                 )
             }),
             raiseHTTPErrors(),
+            share(),
         )
     }
 

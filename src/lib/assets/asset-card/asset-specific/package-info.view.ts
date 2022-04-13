@@ -10,6 +10,7 @@ import {
     filter,
     map,
     mergeMap,
+    share,
     shareReplay,
     tap,
 } from 'rxjs/operators'
@@ -156,6 +157,7 @@ export class PackageInfoState {
             tap(() => {
                 this.selectedLink$.next(PackageInfoState.nativeExplorerId)
             }),
+            share(),
         )
     }
 }
