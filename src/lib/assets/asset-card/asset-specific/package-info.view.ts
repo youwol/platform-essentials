@@ -106,12 +106,12 @@ export class PackageInfoState {
     public readonly selectedLink$ = new BehaviorSubject<string>(
         PackageInfoState.nativeExplorerId,
     )
-    public readonly client = new AssetsGateway.AssetsGatewayClient().raw.package
+    public readonly client = new AssetsGateway.AssetsGatewayClient().cdn
 
     constructor(params: { asset: Asset }) {
         Object.assign(this, params)
 
-        this.metadata$ = this.client.getMetadata$(this.asset.rawId).pipe(
+        this.metadata$ = this.client.getLibraryInfo$(this.asset.rawId).pipe(
             raiseHTTPErrors(),
             tap((metadata) => {
                 this.selectedVersion$.next(metadata.versions[0])
@@ -126,7 +126,8 @@ export class PackageInfoState {
                 return this.client
                     .getResource$(
                         this.asset.rawId,
-                        `${version}/.yw_metadata.json`,
+                        version,
+                        '.yw_metadata.json',
                     )
                     .pipe(
                         onHTTPErrors((error) => {
