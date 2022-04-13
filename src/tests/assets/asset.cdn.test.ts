@@ -13,19 +13,17 @@ import {
     click,
     expectSnapshot,
     installPackage,
-    instrumentSchedulers,
     popupAssetCardView,
     navigateCdnFolder,
     selectTab,
     shell$,
-    wait,
 } from './shell'
 import {
     AssetCardTabsContent,
     AssetCardTabsHeader,
 } from '../../lib/assets/asset-card/asset-card.view'
 import { AssetOverview } from '../../lib/assets'
-import { delay, distinctUntilChanged } from 'rxjs/operators'
+import { mapTo, mergeMap, take } from 'rxjs/operators'
 import {
     ExplorerView,
     FileView,
@@ -99,15 +97,12 @@ test('packages & version & external reports', (done) => {
                     expect(content.view).toBeInstanceOf(PackageInfoView)
                 },
             }),
-            instrumentSchedulers(() => {
+            mergeMap((shell) => {
                 const infoView = getFromDocument<PackageInfoView>(
                     `.${PackageInfoView.ClassSelector}`,
                 )
-                return {
-                    links$: infoView.state.links$.pipe(distinctUntilChanged()),
-                }
+                return infoView.state.links$.pipe(take(1), mapTo(shell))
             }),
-            wait('links$'),
             expectSnapshot({
                 content: (parent: AssetCardTabsContent & HTMLDivElement) => {
                     expectVersions(parent, [
@@ -147,7 +142,12 @@ test('packages & version & external reports', (done) => {
                     ])
                 },
             }),
-            wait('links$'),
+            mergeMap((shell) => {
+                const infoView = getFromDocument<PackageInfoView>(
+                    `.${PackageInfoView.ClassSelector}`,
+                )
+                return infoView.state.links$.pipe(take(1), mapTo(shell))
+            }),
             expectSnapshot({
                 content: (parent: AssetCardTabsContent & HTMLDivElement) => {
                     expectReports(parent, [
@@ -159,8 +159,10 @@ test('packages & version & external reports', (done) => {
                         parent,
                     )
                     expect(iframe).toBeFalsy()
+                    //console.log('Passed2')
                 },
             }),
+            take(1),
         )
         .subscribe(() => {
             done()
@@ -175,16 +177,12 @@ test('packages & explorer view', (done) => {
                 withTabs: { info: (asset) => new PackageInfoView({ asset }) },
             }),
             selectTab({ tabId: 'info' }),
-            instrumentSchedulers(() => {
+            mergeMap((shell) => {
                 const infoView = getFromDocument<PackageInfoView>(
                     `.${PackageInfoView.ClassSelector}`,
                 )
-                return {
-                    links$: infoView.state.links$.pipe(distinctUntilChanged()),
-                }
+                return infoView.state.links$.pipe(take(1), mapTo(shell))
             }),
-            wait('links$'),
-            delay(0),
             expectSnapshot({
                 content: (parent: AssetCardTabsContent & HTMLDivElement) => {
                     expectVersions(parent, [{ name: '2.0.0', selected: true }])
@@ -201,15 +199,12 @@ test('packages & explorer view', (done) => {
                     expect(explorer).toBeTruthy()
                 },
             }),
-            instrumentSchedulers(() => {
+            mergeMap((shell) => {
                 const explorer = getFromDocument<ExplorerView>(
                     `.${ExplorerView.ClassSelector}`,
                 )
-                return {
-                    items$: explorer.state.items$,
-                }
+                return explorer.state.items$.pipe(take(1), mapTo(shell))
             }),
-            wait('items$'),
             expectSnapshot({
                 content: () => {
                     const files = queryFromDocument<FileView>(
@@ -223,7 +218,6 @@ test('packages & explorer view', (done) => {
                 },
             }),
             navigateCdnFolder({ path: 'reports' }),
-            delay(0),
             expectSnapshot({
                 content: () => {
                     const files = queryFromDocument<FileView>(
@@ -257,7 +251,6 @@ test('packages & explorer view', (done) => {
                 },
             }),
             navigateCdnFolder({ path: '..' }),
-            delay(0),
             expectSnapshot({
                 content: () => {
                     const files = queryFromDocument<FileView>(
@@ -277,6 +270,7 @@ test('packages & explorer view', (done) => {
                     expect(pathElements[0].folderPath).toEqual('')
                 },
             }),
+            take(1),
         )
         .subscribe(() => {
             done()
