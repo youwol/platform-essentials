@@ -45,7 +45,7 @@ export class Shell {
 export function shell$() {
     const assetsGtw = new AssetsGateway.AssetsGatewayClient()
 
-    return assetsGtw.explorer.getDefaultUserDrive$().pipe(
+    return assetsGtw.explorerDeprecated.getDefaultUserDrive$().pipe(
         raiseHTTPErrors(),
         map((drive) => {
             return new Shell({ assetsGtw, defaultUserDrive: drive })
@@ -83,7 +83,7 @@ export function installPackage({ zipPath }: { zipPath: string }) {
                 const buffer = readFileSync(path.resolve(__dirname, zipPath))
                 const arraybuffer = Uint8Array.from(buffer).buffer
 
-                return shell.assetsGtw.assets.package
+                return shell.assetsGtw.assetsDeprecated.package
                     .upload$(
                         shell.defaultUserDrive.homeFolderId,
                         zipPath,
@@ -114,11 +114,13 @@ export function popupAssetCardView({
     return (source$: Observable<Shell>) => {
         return source$.pipe(
             mergeMap((shell) => {
-                return shell.assetsGtw.assets.get$(shell.assetId).pipe(
-                    raiseHTTPErrors(),
-                    take(1),
-                    map((asset) => [asset, shell]),
-                )
+                return shell.assetsGtw.assetsDeprecated
+                    .get$(shell.assetId)
+                    .pipe(
+                        raiseHTTPErrors(),
+                        take(1),
+                        map((asset) => [asset, shell]),
+                    )
             }),
             map(([assetResp, shell]: [AssetsGateway.Asset, Shell]) => {
                 const view = new AssetCardView({

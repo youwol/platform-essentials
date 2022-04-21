@@ -23,9 +23,10 @@ export class AssetPermissionsView implements VirtualDOM {
 
     constructor(params: { asset: Asset }) {
         Object.assign(this, params)
-        this.accessInfo$ = new AssetsGateway.AssetsGatewayClient().assets
-            .getAccess$(this.asset.assetId)
-            .pipe(raiseHTTPErrors(), share())
+        this.accessInfo$ =
+            new AssetsGateway.AssetsGatewayClient().assetsDeprecated
+                .getAccess$(this.asset.assetId)
+                .pipe(raiseHTTPErrors(), share())
         this.children = [
             child$(this.accessInfo$, (accessInfo) => {
                 return {

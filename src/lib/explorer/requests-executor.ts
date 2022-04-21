@@ -234,36 +234,41 @@ export class RequestsExecutor {
     }
 
     static renameFolder(folderId: string, newName: string) {
-        return RequestsExecutor.assetsGtwClient.explorer.folders.rename$(
+        return RequestsExecutor.assetsGtwClient.explorerDeprecated.folders.rename$(
             folderId,
             { name: newName },
         )
     }
 
     static renameAsset(itemId: string, newName: string) {
-        return RequestsExecutor.assetsGtwClient.assets.update$(itemId, {
-            name: newName,
-        })
+        return RequestsExecutor.assetsGtwClient.assetsDeprecated.update$(
+            itemId,
+            {
+                name: newName,
+            },
+        )
     }
 
     static deleteItem(node: AnyItemNode) {
-        return RequestsExecutor.assetsGtwClient.explorer.items.delete$(
+        return RequestsExecutor.assetsGtwClient.explorerDeprecated.items.delete$(
             node.treeId,
         )
     }
 
     static getItem(itemId: string) {
-        return RequestsExecutor.assetsGtwClient.explorer.items.get$(itemId)
+        return RequestsExecutor.assetsGtwClient.explorerDeprecated.items.get$(
+            itemId,
+        )
     }
 
     static deleteFolder(node: RegularFolderNode) {
-        return RequestsExecutor.assetsGtwClient.explorer.folders.delete$(
+        return RequestsExecutor.assetsGtwClient.explorerDeprecated.folders.delete$(
             node.folderId,
         )
     }
 
     static deleteDrive(node: DriveNode) {
-        return RequestsExecutor.assetsGtwClient.explorer.drives.delete$(
+        return RequestsExecutor.assetsGtwClient.explorerDeprecated.drives.delete$(
             node.driveId,
         )
     }
@@ -273,13 +278,13 @@ export class RequestsExecutor {
     }
 
     static getDefaultDrive(groupId: string) {
-        return RequestsExecutor.assetsGtwClient.explorer.groups
+        return RequestsExecutor.assetsGtwClient.explorerDeprecated.groups
             .getDefaultDrive$(groupId)
             .pipe(dispatchHTTPErrors(this.error$))
     }
 
     static purgeDrive(driveId: string) {
-        return RequestsExecutor.assetsGtwClient.explorer.drives
+        return RequestsExecutor.assetsGtwClient.explorerDeprecated.drives
             .purge$(driveId)
             .pipe(dispatchHTTPErrors(this.error$))
     }
@@ -288,7 +293,7 @@ export class RequestsExecutor {
         node: DriveNode | AnyFolderNode,
         body: { name: string; folderId: string },
     ) {
-        return RequestsExecutor.assetsGtwClient.explorer.folders
+        return RequestsExecutor.assetsGtwClient.explorerDeprecated.folders
             .create$(node.id, body)
             .pipe(dispatchHTTPErrors(this.error$))
     }
@@ -297,7 +302,7 @@ export class RequestsExecutor {
         target: AnyItemNode | RegularFolderNode,
         folder: AnyFolderNode | DriveNode,
     ) {
-        return RequestsExecutor.assetsGtwClient.explorer
+        return RequestsExecutor.assetsGtwClient.explorerDeprecated
             .move$(target.id, {
                 destinationFolderId: folder.id,
             })
@@ -308,13 +313,13 @@ export class RequestsExecutor {
         target: AnyItemNode | AnyFolderNode,
         folder: AnyFolderNode | DriveNode,
     ) {
-        return RequestsExecutor.assetsGtwClient.explorer
+        return RequestsExecutor.assetsGtwClient.explorerDeprecated
             .borrowItem$(target.id, { destinationFolderId: folder.id })
             .pipe(dispatchHTTPErrors(this.error$))
     }
 
     static getDeletedItems(driveId: string) {
-        return RequestsExecutor.assetsGtwClient.explorer.drives
+        return RequestsExecutor.assetsGtwClient.explorerDeprecated.drives
             .queryDeletedItems$(driveId)
             .pipe(
                 dispatchHTTPErrors(this.error$),
@@ -347,7 +352,7 @@ export class RequestsExecutor {
         driveId: string,
         folderId: string,
     ) {
-        return RequestsExecutor.assetsGtwClient.explorer.folders
+        return RequestsExecutor.assetsGtwClient.explorerDeprecated.folders
             .queryChildren$(folderId)
             .pipe(
                 dispatchHTTPErrors(this.error$),
@@ -404,7 +409,7 @@ export class RequestsExecutor {
     }
 
     static getDrivesChildren(groupId: string) {
-        return RequestsExecutor.assetsGtwClient.explorer.groups
+        return RequestsExecutor.assetsGtwClient.explorerDeprecated.groups
             .queryDrives$(groupId)
             .pipe(
                 dispatchHTTPErrors(this.error$),
@@ -426,7 +431,7 @@ export class RequestsExecutor {
     }
 
     static getAsset(assetId: string): Observable<AssetsGateway.Asset> {
-        return RequestsExecutor.assetsGtwClient.assets
+        return RequestsExecutor.assetsGtwClient.assetsDeprecated
             .get$(assetId)
             .pipe(dispatchHTTPErrors(this.error$))
     }

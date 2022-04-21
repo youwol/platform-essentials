@@ -142,8 +142,11 @@ export class PlatformSettingsStore {
         Called at least when the file is loaded, see below
          */
         const sessionStorage = new CdnSessionsStorage.CdnSessionsStorageClient()
-        sessionStorage.applications
-            .getData$(AUTO_GENERATED.name, 'settings')
+        sessionStorage
+            .getData$({
+                packageName: AUTO_GENERATED.name,
+                dataName: 'settings',
+            })
             .pipe(
                 raiseHTTPErrors(),
                 map((savedData) => {

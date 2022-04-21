@@ -77,7 +77,7 @@ class Lib {
 
 export class FluxDependenciesState {
     error$ = new Subject<HTTPError>()
-    accessInfo$ = new AssetsGateway.AssetsGatewayClient().assets
+    accessInfo$ = new AssetsGateway.AssetsGatewayClient().assetsDeprecated
         .getAccess$(this.asset.assetId)
         .pipe(raiseHTTPErrors(), share())
 
@@ -120,7 +120,7 @@ export class FluxDependenciesState {
         this.userPicks = {}
         this.libsVersionsCache = {}
 
-        this.assetsGtwClient.raw.fluxProject
+        this.assetsGtwClient.rawDeprecated.fluxProject
             .getProject$(asset.rawId)
             .pipe(dispatchHTTPErrors(this.error$))
             .subscribe((project) => {
@@ -134,7 +134,7 @@ export class FluxDependenciesState {
             if (lib.id) {
                 return this.libsVersionsCache[lib.id]
                     ? of(this.libsVersionsCache[lib.id])
-                    : this.assetsGtwClient.raw.package
+                    : this.assetsGtwClient.rawDeprecated.package
                           .getMetadata$(lib.id)
                           .pipe(
                               tap(
@@ -303,12 +303,12 @@ export class FluxDependenciesState {
             libraries: librariesVersion,
         }
 
-        this.assetsGtwClient.raw.fluxProject
+        this.assetsGtwClient.rawDeprecated.fluxProject
             .updateMetadata$(this.asset.rawId, body)
             .pipe(
                 dispatchHTTPErrors(this.error$),
                 mergeMap(() =>
-                    this.assetsGtwClient.raw.fluxProject
+                    this.assetsGtwClient.rawDeprecated.fluxProject
                         .getProject$(this.asset.rawId)
                         .pipe(dispatchHTTPErrors(this.error$)),
                 ),

@@ -8,7 +8,7 @@ export class StoryState {
 
     static newStory$(node: AnyFolderNode) {
         const assetsGtwClient = new AssetsGateway.AssetsGatewayClient()
-        return assetsGtwClient.assets.story.create$(node.id, {
+        return assetsGtwClient.assetsDeprecated.story.create$(node.id, {
             title: 'new story',
         })
     }

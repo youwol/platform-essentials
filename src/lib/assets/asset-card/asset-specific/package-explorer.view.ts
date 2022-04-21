@@ -12,7 +12,7 @@ import { getUrlBase } from '@youwol/cdn-client'
 export class ExplorerState {
     public readonly asset: AssetsGateway.Asset
     public readonly version: string
-    public readonly items$: Observable<CdnBackend.ExplorerResponse>
+    public readonly items$: Observable<CdnBackend.QueryExplorerResponse>
     public readonly selectedFolder$ = new BehaviorSubject<string>('')
 
     public readonly client = new AssetsGateway.AssetsGatewayClient().cdn
@@ -22,11 +22,11 @@ export class ExplorerState {
 
         this.items$ = this.selectedFolder$.pipe(
             mergeMap((folder) => {
-                return this.client.queryExplorer$(
-                    this.asset.rawId,
-                    this.version,
-                    folder,
-                )
+                return this.client.queryExplorer$({
+                    libraryId: this.asset.rawId,
+                    version: this.version,
+                    restOfPath: folder,
+                })
             }),
             raiseHTTPErrors(),
             share(),

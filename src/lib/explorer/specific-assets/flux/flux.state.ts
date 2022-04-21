@@ -7,7 +7,7 @@ export class FluxState {
     constructor(public readonly userTree: TreeGroup) {}
     static newFluxProject$(node: AnyFolderNode) {
         const assetsGtwClient = new AssetsGateway.AssetsGatewayClient()
-        return assetsGtwClient.assets.fluxProject.create$(node.id, {
+        return assetsGtwClient.assetsDeprecated.fluxProject.create$(node.id, {
             name: 'new project',
             description: '',
         })

@@ -112,24 +112,26 @@ export class PackageInfoState {
     constructor(params: { asset: Asset }) {
         Object.assign(this, params)
 
-        this.metadata$ = this.client.getLibraryInfo$(this.asset.rawId).pipe(
-            raiseHTTPErrors(),
-            tap((metadata) => {
-                this.selectedVersion$.next(metadata.versions[0])
-            }),
-            shareReplay(1),
-        )
+        this.metadata$ = this.client
+            .getLibraryInfo$({ libraryId: this.asset.rawId })
+            .pipe(
+                raiseHTTPErrors(),
+                tap((metadata) => {
+                    this.selectedVersion$.next(metadata.versions[0])
+                }),
+                shareReplay(1),
+            )
 
         this.links$ = this.selectedVersion$.pipe(
             filter((v) => v != undefined),
             distinctUntilChanged(),
             mergeMap((version) => {
                 return this.client
-                    .getResource$(
-                        this.asset.rawId,
+                    .getResource$({
+                        libraryId: this.asset.rawId,
                         version,
-                        '.yw_metadata.json',
-                    )
+                        restOfPath: '.yw_metadata.json',
+                    })
                     .pipe(
                         onHTTPErrors((error) => {
                             if (error.status == 404) {

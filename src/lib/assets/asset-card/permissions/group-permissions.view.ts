@@ -23,7 +23,7 @@ export class ExposedGroupState {
 
     update(body: AssetsGateway.AccessPolicyBody) {
         this.loading$.next(true)
-        new AssetsGateway.AssetsGatewayClient().assets
+        new AssetsGateway.AssetsGatewayClient().assetsDeprecated
             .updateAccess$(this.assetId, this.groupId, body)
             // XXX:  Why groupAccess is not used ?
             .subscribe((_groupAccess) => {
@@ -33,7 +33,7 @@ export class ExposedGroupState {
 
     refresh() {
         this.loading$.next(true)
-        new AssetsGateway.AssetsGatewayClient().assets
+        new AssetsGateway.AssetsGatewayClient().assetsDeprecated
             .getAccess$(this.assetId)
             .pipe(raiseHTTPErrors())
             .subscribe((info) => {

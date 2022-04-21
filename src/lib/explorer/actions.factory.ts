@@ -324,14 +324,16 @@ export function getActions$(
             ? selectedItem.node.driveId
             : selectedItem.node.id
 
-    return new Gtw.AssetsGatewayClient().explorer.getPermissions$(id).pipe(
-        map((permissions) => ({ item: selectedItem, permissions })),
-        map(({ item, permissions }) => {
-            return actionsList
-                .map((action) => action(state, item, permissions))
-                .filter((a) => a.applicable())
-        }),
-    )
+    return new Gtw.AssetsGatewayClient().explorerDeprecated
+        .getPermissions$(id)
+        .pipe(
+            map((permissions) => ({ item: selectedItem, permissions })),
+            map(({ item, permissions }) => {
+                return actionsList
+                    .map((action) => action(state, item, permissions))
+                    .filter((a) => a.applicable())
+            }),
+        )
 }
 
 export function openWithActionFromExe(app: Executable) {

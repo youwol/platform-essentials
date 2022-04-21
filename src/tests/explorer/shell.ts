@@ -51,12 +51,15 @@ import {
 import { expectAttributes, getFromDocument, queryFromDocument } from '../common'
 import { raiseHTTPErrors } from '@youwol/http-clients'
 
-export class Shell {
+export class NoContext {}
+
+export class Shell<T = NoContext> {
     folder: AnyFolderNode | DriveNode | GroupNode
     item?: BrowserNode
     actions: Action[]
     explorerState: ExplorerState
     assetCardView?: AssetCardView
+    context: T
 
     constructor(params: {
         folder: AnyFolderNode | DriveNode | GroupNode
@@ -64,12 +67,20 @@ export class Shell {
         actions: Action[]
         explorerState: ExplorerState
         assetCardView?: AssetCardView
+        context?: T
     }) {
         Object.assign(this, params)
     }
 }
 
-export function shell$() {
+export function getDisplayedActions() {
+    const actionsContainer = getFromDocument<ActionsView>(
+        `.${ActionsView.ClassSelector}`,
+    )
+    return actionsContainer.displayedActions$
+}
+
+export function shell$<T>() {
     const state = new ExplorerState()
     document.body.innerHTML = ''
     return combineLatest([
@@ -169,7 +180,7 @@ export function shell$() {
                 }),
                 map(
                     ({ folder, actions, item }) =>
-                        new Shell({
+                        new Shell<T>({
                             folder,
                             item,
                             actions,
@@ -181,11 +192,11 @@ export function shell$() {
     )
 }
 
-export function rename(fromName: string, toName: string) {
-    return (source$: Observable<Shell>) =>
+export function rename<T>(fromName: string, toName: string) {
+    return (source$: Observable<Shell<T>>) =>
         source$.pipe(
             take(1),
-            mergeMap((shell: Shell) => {
+            mergeMap((shell: Shell<T>) => {
                 const folderContentView = getFromDocument<FolderContentView>(
                     `.${FolderContentView.ClassSelector}`,
                 )
@@ -200,7 +211,10 @@ export function rename(fromName: string, toName: string) {
                 )
             }),
             mergeMap(
-                ([target, shell]: [RegularFolderNode | AnyItemNode, Shell]) => {
+                ([target, shell]: [
+                    RegularFolderNode | AnyItemNode,
+                    Shell<T>,
+                ]) => {
                     shell.explorerState.rename(target, toName)
 
                     const folderContentView =
@@ -214,11 +228,12 @@ export function rename(fromName: string, toName: string) {
                             expect(t).toBeTruthy()
                         }),
                         map(() => {
-                            return new Shell({
+                            return new Shell<T>({
                                 explorerState: shell.explorerState,
                                 folder: shell.folder,
                                 item: shell.explorerState.selectedItem$.getValue(),
                                 actions: [],
+                                context: shell.context,
                             })
                         }),
                     )
@@ -227,11 +242,11 @@ export function rename(fromName: string, toName: string) {
         )
 }
 
-export function mkDir(folderName) {
-    return (source$: Observable<Shell>) =>
+export function mkDir<T>(folderName) {
+    return (source$: Observable<Shell<T>>) =>
         source$.pipe(
             take(1),
-            mergeMap((shell: Shell) => {
+            mergeMap((shell: Shell<T>) => {
                 const actionNewFolder = getFromDocument<ActionBtnView>(
                     `.${ActionBtnView.ClassSelector}`,
                     (view) => view.action.name == 'new folder',
@@ -278,7 +293,7 @@ export function mkDir(folderName) {
                     take(1),
                     map(
                         (actions) =>
-                            new Shell({
+                            new Shell<T>({
                                 ...actions,
                                 explorerState: shell.explorerState,
                             }),
@@ -288,8 +303,8 @@ export function mkDir(folderName) {
         )
 }
 
-export function rm(itemName) {
-    return (source$: Observable<Shell>) =>
+export function rm<T>(itemName) {
+    return (source$: Observable<Shell<T>>) =>
         source$.pipe(
             take(1),
             selectItem(itemName),
@@ -332,21 +347,23 @@ export function rm(itemName) {
         )
 }
 
-export function mkAsset({
+export function mkAsset<T>({
     actionName,
     defaultInstanceName,
     instanceName,
     kind,
+    cb,
 }: {
     actionName: string
     defaultInstanceName: string
     instanceName: string
     kind: 'story' | 'flux-project'
+    cb?: (shell: Shell<T>, asset: AnyItemNode) => T
 }) {
-    return (source$: Observable<Shell>) =>
+    return (source$: Observable<Shell<T>>) =>
         source$.pipe(
             take(1),
-            mergeMap((shell: Shell) => {
+            mergeMap((shell: Shell<T>) => {
                 const actionNewAsset = getFromDocument<ActionBtnView>(
                     `.${ActionBtnView.ClassSelector}`,
                     (view) => view.action.name == actionName,
@@ -373,42 +390,57 @@ export function mkAsset({
                 return folderContentView.items$.pipe(
                     skip(1),
                     take(1),
-                    tap((items) => {
+                    map((items) => {
                         const assetNode = items.find(
                             (item) => item.name == defaultInstanceName,
                         ) as AnyItemNode
                         expect(assetNode).toBeTruthy()
                         expect(assetNode.kind).toEqual(kind)
+                        return assetNode
                     }),
-                    mapTo(shell),
+                    map((assetNode) => {
+                        if (!cb) {
+                            return shell
+                        }
+                        const context = cb(shell, assetNode)
+                        return new Shell<T>({ ...shell, context })
+                    }),
                 )
             }),
             rename(defaultInstanceName, instanceName),
         )
 }
-export function mkStory(storyName) {
+export function mkStory<T>(
+    storyName,
+    cb?: (shell: Shell<T>, asset: AnyItemNode) => T,
+) {
     return mkAsset({
         actionName: 'new story',
         defaultInstanceName: 'new story',
         instanceName: storyName,
         kind: 'story',
+        cb,
     })
 }
 
-export function mkFluxApp(appName) {
+export function mkFluxApp<T>(
+    appName,
+    cb?: (shell: Shell<T>, asset: AnyItemNode) => T,
+) {
     return mkAsset({
         actionName: 'new app',
         defaultInstanceName: 'new project',
         instanceName: appName,
         kind: 'flux-project',
+        cb,
     })
 }
 
-export function navigateStepBack() {
-    return (source$: Observable<Shell>) =>
+export function navigateStepBack<T>() {
+    return (source$: Observable<Shell<T>>) =>
         source$.pipe(
             take(1),
-            mergeMap((shell: Shell) => {
+            mergeMap((shell: Shell<T>) => {
                 const pathElements0 = queryFromDocument<PathElementView>(
                     `.${PathElementView.ClassSelector}`,
                 )
@@ -456,21 +488,24 @@ export function navigateStepBack() {
                     }),
                     take(1),
                     map(({ targetFolder }) => {
-                        return new Shell({ ...shell, folder: targetFolder })
+                        return new Shell<T>({ ...shell, folder: targetFolder })
                     }),
                 )
             }),
         )
 }
 
-export function cd(folderName: string) {
+export function cd<T>(folderName: string) {
     if (folderName == '..') {
-        return navigateStepBack()
+        return navigateStepBack<T>()
     }
-    return (source$: Observable<Shell>) =>
+    const isTargetFolder = (folder) => {
+        return !(folder instanceof FolderNode && folder.name == folderName)
+    }
+    return (source$: Observable<Shell<T>>) =>
         source$.pipe(
             take(1),
-            mergeMap((shell: Shell) => {
+            mergeMap((shell: Shell<T>) => {
                 const rowView = getFromDocument<RowView>(
                     `.${RowView.ClassSelector}`,
                     (row) => row.item.name == folderName,
@@ -484,10 +519,7 @@ export function cd(folderName: string) {
                 // Wait for actions menu view to be updated
                 return shell.explorerState.currentFolder$.pipe(
                     skipWhile(({ folder }) => {
-                        return !(
-                            folder instanceof FolderNode &&
-                            folder.name == folderName
-                        )
+                        return !isTargetFolder(folder)
                     }),
                     take(1),
                     tap(({ folder }) => {
@@ -506,20 +538,14 @@ export function cd(folderName: string) {
                         return folderContentView.items$
                     }),
                     mergeMap(() => {
-                        const actionsContainer = getFromDocument<ActionsView>(
-                            `.${ActionsView.ClassSelector}`,
-                        )
-                        return actionsContainer.displayedActions$
+                        return getDisplayedActions()
                     }),
                     skipWhile(({ folder }) => {
-                        return !(
-                            folder instanceof FolderNode &&
-                            folder.name == folderName
-                        )
+                        return !isTargetFolder(folder)
                     }),
                     take(1),
                     map(({ item, folder, actions }) => {
-                        return new Shell({
+                        return new Shell<T>({
                             explorerState: shell.explorerState,
                             item,
                             folder,
@@ -532,8 +558,8 @@ export function cd(folderName: string) {
         )
 }
 
-export function cdGroup(name: string) {
-    return (source$: Observable<Shell>) =>
+export function cdGroup<T>(name: string) {
+    return (source$: Observable<Shell<T>>) =>
         source$.pipe(
             take(1),
             mergeMap((shell) => {
@@ -564,17 +590,14 @@ export function cdGroup(name: string) {
                     }),
                     take(1),
                     mergeMap(() => {
-                        const actionsContainer = getFromDocument<ActionsView>(
-                            `.${ActionsView.ClassSelector}`,
-                        )
-                        return actionsContainer.displayedActions$
+                        return getDisplayedActions()
                     }),
                     skipWhile(({ folder }: DisplayedActions) => {
                         return folder.groupId != targetGroupId
                     }),
                     take(1),
                     map(({ folder, actions }) => {
-                        return new Shell({
+                        return new Shell<T>({
                             folder,
                             actions,
                             explorerState: shell.explorerState,
@@ -585,8 +608,8 @@ export function cdGroup(name: string) {
         )
 }
 
-export function selectItem(itemName: string) {
-    return (source$: Observable<Shell>) =>
+export function selectItem<T>(itemName: string) {
+    return (source$: Observable<Shell<T>>) =>
         source$.pipe(
             take(1),
             mergeMap((shell) => {
@@ -615,7 +638,7 @@ export function selectItem(itemName: string) {
                             }),
                             take(1),
                             map(() => {
-                                return new Shell({
+                                return new Shell<T>({
                                     ...shell,
                                     item: selectedItem,
                                 })
@@ -627,8 +650,8 @@ export function selectItem(itemName: string) {
         )
 }
 
-export function cut(itemName: string) {
-    return (source$: Observable<Shell>) =>
+export function cut<T>(itemName: string) {
+    return (source$: Observable<Shell<T>>) =>
         source$.pipe(
             take(1),
             selectItem(itemName),
@@ -651,8 +674,8 @@ export function cut(itemName: string) {
         )
 }
 
-export function borrow(itemName: string) {
-    return (source$: Observable<Shell>) =>
+export function borrow<T>(itemName: string) {
+    return (source$: Observable<Shell<T>>) =>
         source$.pipe(
             take(1),
             selectItem(itemName),
@@ -674,8 +697,8 @@ export function borrow(itemName: string) {
         )
 }
 
-export function paste() {
-    return (source$: Observable<Shell>) =>
+export function paste<T>() {
+    return (source$: Observable<Shell<T>>) =>
         source$.pipe(
             take(1),
             mergeMap((shell) => {
@@ -712,15 +735,15 @@ export function paste() {
                         expect(target).toBeTruthy()
                     }),
                     map(() => {
-                        return new Shell({ ...shell })
+                        return new Shell<T>({ ...shell })
                     }),
                 )
             }),
         )
 }
 
-export function uploadAsset(itemName: string) {
-    return (source$: Observable<Shell>) =>
+export function uploadAsset<T>(itemName: string) {
+    return (source$: Observable<Shell<T>>) =>
         source$.pipe(
             take(1),
             selectItem(itemName),
@@ -756,15 +779,15 @@ export function uploadAsset(itemName: string) {
                     }),
                     take(1),
                     map(() => {
-                        return new Shell({ ...shell })
+                        return new Shell<T>({ ...shell })
                     }),
                 )
             }),
         )
 }
 
-export function refresh() {
-    return (source$: Observable<Shell>) =>
+export function refresh<T>() {
+    return (source$: Observable<Shell<T>>) =>
         source$.pipe(
             take(1),
             mergeMap((shell) => {
@@ -781,15 +804,15 @@ export function refresh() {
                     skip(1),
                     take(1),
                     map(() => {
-                        return new Shell({ ...shell })
+                        return new Shell<T>({ ...shell })
                     }),
                 )
             }),
         )
 }
 
-export function popupInfo() {
-    return (source$: Observable<Shell>) =>
+export function popupInfo<T>() {
+    return (source$: Observable<Shell<T>>) =>
         source$.pipe(
             take(1),
             mergeMap((shell) => {
@@ -809,7 +832,7 @@ export function popupInfo() {
                         const assetCardView = getFromDocument<AssetCardView>(
                             `.${AssetCardView.ClassSelector}`,
                         )
-                        return new Shell({
+                        return new Shell<T>({
                             ...shell,
                             assetCardView,
                         })
@@ -819,7 +842,7 @@ export function popupInfo() {
         )
 }
 
-function resolveFolder(shell: Shell) {
+function resolveFolder<T>(shell: Shell<T>) {
     const folderContentView = getFromDocument<FolderContentView>(
         `.${FolderContentView.ClassSelector}`,
     )
@@ -831,13 +854,13 @@ function resolveFolder(shell: Shell) {
         take(1),
         mergeMap((items) => {
             expect(items.length).toEqual(0)
-            return of(new Shell({ ...shell }))
+            return of(new Shell<T>({ ...shell }))
         }),
     )
 }
 
-export function purgeTrash() {
-    return (source$: Observable<Shell>) =>
+export function purgeTrash<T>() {
+    return (source$: Observable<Shell<T>>) =>
         source$.pipe(
             take(1),
             mergeMap((shell) => {
@@ -854,8 +877,8 @@ export function purgeTrash() {
         )
 }
 
-export function deleteDrive() {
-    return (source$: Observable<Shell>) =>
+export function deleteDrive<T>() {
+    return (source$: Observable<Shell<T>>) =>
         source$.pipe(
             take(1),
             mergeMap((shell) => {
@@ -873,7 +896,7 @@ export function deleteDrive() {
         )
 }
 
-export function expectSnapshot({
+export function expectSnapshot<T>({
     items,
     explorerState,
     actions,
@@ -889,7 +912,7 @@ export function expectSnapshot({
     const expectActions = actions
     const expectAssetCardView = assetCardView
 
-    return (source$: Observable<Shell>) =>
+    return (source$: Observable<Shell<T>>) =>
         source$.pipe(
             take(1),
             mergeMap((shell) => {
