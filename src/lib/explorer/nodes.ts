@@ -1,25 +1,9 @@
 import { ImmutableTree } from '@youwol/fv-tree'
 import { BehaviorSubject, Observable, Subject } from 'rxjs'
 import { delay, tap } from 'rxjs/operators'
-import { AssetsGateway } from '@youwol/http-clients'
+import { AssetsGateway, RequestEvent } from '@youwol/http-clients'
 import { v4 as uuidv4 } from 'uuid'
 import { debugDelay } from './requests-executor'
-
-export const UploadStep = {
-    START: 'start',
-    SENDING: 'sending',
-    PROCESSING: 'processing',
-    FINISHED: 'finished',
-}
-
-export class ProgressMessage {
-    constructor(
-        public readonly fileName,
-        public readonly step,
-        public readonly percentSent = 0,
-        public readonly result = undefined,
-    ) {}
-}
 
 type NodeEventType = 'item-added'
 
@@ -166,6 +150,19 @@ export type TrashNode = FolderNode<'trash'>
 export type SystemNode = FolderNode<'system'>
 export type AnyFolderNode = FolderNode<FolderKind>
 
+export function instanceOfTrashFolder(folder: BrowserNode) {
+    return folder instanceof FolderNode && folder.kind == 'trash'
+}
+
+export function instanceOfStandardFolder(folder: BrowserNode) {
+    return (
+        folder instanceof FolderNode &&
+        (folder.kind == 'regular' ||
+            folder.kind == 'home' ||
+            folder.kind == 'download')
+    )
+}
+
 export type ItemKind = 'data' | 'story' | 'flux-project' | 'package'
 
 export class ItemNode<T extends ItemKind> extends BrowserNode {
@@ -273,18 +270,21 @@ export class DeletedItemNode extends DeletedNode {
 }
 
 export class ProgressNode extends BrowserNode {
-    progress$: Observable<ProgressMessage>
-
+    public readonly progress$: Observable<RequestEvent>
+    public readonly direction: 'upload' | 'download'
     constructor({
         id,
         name,
         progress$,
+        direction,
     }: {
         id: string
         name: string
-        progress$: Observable<ProgressMessage>
+        progress$: Observable<RequestEvent>
+        direction: 'upload' | 'download'
     }) {
         super({ id, name })
         this.progress$ = progress$
+        this.direction = direction
     }
 }

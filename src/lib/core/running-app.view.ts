@@ -66,7 +66,7 @@ export class RunningApp implements Executable {
             this.header$.next(new HeaderView({ title: params.title }))
         }
         if (!params.title || !params.metadata) {
-            new AssetsGateway.AssetsGatewayClient().raw.package
+            new AssetsGateway.AssetsGatewayClient().rawDeprecated.package
                 .getResource$(rawId, `${this.version}/.yw_metadata.json`)
                 .subscribe((resp) => {
                     const title = resp['displayName'] || this.cdnPackage
@@ -93,7 +93,19 @@ export class RunningApp implements Executable {
         )
         this.url = `/applications/${this.cdnPackage}/${this.version}?instance-id=${this.instanceId}&${queryParams}`
 
-        this.view = {
+        this.view = this.createView()
+    }
+
+    setSnippet(snippet: VirtualDOM) {
+        this.snippet$.next(snippet)
+    }
+
+    terminateInstance() {
+        this.htmlElement.remove()
+    }
+
+    createView() {
+        return {
             class: attr$(this.state.runningApplication$, (app) =>
                 app && app.instanceId == this.instanceId
                     ? 'h-100 w-100 d-flex'
@@ -104,14 +116,6 @@ export class RunningApp implements Executable {
                 this.htmlElement = elem
             },
         }
-    }
-
-    setSnippet(snippet: VirtualDOM) {
-        this.snippet$.next(snippet)
-    }
-
-    terminateInstance() {
-        this.htmlElement.remove()
     }
 }
 

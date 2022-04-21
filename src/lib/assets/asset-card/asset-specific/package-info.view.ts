@@ -10,6 +10,7 @@ import {
     filter,
     map,
     mergeMap,
+    share,
     shareReplay,
     tap,
 } from 'rxjs/operators'
@@ -106,28 +107,31 @@ export class PackageInfoState {
     public readonly selectedLink$ = new BehaviorSubject<string>(
         PackageInfoState.nativeExplorerId,
     )
-    public readonly client = new AssetsGateway.AssetsGatewayClient().raw.package
+    public readonly client = new AssetsGateway.AssetsGatewayClient().cdn
 
     constructor(params: { asset: Asset }) {
         Object.assign(this, params)
 
-        this.metadata$ = this.client.getMetadata$(this.asset.rawId).pipe(
-            raiseHTTPErrors(),
-            tap((metadata) => {
-                this.selectedVersion$.next(metadata.versions[0])
-            }),
-            shareReplay(1),
-        )
+        this.metadata$ = this.client
+            .getLibraryInfo$({ libraryId: this.asset.rawId })
+            .pipe(
+                raiseHTTPErrors(),
+                tap((metadata) => {
+                    this.selectedVersion$.next(metadata.versions[0])
+                }),
+                shareReplay(1),
+            )
 
         this.links$ = this.selectedVersion$.pipe(
             filter((v) => v != undefined),
             distinctUntilChanged(),
             mergeMap((version) => {
                 return this.client
-                    .getResource$(
-                        this.asset.rawId,
-                        `${version}/.yw_metadata.json`,
-                    )
+                    .getResource$({
+                        libraryId: this.asset.rawId,
+                        version,
+                        restOfPath: '.yw_metadata.json',
+                    })
                     .pipe(
                         onHTTPErrors((error) => {
                             if (error.status == 404) {
@@ -155,6 +159,7 @@ export class PackageInfoState {
             tap(() => {
                 this.selectedLink$.next(PackageInfoState.nativeExplorerId)
             }),
+            share(),
         )
     }
 }

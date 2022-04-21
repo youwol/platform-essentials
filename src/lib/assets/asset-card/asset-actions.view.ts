@@ -121,7 +121,7 @@ class DownloadView implements VirtualDOM {
                 icon: 'fas fa-link',
                 name: 'Symbolic link',
                 download$: (asset, drive) => {
-                    return new AssetsGateway.AssetsGatewayClient().explorer
+                    return new AssetsGateway.AssetsGatewayClient().explorerDeprecated
                         .borrowItem$(asset.assetId, {
                             destinationFolderId: drive.downloadFolderId,
                         })
@@ -174,7 +174,7 @@ class DownloadView implements VirtualDOM {
             .pipe(
                 take(1),
                 mergeMap(() => {
-                    return new AssetsGateway.AssetsGatewayClient().explorer.getDefaultUserDrive$()
+                    return new AssetsGateway.AssetsGatewayClient().explorerDeprecated.getDefaultUserDrive$()
                 }),
                 mergeMap((drive: AssetsGateway.DefaultDriveResponse) => {
                     return option.download$(this.asset, drive)

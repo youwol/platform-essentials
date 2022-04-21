@@ -15,7 +15,9 @@ export function resetPyYouwolDbs$() {
             mergeMap(() =>
                 forkJoin([
                     youwol.admin.customCommands.doGet$('reset'),
-                    gtw.explorer.getDefaultUserDrive$().pipe(raiseHTTPErrors()),
+                    gtw.explorerDeprecated
+                        .getDefaultUserDrive$()
+                        .pipe(raiseHTTPErrors()),
                 ]),
             ),
             map(([_, userDrive]) => {
@@ -30,10 +32,10 @@ export function createStory(
     const client = new AssetsGateway.AssetsGatewayClient()
     return (source$: Observable<unknown>) => {
         return source$.pipe(
-            mergeMap(() => client.explorer.getDefaultUserDrive$()),
+            mergeMap(() => client.explorerDeprecated.getDefaultUserDrive$()),
             raiseHTTPErrors(),
             mergeMap((drive: AssetsGateway.DefaultDriveResponse) =>
-                client.assets.story
+                client.assetsDeprecated.story
                     .create$(drive.homeFolderId, {
                         title,
                     })

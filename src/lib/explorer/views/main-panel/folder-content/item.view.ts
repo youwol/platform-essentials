@@ -16,15 +16,70 @@ import {
     AnyItemNode,
     BrowserNode,
     ItemNode,
+    ProgressNode,
     RegularFolderNode,
 } from '../../../nodes'
 import { RequestsExecutor } from '../../../requests-executor'
 
+export class ProgressItemView {
+    static ClassSelector = 'progress-item-view'
+    public readonly class = `${ProgressItemView.ClassSelector} d-flex flex-column p-1 rounded m-3 fv-hover-bg-background-alt fv-pointer`
+    public readonly children: VirtualDOM[]
+    public readonly item: ProgressNode
+
+    constructor(params: {
+        state: ExplorerState
+        item: ProgressNode
+        hovered$?: Observable<BrowserNode>
+    }) {
+        Object.assign(this, params)
+
+        this.children = [
+            {
+                class: 'd-flex align-items-center',
+                children: [
+                    {
+                        class:
+                            this.item.direction == 'download'
+                                ? 'fas fa-arrow-alt-circle-down px-2 fv-blink'
+                                : 'fas fa-arrow-alt-circle-up px-2 fv-blink',
+                    },
+                    {
+                        innerText: this.item.name,
+                    },
+                ],
+            },
+            {
+                class: 'w-100',
+                children: [
+                    {
+                        style: attr$(
+                            this.item.progress$.pipe(
+                                map((progress) =>
+                                    Math.floor(
+                                        (100 * progress.transferredCount) /
+                                            progress.totalCount,
+                                    ),
+                                ),
+                            ),
+                            (progress) => ({
+                                backgroundColor: 'green',
+                                width: `${progress}`,
+                                height: '5px',
+                            }),
+                        ),
+                    },
+                ],
+            },
+        ]
+    }
+}
+
 export class ItemView {
     static ClassSelector = 'item-view'
-    baseClasses = `${ItemView.ClassSelector} d-flex align-items-center p-1 rounded m-3 fv-hover-bg-background-alt fv-pointer`
-    class: Stream$<BrowserNode, string>
-    children: VirtualDOM[]
+    public readonly baseClasses = `${ItemView.ClassSelector} d-flex align-items-center p-1 rounded m-3 fv-hover-bg-background-alt fv-pointer`
+    public readonly class: Stream$<BrowserNode, string>
+    public readonly children: VirtualDOM[]
     public readonly style: Stream$<
         { type: string; id: string }[],
         { [key: string]: string }
