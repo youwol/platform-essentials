@@ -4,8 +4,14 @@ import { filter, map, mergeMap, take } from 'rxjs/operators'
 import { ChildApplicationAPI, PlatformSettingsStore } from '../../../../core'
 import { IPlatformHandler } from '../../../../core/platform.state'
 import { ExplorerState } from '../../../explorer.state'
-import { BrowserNode, DriveNode, FolderNode, ItemNode } from '../../../nodes'
-import { ItemView } from './item.view'
+import {
+    BrowserNode,
+    DriveNode,
+    FolderNode,
+    ItemNode,
+    ProgressNode,
+} from '../../../nodes'
+import { ItemView, ProgressItemView } from './item.view'
 
 export class DetailsContentView {
     public readonly class =
@@ -35,9 +41,10 @@ export class DetailsContentView {
             },
             {
                 class: 'flex-grow-1 overflow-auto',
-                children: this.items.map(
-                    (item: BrowserNode) =>
-                        new RowView({ state: this.state, item }),
+                children: this.items.map((item: BrowserNode) =>
+                    item instanceof ProgressNode
+                        ? new ProgressItemView({ state: this.state, item })
+                        : new RowView({ state: this.state, item }),
                 ),
             },
         ]
