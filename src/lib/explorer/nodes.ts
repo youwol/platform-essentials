@@ -166,6 +166,19 @@ export type TrashNode = FolderNode<'trash'>
 export type SystemNode = FolderNode<'system'>
 export type AnyFolderNode = FolderNode<FolderKind>
 
+export function instanceOfTrashFolder(folder: BrowserNode) {
+    return folder instanceof FolderNode && folder.kind == 'trash'
+}
+
+export function instanceOfStandardFolder(folder: BrowserNode) {
+    return (
+        folder instanceof FolderNode &&
+        (folder.kind == 'regular' ||
+            folder.kind == 'home' ||
+            folder.kind == 'download')
+    )
+}
+
 export type ItemKind = 'data' | 'story' | 'flux-project' | 'package'
 
 export class ItemNode<T extends ItemKind> extends BrowserNode {

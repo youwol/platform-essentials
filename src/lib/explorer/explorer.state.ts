@@ -39,6 +39,7 @@ import {
     FutureNode,
     GroupNode,
     HomeNode,
+    instanceOfTrashFolder,
     ItemNode,
     RegularFolderNode,
     serialize,
@@ -321,15 +322,15 @@ export class ExplorerState {
         )
     }
 
-    deleteFolder(node: RegularFolderNode) {
+    deleteItemOrFolder(node: RegularFolderNode | AnyItemNode) {
         this.groupsTree[node.groupId].removeNode(node)
+        const trashNode = this.groupsTree[node.groupId].getTrashNode()
+        if (trashNode) {
+            this.refresh(trashNode, false)
+        }
     }
 
     deleteDrive(node: DriveNode) {
-        this.groupsTree[node.groupId].removeNode(node)
-    }
-
-    deleteItem(node: AnyItemNode) {
         this.groupsTree[node.groupId].removeNode(node)
     }
 
@@ -407,21 +408,26 @@ export class ExplorerState {
         this.itemCut = undefined
     }
 
-    refresh(folder: AnyFolderNode) {
+    refresh(folder: AnyFolderNode, openFolder: boolean = true) {
         const tree = this.groupsTree[folder.groupId]
-        const newFolder = new FolderNode({
-            ...folder,
-            children: RequestsExecutor.getFolderChildren(
-                folder.groupId,
-                folder.driveId,
-                folder.folderId,
-            ),
-        })
+        const newFolder = instanceOfTrashFolder(folder)
+            ? new FolderNode({
+                  ...folder,
+                  children: RequestsExecutor.getDeletedItems(folder.driveId),
+              })
+            : new FolderNode({
+                  ...folder,
+                  children: RequestsExecutor.getFolderChildren(
+                      folder.groupId,
+                      folder.driveId,
+                      folder.folderId,
+                  ),
+              })
 
         tree.replaceNode(folder.id, newFolder, true, () => ({}), {
             toBeSaved: false,
         })
-        this.openFolder(newFolder)
+        openFolder && this.openFolder(newFolder)
     }
 
     uploadAsset(node: AnyItemNode) {
