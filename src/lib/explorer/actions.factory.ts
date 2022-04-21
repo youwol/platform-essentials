@@ -11,6 +11,7 @@ import {
     DataNode,
     DeletedNode,
     DriveNode,
+    instanceOfStandardFolder,
     FolderNode,
     FutureNode,
     GroupNode,
@@ -79,7 +80,7 @@ export const GENERIC_ACTIONS = {
         applicable: () => {
             return (
                 selection == 'indirect' &&
-                (node instanceof FolderNode || node instanceof DriveNode)
+                (instanceOfStandardFolder(node) || node instanceof DriveNode)
             )
         },
         exe: () => {
@@ -168,7 +169,8 @@ export const GENERIC_ACTIONS = {
         icon: 'fas fa-sitemap',
         name: 'new app',
         enable: permissions.write,
-        applicable: () => selection == 'indirect' && node instanceof FolderNode,
+        applicable: () =>
+            selection == 'indirect' && instanceOfStandardFolder(node),
         exe: () => {
             state.flux.new(node as AnyFolderNode)
         },
@@ -182,7 +184,8 @@ export const GENERIC_ACTIONS = {
         icon: 'fas fa-book',
         name: 'new story',
         enable: permissions.write,
-        applicable: () => selection == 'indirect' && node instanceof FolderNode,
+        applicable: () =>
+            selection == 'indirect' && instanceOfStandardFolder(node),
         exe: () => {
             state.story.new(node as AnyFolderNode)
         },
@@ -198,7 +201,7 @@ export const GENERIC_ACTIONS = {
         enable: permissions.write && state.itemCut != undefined,
         applicable: () =>
             selection == 'indirect' &&
-            node instanceof FolderNode &&
+            instanceOfStandardFolder(node) &&
             permissions.write,
         exe: () => {
             state.pasteItem(node as AnyFolderNode)
@@ -221,7 +224,7 @@ export const GENERIC_ACTIONS = {
                 return !node.borrowed
             }
 
-            return node instanceof FolderNode
+            return instanceOfStandardFolder(node)
         },
         exe: () => {
             state.cutItem(node as AnyItemNode | RegularFolderNode)
@@ -250,7 +253,8 @@ export const GENERIC_ACTIONS = {
         icon: 'fas fa-file-import',
         name: 'import data',
         enable: permissions.write,
-        applicable: () => selection == 'indirect' && node instanceof FolderNode,
+        applicable: () =>
+            selection == 'indirect' && instanceOfStandardFolder(node),
         exe: () => {
             const input = document.createElement('input')
             input.setAttribute('type', 'file')
@@ -273,7 +277,7 @@ export const GENERIC_ACTIONS = {
         enable: permissions.write,
         applicable: () => node instanceof ItemNode,
         exe: () => {
-            state.deleteItem(node as AnyItemNode)
+            state.deleteItemOrFolder(node as AnyItemNode)
         },
     }),
     refresh: (state: ExplorerState, { node }: SelectedItem, permissions) => ({
