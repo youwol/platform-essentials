@@ -73,7 +73,6 @@ export class TreeGroup extends ImmutableTree.State<BrowserNode> {
     public readonly trashFolderId: string
     public readonly drivesId: string
     public readonly downloadFolderId?: string
-    public readonly recentId?: string
 
     constructor(
         rootNode: GroupNode,
