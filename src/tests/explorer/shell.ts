@@ -500,7 +500,7 @@ export function cd<T>(folderName: string) {
         return navigateStepBack<T>()
     }
     const isTargetFolder = (folder) => {
-        return !(folder instanceof FolderNode && folder.name == folderName)
+        return folder instanceof FolderNode && folder.name == folderName
     }
     return (source$: Observable<Shell<T>>) =>
         source$.pipe(
