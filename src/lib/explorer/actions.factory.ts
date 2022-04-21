@@ -137,7 +137,7 @@ export const GENERIC_ACTIONS = {
             node instanceof FolderNode &&
             selection == 'direct' /*&& node.kind == 'regular'*/,
         exe: () => {
-            state.deleteFolder(node as RegularFolderNode)
+            state.deleteItemOrFolder(node as RegularFolderNode)
         },
     }),
     deleteDrive: (state: ExplorerState, { node, selection }: SelectedItem) => ({
