@@ -217,6 +217,9 @@ export class ExplorerState {
                     })
                 },
             ),
+            this.openFolder$.subscribe(() => {
+                this.selectedItem$.next(undefined)
+            }),
         )
         const os = ChildApplicationAPI.getOsInstance()
         if (os) {
