@@ -1,6 +1,6 @@
 {
     "name": "@youwol/platform-essentials",
-    "version": "0.1.3",
+    "version": "0.1.4-wip",
     "description": "The essentials of YouWol platform in a npm library",
     "author": "greinisch@youwol.com",
     "keywords": [
