@@ -4,31 +4,15 @@ import { AssetsGateway, raiseHTTPErrors } from '@youwol/http-clients'
 import {
     BehaviorSubject,
     combineLatest,
-    Observable,
-    of,
     ReplaySubject,
     Subscription,
 } from 'rxjs'
-import {
-    distinctUntilChanged,
-    filter,
-    map,
-    mergeMap,
-    share,
-    shareReplay,
-    take,
-} from 'rxjs/operators'
+import { filter, mergeMap, share, take } from 'rxjs/operators'
 import { v4 as uuidv4 } from 'uuid'
-import { DisplayMode } from '.'
-import { ChildApplicationAPI, PlatformSettingsStore } from '../core'
+import { DisplayMode, FutureFolderNode } from '.'
+import { ChildApplicationAPI } from '../core'
 import { FileAddedEvent, PlatformEvent } from '../core/platform.events'
-import { YouwolBannerState } from '../top-banner'
-import {
-    Action,
-    GENERIC_ACTIONS,
-    getActions$,
-    openWithActionFromExe,
-} from './actions.factory'
+
 import {
     AnyFolderNode,
     AnyItemNode,
@@ -41,7 +25,6 @@ import {
     instanceOfTrashFolder,
     ItemNode,
     RegularFolderNode,
-    serialize,
     TrashNode,
 } from './nodes'
 import { RequestsExecutor } from './requests-executor'
@@ -54,18 +37,6 @@ import {
     processMoveFolder,
     processMoveItem,
 } from './utils'
-
-/**
- * Ideally this concept should not exist.
- * A direct selection is: the user has clicked on an item in the view
- * The indirect selection is actually the current folder opened.
- * At any time there is at least on 'indirect' selection (the current folder opened),
- * in addition to which there may be on direct selection (e.g. if the user click on a file).
- */
-export type SelectedItem = {
-    node: BrowserNode
-    selection: 'direct' | 'indirect'
-}
 
 export class TreeGroup extends ImmutableTree.State<BrowserNode> {
     public readonly explorerState: ExplorerState
@@ -111,57 +82,9 @@ export class ExplorerState {
     public story: StoryState
     public data: DataState
 
-    public readonly topBannerState = new YouwolBannerState()
-
     public readonly selectedItem$ = new BehaviorSubject<BrowserNode>(undefined)
 
     public readonly openFolder$ = new ReplaySubject<OpenFolder>(1)
-
-    public readonly currentFolder$ = this.openFolder$.pipe(
-        mergeMap(({ tree, folder }) => {
-            // this next line is the one that actually 'trigger' the request to fetch the children
-            tree.getChildren(folder)
-            return tree.getChildren$(folder).pipe(map(() => ({ tree, folder })))
-        }),
-        distinctUntilChanged((a, b) => {
-            return serialize(a.folder) == serialize(b.folder)
-        }),
-        shareReplay(1),
-    ) as Observable<{ tree: TreeGroup; folder: AnyFolderNode }>
-
-    actions$ = combineLatest([this.selectedItem$, this.currentFolder$]).pipe(
-        mergeMap(([item, { folder }]) => {
-            const a0$ = getActions$(
-                this,
-                { node: folder, selection: 'indirect' },
-                Object.values(GENERIC_ACTIONS),
-            )
-            const a1$ = item
-                ? getActions$(
-                      this,
-                      { node: item, selection: 'direct' },
-                      Object.values(GENERIC_ACTIONS),
-                  )
-                : of([])
-            const a2$ = item
-                ? PlatformSettingsStore.getOpeningApps$(item).pipe(
-                      map((apps) =>
-                          apps.map((app) => openWithActionFromExe(app)),
-                      ),
-                  )
-                : of([])
-
-            return combineLatest([a0$, a1$, a2$]).pipe(
-                map(([a0, a1, a2]) => {
-                    return {
-                        item: item,
-                        folder: folder,
-                        actions: [...a0, ...a1, ...a2] as Action[],
-                    }
-                }),
-            )
-        }),
-    )
 
     public readonly displayMode$ = new BehaviorSubject<DisplayMode>('details')
 
