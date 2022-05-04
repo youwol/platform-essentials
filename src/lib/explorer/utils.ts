@@ -1,4 +1,4 @@
-import { TreeGroup } from './explorer.state'
+import { ExplorerState, TreeGroup } from './explorer.state'
 import {
     AnyFolderNode,
     AnyItemNode,
@@ -17,6 +17,7 @@ export function isLocalYouwol() {
 }
 
 export function createTreeGroup(
+    explorerState: ExplorerState,
     groupName: string,
     respUserDrives,
     respDefaultDrive,
@@ -99,6 +100,7 @@ export function createTreeGroup(
     })
 
     return new TreeGroup(userGroup, {
+        explorerState,
         homeFolderId: homeFolderNode.id,
         trashFolderId: trashFolderNode.id,
         defaultDriveId: defaultDrive.id,

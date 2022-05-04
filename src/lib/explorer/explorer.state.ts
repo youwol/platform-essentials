@@ -68,6 +68,7 @@ export type SelectedItem = {
 }
 
 export class TreeGroup extends ImmutableTree.State<BrowserNode> {
+    public readonly explorerState: ExplorerState
     public readonly homeFolderId: string
     public readonly trashFolderId: string
     public readonly drivesId: string
@@ -76,6 +77,7 @@ export class TreeGroup extends ImmutableTree.State<BrowserNode> {
     constructor(
         rootNode: GroupNode,
         params: {
+            explorerState: ExplorerState
             homeFolderId: string
             trashFolderId: string
             defaultDriveId: string
@@ -199,6 +201,7 @@ export class ExplorerState {
             combineLatest([this.userDrives$, this.defaultUserDrive$]).subscribe(
                 ([respUserDrives, respDefaultDrive]) => {
                     const tree = createTreeGroup(
+                        this,
                         'You',
                         respUserDrives,
                         respDefaultDrive,
@@ -271,6 +274,7 @@ export class ExplorerState {
             RequestsExecutor.getDrivesChildren(group.id),
         ]).subscribe(([defaultDrive, drives]) => {
             const tree = createTreeGroup(
+                this,
                 group.elements.slice(-1)[0],
                 drives,
                 defaultDrive,
