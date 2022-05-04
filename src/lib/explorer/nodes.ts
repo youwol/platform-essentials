@@ -221,6 +221,9 @@ export class FutureNode extends BrowserNode {
     }
 }
 
+export class FutureItemNode extends FutureNode {}
+export class FutureFolderNode extends FutureNode {}
+
 export class DeletedNode extends BrowserNode {
     name: string
     driveId: string

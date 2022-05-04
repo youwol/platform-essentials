@@ -36,7 +36,6 @@ import {
     DownloadNode,
     DriveNode,
     FolderNode,
-    FutureNode,
     GroupNode,
     HomeNode,
     instanceOfTrashFolder,
@@ -286,7 +285,7 @@ export class ExplorerState {
 
     newFolder(parentNode: DriveNode | AnyFolderNode) {
         const tree = this.groupsTree[parentNode.groupId]
-        const childFolder = new FutureNode({
+        const childFolder = new FutureFolderNode({
             icon: 'fas fa-folder',
             name: 'new folder',
             onResponse: (resp) => {

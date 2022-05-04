@@ -4,7 +4,8 @@ import {
     AnyItemNode,
     DriveNode,
     FolderNode,
-    FutureNode,
+    FutureFolderNode,
+    FutureItemNode,
     GroupNode,
     ItemNode,
     RegularFolderNode,
@@ -111,7 +112,7 @@ export function processBorrowItem(
     treeDestination: TreeGroup,
     destination: AnyFolderNode | DriveNode,
 ) {
-    const childNode = new FutureNode({
+    const childNode = new FutureItemNode({
         icon: ItemNode.iconsFactory[nodeSelected.kind],
         name: nodeSelected.name,
         onResponse: (resp) => {
@@ -134,7 +135,7 @@ export function processMoveItem(
     treeDestination: TreeGroup,
     destination: AnyFolderNode | DriveNode,
 ) {
-    const childNode = new FutureNode({
+    const childNode = new FutureItemNode({
         icon: ItemNode.iconsFactory[nodeSelected.kind],
         name: nodeSelected.name,
         onResponse: (resp) => {
@@ -164,7 +165,7 @@ export function processMoveFolder(
     treeDestination: TreeGroup,
     destination: AnyFolderNode | DriveNode,
 ) {
-    const childNode = new FutureNode({
+    const childNode = new FutureFolderNode({
         icon: FolderNode.iconsFactory[nodeSelected.kind],
         name: nodeSelected.name,
         onResponse: (resp) => {

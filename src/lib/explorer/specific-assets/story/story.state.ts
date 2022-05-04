@@ -1,7 +1,7 @@
 import { v4 as uuidv4 } from 'uuid'
 import { AssetsGateway } from '@youwol/http-clients'
 import { TreeGroup } from '../../explorer.state'
-import { AnyFolderNode, FutureNode, ItemNode } from '../../nodes'
+import { AnyFolderNode, FutureItemNode, ItemNode } from '../../nodes'
 
 export class StoryState {
     constructor(public readonly userTree: TreeGroup) {}
@@ -16,7 +16,7 @@ export class StoryState {
     new(parentNode: AnyFolderNode) {
         const uid = uuidv4()
         parentNode.addStatus({ type: 'request-pending', id: uid })
-        const node = new FutureNode({
+        const node = new FutureItemNode({
             name: 'new story',
             icon: 'fas fa-book',
             request: StoryState.newStory$(parentNode),
