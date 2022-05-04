@@ -1,9 +1,13 @@
 import { attr$, child$ } from '@youwol/flux-view'
-import { Observable, of } from 'rxjs'
+import { forkJoin, Observable, of } from 'rxjs'
 import { map } from 'rxjs/operators'
 import { ChildApplicationAPI, Executable } from '../core'
-import { ExplorerState, SelectedItem } from './explorer.state'
-import { AssetsGateway as Gtw } from '@youwol/http-clients'
+import { ExplorerState } from './explorer.state'
+import {
+    AssetsGateway,
+    AssetsGateway as Gtw,
+    raiseHTTPErrors,
+} from '@youwol/http-clients'
 import {
     AnyFolderNode,
     AnyItemNode,
@@ -14,7 +18,6 @@ import {
     instanceOfStandardFolder,
     FolderNode,
     FutureNode,
-    GroupNode,
     ItemNode,
     ProgressNode,
     RegularFolderNode,
@@ -22,47 +25,112 @@ import {
 } from './nodes'
 import { isLocalYouwol } from './utils'
 
+export type Section = 'Modify' | 'Move' | 'New' | 'IO' | 'Disposition'
 export interface Action {
     sourceEventNode: BrowserNode
     icon: string
     name: string
-    enable: boolean
+    authorized: boolean
     exe: () => void
     applicable: () => boolean
+    section: Section
+}
+
+export interface GroupPermissions {
+    write: boolean
+}
+
+export interface OverallPermissions {
+    group: GroupPermissions
+    item?: AssetsGateway.PermissionsResp
 }
 
 export type ActionConstructor = (
     state: ExplorerState,
-    { node, selection }: SelectedItem,
-    permissions,
+    node: BrowserNode,
+    permissions: OverallPermissions,
 ) => Action
 
-export const GENERIC_ACTIONS = {
-    rename: (
+/**
+ * fetch the permissions of the current user regarding a group management
+ */
+function fetchGroupPermissions$(_groupId: string) {
+    return of({
+        write: true,
+    })
+}
+
+/**
+ * fetch the permissions of the current user regarding an asset
+ */
+function fetchItemPermissions$(node: AnyItemNode) {
+    if (node.origin && !node.origin.local) {
+        return of({
+            write: false,
+            read: true,
+            share: false,
+        })
+    }
+    return new Gtw.AssetsGatewayClient().assets
+        .getPermissions$({
+            assetId: node.assetId,
+        })
+        .pipe(raiseHTTPErrors())
+}
+
+function hasItemModifyPermission(
+    node: BrowserNode,
+    permissions: OverallPermissions,
+) {
+    if (!permissions.item) return false
+
+    if (!permissions.item.write || !permissions.group.write) {
+        return false
+    }
+    return !(node.origin && !node.origin.local)
+}
+
+function hasItemSharePermission(
+    node: BrowserNode,
+    permissions: OverallPermissions,
+) {
+    return permissions.item && permissions.item.share
+}
+
+function hasGroupModifyPermissions(permissions: OverallPermissions) {
+    return permissions.group.write
+}
+
+export const GENERIC_ACTIONS: { [k: string]: ActionConstructor } = {
+    renameItem: (
         state: ExplorerState,
-        { node, selection }: SelectedItem,
-        permissions,
+        node: BrowserNode,
+        permissions: OverallPermissions,
     ) => ({
         sourceEventNode: node,
         icon: 'fas fa-pen',
         name: 'rename',
-        enable: true,
+        section: 'Modify',
+        authorized: hasItemModifyPermission(node, permissions),
         applicable: () => {
-            if (selection == 'indirect' || !permissions.write) {
-                return false
-            }
-            if (node instanceof FolderNode && node.kind != 'regular') {
-                return false
-            }
-            if (node instanceof ItemNode && node.borrowed) {
-                return false
-            }
-
-            return (
-                node instanceof FolderNode ||
-                node instanceof ItemNode ||
-                node instanceof DriveNode
-            )
+            return node instanceof ItemNode
+        },
+        exe: () => {
+            node.addStatus({ type: 'renaming' })
+        },
+    }),
+    renameFolder: (
+        state: ExplorerState,
+        node: BrowserNode,
+        permissions: OverallPermissions,
+    ) => ({
+        sourceEventNode: node,
+        icon: 'fas fa-pen',
+        name: 'rename',
+        section: 'Modify',
+        authorized: hasGroupModifyPermissions(permissions),
+        applicable: () => {
+            return node instanceof FolderNode && node.kind == 'regular'
         },
         exe: () => {
             node.addStatus({ type: 'renaming' })
@@ -70,32 +138,28 @@ export const GENERIC_ACTIONS = {
     }),
     newFolder: (
         state: ExplorerState,
-        { node, selection }: SelectedItem,
-        permissions,
+        node: BrowserNode,
+        permissions: OverallPermissions,
     ) => ({
         sourceEventNode: node,
         icon: 'fas fa-folder',
         name: 'new folder',
-        enable: permissions.write,
+        section: 'New',
+        authorized: hasGroupModifyPermissions(permissions),
         applicable: () => {
-            return (
-                selection == 'indirect' &&
-                (instanceOfStandardFolder(node) || node instanceof DriveNode)
-            )
+            return instanceOfStandardFolder(node) || node instanceof DriveNode
         },
         exe: () => {
             state.newFolder(node as AnyFolderNode | DriveNode)
         },
     }),
-    download: (state: ExplorerState, { node }: SelectedItem, permissions) => ({
+    download: (state: ExplorerState, node: BrowserNode) => ({
         sourceEventNode: node,
         icon: 'fas fa-download',
         name: 'download file',
-        enable: true,
-        applicable: () =>
-            node instanceof ItemNode &&
-            node.kind == 'data' &&
-            permissions.write,
+        section: 'IO',
+        authorized: true,
+        applicable: () => node instanceof ItemNode && node.kind == 'data',
         exe: () => {
             const nodeData = node as DataNode
             const anchor = document.createElement('a')
@@ -108,11 +172,12 @@ export const GENERIC_ACTIONS = {
             anchor.remove()
         },
     }),
-    upload: (state: ExplorerState, { node }: SelectedItem) => ({
+    upload: (state: ExplorerState, node: BrowserNode) => ({
         sourceEventNode: node,
         icon: 'fas fa-upload',
         name: 'upload asset',
-        enable: true,
+        section: 'IO',
+        authorized: true,
         applicable: () => {
             return (
                 isLocalYouwol() &&
@@ -127,34 +192,48 @@ export const GENERIC_ACTIONS = {
     }),
     deleteFolder: (
         state: ExplorerState,
-        { node, selection }: SelectedItem,
+        node: BrowserNode,
+        permissions: OverallPermissions,
     ) => ({
         sourceEventNode: node,
         icon: 'fas fa-trash',
         name: 'delete',
-        enable: true /*permissions.write*/,
-        applicable: () =>
-            node instanceof FolderNode &&
-            selection == 'direct' /*&& node.kind == 'regular'*/,
+        section: 'Modify',
+        authorized: hasGroupModifyPermissions(permissions),
+        applicable: () => {
+            return node instanceof FolderNode && node.kind == 'regular'
+        },
         exe: () => {
             state.deleteItemOrFolder(node as RegularFolderNode)
         },
     }),
-    deleteDrive: (state: ExplorerState, { node, selection }: SelectedItem) => ({
+    deleteDrive: (
+        state: ExplorerState,
+        node: BrowserNode,
+        permissions: OverallPermissions,
+    ) => ({
         sourceEventNode: node,
         icon: 'fas fa-trash',
         name: 'delete drive',
-        enable: true /*permissions.write*/,
-        applicable: () => node instanceof DriveNode && selection == 'direct',
+        section: 'Modify',
+        authorized: hasGroupModifyPermissions(permissions),
+        applicable: () => {
+            return node instanceof DriveNode
+        },
         exe: () => {
             state.deleteDrive(node as DriveNode)
         },
     }),
-    clearTrash: (state: ExplorerState, { node }: SelectedItem) => ({
+    clearTrash: (
+        state: ExplorerState,
+        node: BrowserNode,
+        permissions: OverallPermissions,
+    ) => ({
         sourceEventNode: node,
         icon: 'fas fa-times',
         name: 'clear trash',
-        enable: true /*permissions.write*/,
+        section: 'Modify',
+        authorized: hasGroupModifyPermissions(permissions),
         applicable: () => node instanceof FolderNode && node.kind == 'trash',
         exe: () => {
             state.purgeDrive(node as TrashNode)
@@ -162,68 +241,65 @@ export const GENERIC_ACTIONS = {
     }),
     newFluxProject: (
         state: ExplorerState,
-        { node, selection }: SelectedItem,
-        permissions,
+        node: BrowserNode,
+        permissions: OverallPermissions,
     ) => ({
         sourceEventNode: node,
         icon: 'fas fa-sitemap',
         name: 'new app',
-        enable: permissions.write,
-        applicable: () =>
-            selection == 'indirect' && instanceOfStandardFolder(node),
+        section: 'New',
+        authorized: hasGroupModifyPermissions(permissions),
+        applicable: () => instanceOfStandardFolder(node),
         exe: () => {
             state.flux.new(node as AnyFolderNode)
         },
     }),
     newStory: (
         state: ExplorerState,
-        { node, selection }: SelectedItem,
-        permissions,
+        node: BrowserNode,
+        permissions: OverallPermissions,
     ) => ({
         sourceEventNode: node,
         icon: 'fas fa-book',
         name: 'new story',
-        enable: permissions.write,
-        applicable: () =>
-            selection == 'indirect' && instanceOfStandardFolder(node),
+        section: 'New',
+        authorized: hasGroupModifyPermissions(permissions),
+        applicable: () => instanceOfStandardFolder(node),
         exe: () => {
             state.story.new(node as AnyFolderNode)
         },
     }),
     paste: (
         state: ExplorerState,
-        { node, selection }: SelectedItem,
-        permissions,
+        node: BrowserNode,
+        permissions: OverallPermissions,
     ) => ({
         sourceEventNode: node,
         icon: 'fas fa-paste',
         name: 'paste',
-        enable: permissions.write && state.itemCut != undefined,
-        applicable: () =>
-            selection == 'indirect' &&
-            instanceOfStandardFolder(node) &&
-            permissions.write,
+        section: 'Move',
+        authorized: hasGroupModifyPermissions(permissions),
+        applicable: () => {
+            return instanceOfStandardFolder(node) && state.itemCut != undefined
+        },
         exe: () => {
             state.pasteItem(node as AnyFolderNode)
         },
     }),
     cut: (
         state: ExplorerState,
-        { node, selection }: SelectedItem,
-        permissions,
+        node: BrowserNode,
+        permissions: OverallPermissions,
     ) => ({
         sourceEventNode: node,
         icon: 'fas fa-cut',
         name: 'cut',
-        enable: true,
+        section: 'Move',
+        authorized: hasItemModifyPermission(node, permissions),
         applicable: () => {
-            if (!permissions.write || selection == 'indirect') {
-                return false
-            }
             if (node instanceof ItemNode) {
                 return !node.borrowed
             }
-
             return instanceOfStandardFolder(node)
         },
         exe: () => {
@@ -232,13 +308,14 @@ export const GENERIC_ACTIONS = {
     }),
     borrowItem: (
         state: ExplorerState,
-        { node }: SelectedItem,
-        permissions,
+        node: BrowserNode,
+        permissions: OverallPermissions,
     ) => ({
         sourceEventNode: node,
         icon: 'fas fa-link',
         name: 'borrow item',
-        enable: permissions.share,
+        section: 'Move',
+        authorized: hasItemSharePermission(node, permissions),
         applicable: () => node instanceof ItemNode,
         exe: () => {
             state.borrowItem(node as AnyItemNode)
@@ -246,15 +323,15 @@ export const GENERIC_ACTIONS = {
     }),
     importData: (
         state: ExplorerState,
-        { node, selection }: SelectedItem,
-        permissions,
+        node: BrowserNode,
+        permissions: OverallPermissions,
     ) => ({
         sourceEventNode: node,
         icon: 'fas fa-file-import',
         name: 'import data',
-        enable: permissions.write,
-        applicable: () =>
-            selection == 'indirect' && instanceOfStandardFolder(node),
+        section: 'IO',
+        authorized: hasGroupModifyPermissions(permissions),
+        applicable: () => instanceOfStandardFolder(node),
         exe: () => {
             const input = document.createElement('input')
             input.setAttribute('type', 'file')
@@ -268,23 +345,27 @@ export const GENERIC_ACTIONS = {
     }),
     deleteItem: (
         state: ExplorerState,
-        { node }: SelectedItem,
-        permissions,
+        node: BrowserNode,
+        permissions: OverallPermissions,
     ) => ({
         sourceEventNode: node,
         icon: 'fas fa-trash',
         name: 'delete',
-        enable: permissions.write,
-        applicable: () => node instanceof ItemNode,
+        section: 'Modify',
+        authorized: hasItemModifyPermission(node, permissions),
+        applicable: () => {
+            return node instanceof ItemNode
+        },
         exe: () => {
             state.deleteItemOrFolder(node as AnyItemNode)
         },
     }),
-    refresh: (state: ExplorerState, { node }: SelectedItem, permissions) => ({
+    refresh: (state: ExplorerState, node: BrowserNode) => ({
         sourceEventNode: node,
         icon: 'fas fa-sync-alt',
         name: 'refresh',
-        enable: permissions.read,
+        section: 'Disposition',
+        authorized: true,
         applicable: () => node instanceof FolderNode,
         exe: () => {
             state.refresh(node as AnyFolderNode)
@@ -294,50 +375,43 @@ export const GENERIC_ACTIONS = {
 
 export function getActions$(
     state: ExplorerState,
-    selectedItem: SelectedItem,
-    actionsList: ActionConstructor[],
+    node: BrowserNode,
+    actionsList: ActionConstructor[] = Object.values(GENERIC_ACTIONS),
 ): Observable<Array<Action>> {
-    if (
-        selectedItem.node instanceof FutureNode ||
-        selectedItem.node instanceof ProgressNode
-    ) {
+    if (node instanceof FutureNode || node instanceof ProgressNode) {
         return of([])
     }
-    if (selectedItem.node instanceof DeletedNode) {
+    if (node instanceof DeletedNode) {
         return of([])
     } // restore at some point
 
-    if (selectedItem.node instanceof GroupNode) {
-        // a service should return permissions of the current user for the group
-        // for now, everybody can do everything
-        const actions = actionsList
-            .map((action) =>
-                action(state, selectedItem, {
-                    read: true,
-                    write: true,
-                    share: true,
-                }),
-            )
-            .filter((a) => a.applicable())
-        return of(actions)
-    }
+    if (!(node instanceof ItemNode) && !(node instanceof FolderNode))
+        return of([])
 
-    const id =
-        selectedItem.node instanceof FolderNode &&
-        selectedItem.node.kind == 'trash'
-            ? selectedItem.node.driveId
-            : selectedItem.node.id
+    const permissions$ =
+        node instanceof ItemNode
+            ? forkJoin([
+                  fetchItemPermissions$(node),
+                  fetchGroupPermissions$(node.groupId),
+              ]).pipe(
+                  map(([item, group]) => {
+                      return { group, item }
+                  }),
+              )
+            : fetchGroupPermissions$(node.groupId).pipe(
+                  raiseHTTPErrors(),
+                  map((group) => {
+                      return { group }
+                  }),
+              )
 
-    return new Gtw.AssetsGatewayClient().explorerDeprecated
-        .getPermissions$(id)
-        .pipe(
-            map((permissions) => ({ item: selectedItem, permissions })),
-            map(({ item, permissions }) => {
-                return actionsList
-                    .map((action) => action(state, item, permissions))
-                    .filter((a) => a.applicable())
-            }),
-        )
+    return permissions$.pipe(
+        map((permissions) => {
+            return actionsList
+                .map((action) => action(state, node, permissions))
+                .filter((a) => a.applicable())
+        }),
+    )
 }
 
 export function openWithActionFromExe(app: Executable) {
