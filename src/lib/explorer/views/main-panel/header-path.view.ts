@@ -1,9 +1,8 @@
 import { attr$, child$, children$, VirtualDOM } from '@youwol/flux-view'
-import { BehaviorSubject, merge, Observable, Subject } from 'rxjs'
+import { merge, Observable, Subject } from 'rxjs'
 import { ywSpinnerView } from '../../..'
 import { ExplorerState, TreeGroup } from '../../explorer.state'
 import { AnyFolderNode, BrowserNode } from '../../nodes'
-import { ActionsView } from './actions.view'
 import { DisplayMode } from './main-panel.view'
 
 class DisplayModesView implements VirtualDOM {
@@ -89,7 +88,6 @@ export class HeaderPathView implements VirtualDOM {
                     },
                 ),
             },
-            new ActionsMenuView({ state: this.state }),
             new DisplayModesView({ displayMode$: this.state.displayMode$ }),
         ]
     }
@@ -119,39 +117,6 @@ export class LoadingSpinnerView implements VirtualDOM {
                         : {}
                 },
             ),
-        ]
-    }
-}
-
-export class ActionsMenuView implements VirtualDOM {
-    static ClassSelector = 'actions-menu-view'
-    public readonly class = `${ActionsMenuView.ClassSelector} d-flex align-items-center mr-5 fv-border-primary position-relative fv-pointer rounded fv-bg-secondary-alt px-2 fv-hover-bg-secondary`
-    public readonly expanded$ = new BehaviorSubject(false)
-
-    public readonly children: VirtualDOM[]
-    public readonly onclick = () =>
-        this.expanded$.next(!this.expanded$.getValue())
-    public readonly onmouseleave = () => this.expanded$.next(false)
-
-    public readonly state: ExplorerState
-
-    constructor(params: { state: ExplorerState }) {
-        Object.assign(this, params)
-
-        this.children = [
-            {
-                innerText: 'Actions',
-            },
-            {
-                class: 'fas fa-caret-down mx-1',
-            },
-            {
-                class: attr$(this.expanded$, (expanded) =>
-                    expanded ? 'position-absolute' : 'd-none',
-                ),
-                style: { top: '100%', right: '0%', zIndex: 100 },
-                children: [new ActionsView({ state: this.state })],
-            },
         ]
     }
 }
