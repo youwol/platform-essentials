@@ -8,7 +8,6 @@ import {
     BrowserNode,
     DriveNode,
     FolderNode,
-    ItemNode,
     ProgressNode,
 } from '../../../nodes'
 import { ItemView, ProgressItemView } from './item.view'
@@ -27,18 +26,6 @@ export class DetailsContentView {
         Object.assign(this, params)
 
         this.children = [
-            {
-                class: 'row w-100 justify-content-between py-2 border-bottom',
-                style: {
-                    fontWeight: 'bolder',
-                },
-                children: [
-                    { innerText: 'Name', class: 'px-2 col-sm text-center' },
-                    { innerText: 'Asset id', class: 'px-2 col-sm text-center' },
-                    { innerText: 'Tree id', class: 'px-2 col-sm text-center' },
-                    { innerText: 'URL', class: 'px-2 col-sm text-center' },
-                ],
-            },
             {
                 class: 'flex-grow-1 overflow-auto',
                 children: this.items.map((item: BrowserNode) =>
@@ -72,7 +59,9 @@ export class RowView implements VirtualDOM {
     public readonly onmouseleave = () => {
         this.hoveredRow$.next(undefined)
     }
-
+    public readonly oncontextmenu = () => {
+        this.state.selectItem(this.item)
+    }
     public readonly onclick = (ev: PointerEvent) => {
         this.state.selectItem(this.item)
         ev.stopPropagation()
@@ -134,24 +123,6 @@ export class RowView implements VirtualDOM {
                     }),
                 ],
             },
-            new CellView({
-                treeId: this.item.id,
-                content: this.item instanceof ItemNode ? this.item.assetId : '',
-                hoveredRow$: this.hoveredRow$,
-            }),
-            new CellView({
-                treeId: this.item.id,
-                content: this.item.id,
-                hoveredRow$: this.hoveredRow$,
-            }),
-            new CellView({
-                treeId: this.item.id,
-                content:
-                    this.item instanceof ItemNode && this.item.kind == 'data'
-                        ? `/api/assets-gateway/raw/data/${this.item.rawId}`
-                        : '',
-                hoveredRow$: this.hoveredRow$,
-            }),
         ]
     }
 }

@@ -77,7 +77,7 @@ export class ProgressItemView {
 
 export class ItemView {
     static ClassSelector = 'item-view'
-    public readonly baseClasses = `${ItemView.ClassSelector} d-flex align-items-center p-1 rounded m-3 fv-hover-bg-background-alt fv-pointer`
+    public readonly baseClasses = `${ItemView.ClassSelector} d-flex align-items-center p-1 rounded fv-hover-bg-background-alt fv-pointer`
     public readonly class: Stream$<BrowserNode, string>
     public readonly children: VirtualDOM[]
     public readonly style: Stream$<
@@ -140,9 +140,6 @@ export class ItemView {
                           duration: 1.5,
                       })
                     : {}
-            }),
-            child$(this.hovered$, (node) => {
-                return this.infosView(node)
             }),
         ]
     }
