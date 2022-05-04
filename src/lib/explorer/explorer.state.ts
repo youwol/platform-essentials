@@ -253,10 +253,15 @@ export class ExplorerState {
     }
 
     deleteItemOrFolder(node: RegularFolderNode | AnyItemNode) {
-        this.groupsTree[node.groupId].removeNode(node)
+        this.groupsTree[node.groupId].removeNode(node.id)
         const trashNode = this.groupsTree[node.groupId].getTrashNode()
         if (trashNode) {
             this.refresh(trashNode, false)
+        }
+        if (node instanceof FolderNode) {
+            this.openFolder(
+                this.groupsTree[node.groupId].getNode(node.parentFolderId),
+            )
         }
     }
 
