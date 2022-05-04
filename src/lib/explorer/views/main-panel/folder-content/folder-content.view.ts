@@ -1,14 +1,15 @@
 import { child$, VirtualDOM } from '@youwol/flux-view'
-import { combineLatest, Observable } from 'rxjs'
-import { filter, map, shareReplay } from 'rxjs/operators'
+import { Observable } from 'rxjs'
+import { map, shareReplay, switchMap, take, tap } from 'rxjs/operators'
 import { ExplorerState, TreeGroup } from '../../../explorer.state'
-import { BrowserNode } from '../../../nodes'
-import { DisplayMode } from '../main-panel.view'
+import {
+    BrowserNode,
+    DeletedItemNode,
+    FutureItemNode,
+    ItemNode,
+    ProgressNode,
+} from '../../../nodes'
 import { DetailsContentView } from './details.view'
-
-function unreachable(_mode: never) {
-    /* NOOP */
-}
 
 export class FolderContentView implements VirtualDOM {
     static ClassSelector = 'folder-content-view'
@@ -27,35 +28,33 @@ export class FolderContentView implements VirtualDOM {
         state: ExplorerState
         folderId: string
         groupId: string
+        [k: string]: unknown
     }) {
         Object.assign(this, params)
         this.tree = this.state.groupsTree[this.groupId]
         this.items$ = this.tree.root$.pipe(
-            map((root) => {
-                return root.id == this.folderId
-                    ? root
-                    : this.tree.getNode(this.folderId)
-            }),
-            map((node) => node.children as BrowserNode[]),
-            // When double-clicking on sidebar this prevents error (an observable is actually reaching here)
-            filter((children) => Array.isArray(children)),
-            shareReplay(1),
+            map(() => this.tree.getNode(this.folderId)),
+            switchMap((node) => this.tree.getChildren$(node).pipe(take(1))),
+            map((children) =>
+                children.filter(
+                    (c) =>
+                        c instanceof ItemNode ||
+                        c instanceof FutureItemNode ||
+                        c instanceof DeletedItemNode ||
+                        c instanceof ProgressNode,
+                ),
+            ),
+            tap((children) => console.log('FolderContent', children)),
+            shareReplay({ bufferSize: 1, refCount: true }),
         )
 
         this.children = [
-            child$(
-                combineLatest([this.state.displayMode$, this.items$]),
-                ([mode, items]: [DisplayMode, BrowserNode[]]) => {
-                    if (mode === 'details') {
-                        return new DetailsContentView({
-                            state: this.state,
-                            items,
-                        })
-                    } else {
-                        unreachable(mode)
-                    }
-                },
-            ),
+            child$(this.items$, (items: BrowserNode[]) => {
+                return new DetailsContentView({
+                    state: this.state,
+                    items,
+                })
+            }),
         ]
     }
 }
