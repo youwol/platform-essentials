@@ -3,7 +3,7 @@
 
 import '../mock-requests'
 import { take } from 'rxjs/operators'
-import { FolderNode, ItemNode, StoryNode } from '../../lib/explorer/nodes'
+import { FolderNode, ItemNode, StoryNode } from '../../lib/explorer'
 import { resetPyYouwolDbs$ } from '../common'
 import {
     borrow,
@@ -60,11 +60,9 @@ test(`cut & paste`, (done) => {
             cd('..'),
             expectSnapshot({
                 explorerState: (state) => {
-                    state.currentFolder$
-                        .pipe(take(1))
-                        .subscribe(({ folder }) => {
-                            expect(folder.name).toBe('Home')
-                        })
+                    state.openFolder$.pipe(take(1)).subscribe(({ folder }) => {
+                        expect(folder.name).toBe('Home')
+                    })
                 },
             }),
             paste(),

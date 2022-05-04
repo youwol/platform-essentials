@@ -31,7 +31,7 @@ beforeEach((done) => {
         .pipe(
             mergeMap((defaultDrive) => {
                 return youwolClient.admin.customCommands
-                    .doDelete$('purge-downloads')
+                    .doDelete$({ name: 'purge-downloads' })
                     .pipe(mapTo(defaultDrive))
             }),
             mergeMap((defaultDrive) => {
