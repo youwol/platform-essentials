@@ -9,7 +9,7 @@ import {
 } from 'rxjs'
 import { filter, mergeMap, share, take } from 'rxjs/operators'
 import { v4 as uuidv4 } from 'uuid'
-import { DisplayMode, FutureFolderNode } from '.'
+import { FutureFolderNode } from '.'
 import { ChildApplicationAPI } from '../core'
 import { FileAddedEvent, PlatformEvent } from '../core/platform.events'
 
@@ -89,8 +89,6 @@ export class ExplorerState {
     public readonly selectedItem$ = new BehaviorSubject<BrowserNode>(undefined)
 
     public readonly openFolder$ = new ReplaySubject<OpenFolder>(1)
-
-    public readonly displayMode$ = new BehaviorSubject<DisplayMode>('details')
 
     public readonly userInfo$ = RequestsExecutor.getUserInfo().pipe(
         share(),

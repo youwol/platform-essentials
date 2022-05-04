@@ -1,38 +1,8 @@
-import { attr$, child$, children$, VirtualDOM } from '@youwol/flux-view'
-import { merge, Observable, Subject } from 'rxjs'
+import { child$, children$, VirtualDOM } from '@youwol/flux-view'
+import { merge, Observable } from 'rxjs'
 import { ywSpinnerView } from '../../..'
 import { ExplorerState, TreeGroup } from '../../explorer.state'
 import { AnyFolderNode, BrowserNode } from '../../nodes'
-import { DisplayMode } from './main-panel.view'
-
-class DisplayModesView implements VirtualDOM {
-    public readonly class = 'd-flex py-1 border-bottom justify-content-around'
-    public readonly children: VirtualDOM[]
-
-    public readonly displayMode$: Subject<DisplayMode>
-
-    constructor(params: { displayMode$: Subject<DisplayMode> }) {
-        Object.assign(this, params)
-
-        this.children = [this.itemView('details')]
-    }
-
-    itemView(mode: DisplayMode) {
-        const icons: Record<DisplayMode, string> = {
-            //'cards': "fa-th-large",
-            //'miniatures': "fa-th",
-            details: 'fa-th-list',
-        }
-        const baseClass = `fv-pointer fv-hover-text-secondary fas ${icons[mode]} mx-2 p-1`
-        const selectionClass = 'fv-text-focus'
-        return {
-            class: attr$(this.displayMode$, (m) =>
-                m == mode ? `${baseClass} ${selectionClass}` : `${baseClass}`,
-            ),
-            onclick: () => this.displayMode$.next(mode),
-        }
-    }
-}
 
 export class HeaderPathView implements VirtualDOM {
     static ClassSelector = 'header-path-view'
@@ -88,7 +58,6 @@ export class HeaderPathView implements VirtualDOM {
                     },
                 ),
             },
-            new DisplayModesView({ displayMode$: this.state.displayMode$ }),
         ]
     }
 }
