@@ -56,7 +56,7 @@ export class HeaderPathView implements VirtualDOM {
                     'overflow-y': 'hidden',
                 },
                 children: children$(
-                    this.state.currentFolder$,
+                    this.state.openFolder$,
                     ({
                         tree,
                         folder,

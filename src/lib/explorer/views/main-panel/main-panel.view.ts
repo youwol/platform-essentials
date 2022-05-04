@@ -28,7 +28,7 @@ export class MainPanelView implements VirtualDOM {
                     {
                         class: 'w-100 h-100 d-flex',
                         children: [
-                            child$(this.state.currentFolder$, ({ folder }) => {
+                            child$(this.state.openFolder$, ({ folder }) => {
                                 return new FolderContentView({
                                     state: this.state,
                                     folderId: folder.id,
