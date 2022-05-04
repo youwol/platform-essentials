@@ -1,6 +1,5 @@
 import { child$, HTMLElement$, VirtualDOM } from '@youwol/flux-view'
-import { BehaviorSubject } from 'rxjs'
-import { FolderContentView, SideBarView } from '../..'
+import { FolderContentView } from '../..'
 import { ExplorerState } from '../../explorer.state'
 
 export class MainPanelView implements VirtualDOM {
@@ -24,7 +23,6 @@ export class MainPanelView implements VirtualDOM {
                     elem.ownSubscriptions(...this.state.subscriptions)
                 },
                 children: [
-                    new SideBarView(this.state, new BehaviorSubject(false)),
                     {
                         class: 'w-100 h-100 d-flex',
                         children: [
