@@ -36,7 +36,7 @@ class DisplayModesView implements VirtualDOM {
 
 export class HeaderPathView implements VirtualDOM {
     static ClassSelector = 'header-path-view'
-    public readonly class = `${HeaderPathView.ClassSelector} w-100 d-flex p-2 fv-bg-background-alt`
+    public readonly class = `${HeaderPathView.ClassSelector} w-100 d-flex justify-content-center p-2 fv-bg-background-alt`
     style = {
         height: '50px',
     }
@@ -44,12 +44,12 @@ export class HeaderPathView implements VirtualDOM {
 
     public readonly state: ExplorerState
 
-    constructor(params: { state: ExplorerState }) {
+    constructor(params: { state: ExplorerState; [k: string]: unknown }) {
         Object.assign(this, params)
 
         this.children = [
             {
-                class: 'd-flex flex-grow-1 overflow-auto mr-1',
+                class: 'd-flex flex-grow-1 justify-content-center overflow-auto mr-1',
                 style: {
                     'white-space': 'nowrap',
                     'overflow-x': 'auto',
@@ -123,7 +123,7 @@ export class LoadingSpinnerView implements VirtualDOM {
 
 export class PathElementView implements VirtualDOM {
     static ClassSelector = 'path-elem-view'
-    public readonly baseClass = `${PathElementView.ClassSelector} p-1 rounded d-flex align-items-center fv-pointer fv-bg-background`
+    public readonly baseClass = `${PathElementView.ClassSelector} rounded px-1 d-flex align-items-center fv-pointer fv-bg-background fv-hover-bg-background-alt`
 
     public readonly class: string
     public readonly children: VirtualDOM[]
@@ -145,15 +145,15 @@ export class PathElementView implements VirtualDOM {
 
         this.class =
             this.node.id == this.selectedNode.id
-                ? `${this.baseClass} fv-border-focus fv-text-focus fv-hover-text-primary fv-hover-bg-secondary`
-                : `${this.baseClass} fv-border-primary fv-hover-text-primary fv-hover-bg-secondary`
+                ? `${this.baseClass} fv-text-focus`
+                : `${this.baseClass}`
 
         this.children = [
             {
                 class: this.node.icon,
             },
             {
-                class: 'px-2',
+                class: 'px-1',
                 innerText: this.node.name,
             },
         ]
