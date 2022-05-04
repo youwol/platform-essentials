@@ -3,8 +3,6 @@ import { BehaviorSubject } from 'rxjs'
 import { FolderContentView, SideBarView } from '../..'
 import { ExplorerState } from '../../explorer.state'
 
-export type DisplayMode = 'details'
-
 export class MainPanelView implements VirtualDOM {
     static ClassSelector = 'main-panel-view'
     public readonly class = `${MainPanelView.ClassSelector} w-100 h-100 flex-grow-1 d-flex flex-column`
