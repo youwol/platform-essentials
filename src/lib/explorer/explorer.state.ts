@@ -43,6 +43,7 @@ export class TreeGroup extends ImmutableTree.State<BrowserNode> {
     public readonly homeFolderId: string
     public readonly trashFolderId: string
     public readonly drivesId: string
+    public readonly defaultDriveId: string
     public readonly downloadFolderId?: string
 
     constructor(
@@ -69,6 +70,9 @@ export class TreeGroup extends ImmutableTree.State<BrowserNode> {
     }
     getTrashNode(): TrashNode {
         return this.getNode(this.trashFolderId)
+    }
+    getDefaultDriveNode(): DriveNode {
+        return this.getNode(this.defaultDriveId)
     }
 }
 
