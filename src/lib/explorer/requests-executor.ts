@@ -348,6 +348,14 @@ export class RequestsExecutor {
             ) as Observable<Array<BrowserNode>>
     }
 
+    static getPath(folderId: string) {
+        return new AssetsGateway.AssetsGatewayClient().treedb
+            .getPathFolder$({
+                folderId,
+            })
+            .pipe(dispatchHTTPErrors(this.error$))
+    }
+
     static createFolderNode(folder: TreedbBackend.GetFolderResponse) {
         return new FolderNode({
             folderId: folder.folderId,
