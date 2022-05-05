@@ -97,8 +97,8 @@ export class ExplorerState {
     public readonly favoriteFolders$ = new BehaviorSubject<FavoriteFolder[]>([])
 
     public readonly userInfo$ = RequestsExecutor.getUserInfo().pipe(
-        share(),
         raiseHTTPErrors(),
+        shareReplay({ bufferSize: 1, refCount: true }),
     )
 
     public readonly defaultUserDrive$ = this.userInfo$.pipe(
