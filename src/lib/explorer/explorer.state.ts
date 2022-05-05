@@ -1,13 +1,30 @@
 import { ImmutableTree } from '@youwol/fv-tree'
 
-import { AssetsGateway, raiseHTTPErrors } from '@youwol/http-clients'
+import {
+    AssetsGateway,
+    CdnSessionsStorage,
+    raiseHTTPErrors,
+    TreedbBackend,
+} from '@youwol/http-clients'
 import {
     BehaviorSubject,
     combineLatest,
+    from,
+    Observable,
+    of,
     ReplaySubject,
     Subscription,
 } from 'rxjs'
-import { filter, mergeMap, share, take } from 'rxjs/operators'
+import {
+    filter,
+    map,
+    mergeMap,
+    reduce,
+    share,
+    shareReplay,
+    take,
+    tap,
+} from 'rxjs/operators'
 import { v4 as uuidv4 } from 'uuid'
 import { FutureFolderNode } from '.'
 import { ChildApplicationAPI } from '../core'
@@ -36,6 +53,7 @@ import {
     processBorrowItem,
     processMoveFolder,
     processMoveItem,
+    renameFavoriteIfNeeded,
 } from './utils'
 
 export class TreeGroup extends ImmutableTree.State<BrowserNode> {
