@@ -215,6 +215,40 @@ export class ExplorerState {
         this.openFolder$.next({ tree: this.groupsTree[folder.groupId], folder })
     }
 
+    navigateTo(folderId: string) {
+        new AssetsGateway.AssetsGatewayClient().treedb
+            .getFolder$({ folderId })
+            .pipe(
+                raiseHTTPErrors(),
+                mergeMap((folder) => this.selectGroup$(folder.groupId)),
+                mergeMap((treeGroupState) => {
+                    return RequestsExecutor.getPath(folderId).pipe(
+                        map((path) => ({ path, treeGroupState })),
+                    )
+                }),
+                mergeMap(({ path, treeGroupState }) => {
+                    return treeGroupState
+                        .resolvePath(path.folders.map((f) => f.folderId))
+                        .pipe(
+                            map((nodes) => {
+                                return { nodes, treeGroupState }
+                            }),
+                        )
+                }),
+            )
+            .subscribe(({ nodes, treeGroupState }) => {
+                const nodeIds = nodes.map((n) => n.id)
+                const expanded = [
+                    ...treeGroupState.expandedNodes$
+                        .getValue()
+                        .filter((expandedId) => !nodeIds.includes(expandedId)),
+                    ...nodeIds,
+                ]
+                treeGroupState.expandedNodes$.next(expanded)
+                this.openFolder(nodes.slice(-1)[0] as AnyFolderNode)
+            })
+    }
+
     selectItem(item: BrowserNode) {
         if (this.selectedItem$.getValue() != item) {
             this.selectedItem$.next(item)
