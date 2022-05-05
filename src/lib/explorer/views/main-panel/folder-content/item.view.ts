@@ -123,15 +123,20 @@ export class ItemView {
         )
 
         this.children = [
-            this.originView(this.item),
             {
-                class: `fas ${this.item.icon} mr-1`,
+                class: 'col-6 d-flex align-items-center',
+                children: [
+                    {
+                        class: `fas ${this.item.icon} mr-1`,
+                    },
+                    child$(this.item.status$, (statusList) =>
+                        statusList.find((s) => s.type == 'renaming')
+                            ? this.editView()
+                            : { innerText: this.item.name, class: 'pr-3' },
+                    ),
+                ],
             },
-            child$(this.item.status$, (statusList) =>
-                statusList.find((s) => s.type == 'renaming')
-                    ? this.editView()
-                    : { innerText: this.item.name },
-            ),
+            this.originView(this.item),
             child$(this.item.status$, (status) => {
                 return status.find((s) => s.type == 'request-pending')
                     ? ywSpinnerView({
@@ -146,10 +151,7 @@ export class ItemView {
 
     originView(node: BrowserNode) {
         return {
-            class: 'd-flex flex-column align-items-center mx-1',
-            style: {
-                transform: 'scale(0.7)',
-            },
+            class: 'd-flex align-items-center mx-1 col-4',
             children: [
                 this.item instanceof ItemNode && this.item.borrowed
                     ? { class: 'fas fa-link pr-1 py-1' }
