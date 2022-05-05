@@ -7,6 +7,7 @@ import {
     dispatchHTTPErrors,
     HTTPError,
     send$,
+    TreedbBackend,
 } from '@youwol/http-clients'
 
 import {
@@ -347,43 +348,52 @@ export class RequestsExecutor {
             ) as Observable<Array<BrowserNode>>
     }
 
+    static createFolderNode(folder: TreedbBackend.GetFolderResponse) {
+        return new FolderNode({
+            folderId: folder.folderId,
+            kind: 'regular',
+            groupId: folder.groupId,
+            name: folder.name,
+            type: folder.type,
+            metadata: folder.metadata,
+            driveId: folder.driveId,
+            parentFolderId: folder.parentFolderId,
+            origin: folder['origin'],
+            children: RequestsExecutor.getFolderChildren(
+                folder.groupId,
+                folder.driveId,
+                folder.folderId,
+            ),
+        })
+    }
     static getFolderChildren(
         groupId: string,
         driveId: string,
         folderId: string,
     ) {
-        return RequestsExecutor.assetsGtwClient.explorerDeprecated.folders
-            .queryChildren$(folderId)
+        return RequestsExecutor.assetsGtwClient.treedb
+            .queryChildren$({ parentId: folderId })
             .pipe(
                 dispatchHTTPErrors(this.error$),
                 map(({ items, folders }) => {
                     return [
                         ...folders.map(
-                            (folder: AssetsGateway.FolderResponse) => {
-                                return new FolderNode({
-                                    folderId: folder.folderId,
-                                    kind: 'regular',
-                                    groupId,
-                                    name: folder.name,
-                                    driveId,
-                                    parentFolderId: folderId,
-                                    origin: folder.origin,
-                                    children:
-                                        RequestsExecutor.getFolderChildren(
-                                            groupId,
-                                            driveId,
-                                            folder.folderId,
-                                        ),
-                                })
+                            (folder: TreedbBackend.GetFolderResponse) => {
+                                return RequestsExecutor.createFolderNode(folder)
                             },
                         ),
-                        ...items.map((item: AssetsGateway.ItemResponse) => {
+                        ...items.map((item: TreedbBackend.GetItemResponse) => {
                             const assetData = {
-                                id: item.treeId,
+                                id: item.itemId,
                                 groupId,
                                 driveId,
-                                ...item,
-                                kind: item.kind as ItemKind,
+                                assetId: item.relatedId,
+                                rawId: atob(item.relatedId),
+                                treeId: item.itemId,
+                                origin: item['origin'],
+                                borrowed: JSON.parse(item.metadata).borrowed,
+                                kind: item.type as ItemKind,
+                                name: item.name,
                             }
                             return new ItemNode(assetData)
                         }),
@@ -396,6 +406,8 @@ export class RequestsExecutor {
                                       kind: 'trash',
                                       name: 'Trash',
                                       folderId: 'trash',
+                                      type: '',
+                                      metadata: '',
                                       children:
                                           RequestsExecutor.getDeletedItems(
                                               driveId,
