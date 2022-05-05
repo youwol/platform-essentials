@@ -192,3 +192,62 @@ export function processMoveFolder(
     })
     treeDestination.addChild(destination.id, childNode)
 }
+
+export function popupAssetCardView(node: AnyItemNode) {
+    const withTabs = {
+        Permissions: new AssetPermissionsView({
+            asset: node as unknown as AssetsGateway.Asset,
+        }),
+    }
+    if (node.kind == 'flux-project') {
+        withTabs['Dependencies'] = new FluxDependenciesView({
+            asset: node as unknown as AssetsGateway.Asset,
+        })
+    }
+    if (node.kind == 'package') {
+        withTabs['Package Info'] = new PackageInfoView({
+            asset: node as unknown as AssetsGateway.Asset,
+        })
+    }
+    of(node)
+        .pipe(
+            mergeMap(({ assetId }) => {
+                return RequestsExecutor.getAsset(assetId)
+            }),
+            take(1),
+        )
+        .subscribe((asset) => {
+            const assetUpdate$ = popupAssetModalView({
+                asset,
+                actionsFactory: (targetAsset) => {
+                    return new AssetActionsView({ asset: targetAsset })
+                },
+                withTabs,
+            })
+            assetUpdate$
+                .pipe(
+                    map(({ name }) => name),
+                    distinct(),
+                )
+                .subscribe(() => {
+                    console.warn('Asset may need rename')
+                    //this.state.rename(this.node, name, false)
+                })
+        })
+}
+
+export function renameFavoriteIfNeeded(
+    favorites$: BehaviorSubject<FavoriteFolder[]>,
+    { folderId, newName }: { folderId: string; newName: string },
+) {
+    const favorites = favorites$.getValue()
+    const favoriteFolder = favorites.find(
+        (folder) => folder.folderId == folderId,
+    )
+    if (favoriteFolder) {
+        favorites$.next([
+            ...favorites.filter((f) => f.folderId != folderId),
+            { ...favoriteFolder, name: newName } as AnyFolderNode,
+        ])
+    }
+}

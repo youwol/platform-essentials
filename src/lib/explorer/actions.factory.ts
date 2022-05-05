@@ -23,9 +23,9 @@ import {
     RegularFolderNode,
     TrashNode,
 } from './nodes'
-import { isLocalYouwol } from './utils'
+import { isLocalYouwol, popupAssetCardView } from './utils'
 
-export type Section = 'Modify' | 'Move' | 'New' | 'IO' | 'Disposition'
+export type Section = 'Modify' | 'Move' | 'New' | 'IO' | 'Disposition' | 'Info'
 export interface Action {
     sourceEventNode: BrowserNode
     icon: string
@@ -369,6 +369,28 @@ export const GENERIC_ACTIONS: { [k: string]: ActionConstructor } = {
         applicable: () => node instanceof FolderNode,
         exe: () => {
             state.refresh(node as AnyFolderNode)
+        },
+    }),
+    info: (state: ExplorerState, node: BrowserNode) => ({
+        sourceEventNode: node,
+        icon: 'fas fa-info-circle',
+        name: 'info',
+        section: 'Info',
+        authorized: true,
+        applicable: () => node instanceof ItemNode,
+        exe: () => {
+            popupAssetCardView(node as AnyItemNode)
+        },
+    }),
+    favoriteFolder: (state: ExplorerState, node: BrowserNode) => ({
+        sourceEventNode: node,
+        icon: 'fas fa-map-pin',
+        name: 'add to favorite',
+        section: 'Disposition',
+        authorized: true,
+        applicable: () => node instanceof FolderNode,
+        exe: () => {
+            state.addFavoriteFolder(node as AnyFolderNode)
         },
     }),
 }

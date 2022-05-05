@@ -81,6 +81,8 @@ export type OpenFolder = {
     folder: AnyFolderNode | DriveNode
 }
 
+export interface FavoriteFolder extends TreedbBackend.GetFolderResponse {}
+
 export class ExplorerState {
     public flux: FluxState
     public story: StoryState
@@ -89,6 +91,8 @@ export class ExplorerState {
     public readonly selectedItem$ = new BehaviorSubject<BrowserNode>(undefined)
 
     public readonly openFolder$ = new ReplaySubject<OpenFolder>(1)
+
+    public readonly favoriteFolders$ = new BehaviorSubject<FavoriteFolder[]>([])
 
     public readonly userInfo$ = RequestsExecutor.getUserInfo().pipe(
         share(),
@@ -147,6 +151,35 @@ export class ExplorerState {
                 this.selectedItem$.next(undefined)
             }),
         )
+        new CdnSessionsStorage.CdnSessionsStorageClient()
+            .getData$({
+                packageName: '@youwol/platform-essentials',
+                dataName: 'explorer',
+            })
+            .pipe(
+                raiseHTTPErrors(),
+                take(1),
+                filter((explorerData) =>
+                    Array.isArray(explorerData['favoriteFolders']),
+                ),
+                mergeMap((explorerData) =>
+                    from(
+                        explorerData['favoriteFolders'] as FavoriteFolder[],
+                    ).pipe(
+                        mergeMap(({ folderId }) => {
+                            return new AssetsGateway.AssetsGatewayClient().treedb.getFolder$(
+                                { folderId },
+                            )
+                        }),
+                        raiseHTTPErrors(),
+                    ),
+                ),
+                reduce((acc, e) => [...acc, e], []),
+            )
+            .subscribe((favorites) => {
+                this.favoriteFolders$.next(favorites)
+            })
+
         const os = ChildApplicationAPI.getOsInstance()
         if (os) {
             this.subscriptions.push(
@@ -243,6 +276,10 @@ export class ExplorerState {
         save = true,
     ) {
         node.removeStatus({ type: 'renaming' })
+        renameFavoriteIfNeeded(this.favoriteFolders$, {
+            folderId: node.id,
+            newName,
+        })
         this.groupsTree[node.groupId].replaceAttributes(
             node,
             { name: newName },
@@ -376,5 +413,21 @@ export class ExplorerState {
                     this.refresh(folder)
                 }
             })
+    }
+
+    addFavoriteFolder(folder: AnyFolderNode) {
+        const favorites = [...this.favoriteFolders$.getValue(), folder]
+        new CdnSessionsStorage.CdnSessionsStorageClient()
+            .postData$({
+                packageName: '@youwol/platform-essentials',
+                dataName: 'explorer',
+                body: {
+                    favoriteFolders: favorites.map((f) => ({
+                        folderId: f.folderId,
+                    })),
+                },
+            })
+            .subscribe()
+        this.favoriteFolders$.next(favorites)
     }
 }
