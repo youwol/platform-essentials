@@ -10,11 +10,11 @@ export function resetPyYouwolDbs$() {
     const youwol = new PyYouwol.PyYouwolClient()
     const gtw = new AssetsGateway.AssetsGatewayClient()
     return youwol.admin.environment
-        .login$({ email: 'int_tests_yw-users@test-user' })
+        .login$({ body: { email: 'int_tests_yw-users@test-user' } })
         .pipe(
             mergeMap(() =>
                 forkJoin([
-                    youwol.admin.customCommands.doGet$('reset'),
+                    youwol.admin.customCommands.doGet$({ name: 'reset' }),
                     gtw.explorerDeprecated
                         .getDefaultUserDrive$()
                         .pipe(raiseHTTPErrors()),

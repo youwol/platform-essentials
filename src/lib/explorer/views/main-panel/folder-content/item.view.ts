@@ -164,16 +164,6 @@ export class ItemView {
         }
     }
 
-    infosView(node: BrowserNode) {
-        if (!(node instanceof ItemNode)) {
-            return {}
-        }
-
-        return node.id == this.item.id
-            ? new InfoBtnView({ state: this.state, node: node })
-            : {}
-    }
-
     editView() {
         return {
             tag: 'input',
