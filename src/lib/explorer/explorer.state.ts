@@ -140,11 +140,6 @@ export class ExplorerState {
                     this.story = new StoryState(tree)
                     this.data = new DataState(tree)
                     this.openFolder(tree.getHomeNode())
-                    tree.directUpdates$.subscribe((updates) => {
-                        updates.forEach((update) =>
-                            RequestsExecutor.execute(update),
-                        )
-                    })
                 },
             ),
             this.openFolder$.subscribe(() => {
@@ -226,23 +221,30 @@ export class ExplorerState {
         }
     }
 
-    selectGroup(group) {
-        combineLatest([
-            RequestsExecutor.getDefaultDrive(group.id),
-            RequestsExecutor.getDrivesChildren(group.id),
-        ]).subscribe(([defaultDrive, drives]) => {
-            const tree = createTreeGroup(
-                this,
-                group.elements.slice(-1)[0],
-                drives,
-                defaultDrive,
-            )
-            this.groupsTree[defaultDrive.groupId] = tree
-            this.openFolder(tree.getHomeNode())
-            tree.directUpdates$.subscribe((updates) => {
-                updates.forEach((update) => RequestsExecutor.execute(update))
-            })
-        })
+    selectGroup$(groupId: string): Observable<TreeGroup> {
+        if (this.groupsTree[groupId]) {
+            return of(this.groupsTree[groupId])
+        }
+        return combineLatest([
+            RequestsExecutor.getDefaultDrive(groupId),
+            RequestsExecutor.getDrivesChildren(groupId),
+            this.userInfo$,
+        ]).pipe(
+            map(([defaultDrive, drives, userInfo]) =>
+                createTreeGroup(
+                    this,
+                    userInfo.groups
+                        .find((g) => g.id == groupId)
+                        .path.split('/')
+                        .slice(-1)[0],
+                    drives,
+                    defaultDrive,
+                ),
+            ),
+            tap((tree) => {
+                this.groupsTree[tree.groupId] = tree
+            }),
+        )
     }
 
     newFolder(parentNode: DriveNode | AnyFolderNode) {

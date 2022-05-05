@@ -1,4 +1,4 @@
-import { ExplorerState, TreeGroup } from './explorer.state'
+import { ExplorerState, FavoriteFolder, TreeGroup } from './explorer.state'
 import {
     AnyFolderNode,
     AnyItemNode,
@@ -11,6 +11,16 @@ import {
     RegularFolderNode,
 } from './nodes'
 import { RequestsExecutor } from './requests-executor'
+import {
+    AssetActionsView,
+    AssetPermissionsView,
+    FluxDependenciesView,
+    PackageInfoView,
+    popupAssetModalView,
+} from '../assets'
+import { AssetsGateway } from '@youwol/http-clients'
+import { distinct, map, mergeMap, take } from 'rxjs/operators'
+import { BehaviorSubject, of } from 'rxjs'
 
 export function isLocalYouwol() {
     return window.location.hostname == 'localhost'
@@ -98,15 +108,19 @@ export function createTreeGroup(
         children: [defaultDrive, ...userDrives],
         kind: 'user',
     })
-
-    return new TreeGroup(userGroup, {
+    const tree = new TreeGroup(userGroup, {
         explorerState,
+        groupId: respDefaultDrive.groupId,
         homeFolderId: homeFolderNode.id,
         trashFolderId: trashFolderNode.id,
         defaultDriveId: defaultDrive.id,
         drivesId: userDrives.map((d) => d.id),
         downloadFolderId: downloadFolderNode.id,
     })
+    tree.directUpdates$.subscribe((updates) => {
+        updates.forEach((update) => RequestsExecutor.execute(update))
+    })
+    return tree
 }
 
 export function processBorrowItem(
