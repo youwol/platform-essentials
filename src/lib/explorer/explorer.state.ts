@@ -298,6 +298,8 @@ export class ExplorerState {
                     name: 'new folder',
                     folderId: resp.folderId,
                     parentFolderId: parentNode.id,
+                    type: resp.type,
+                    metadata: resp.metadata,
                     children: [],
                 })
                 tree.replaceNode(childFolder.id, folderNode)

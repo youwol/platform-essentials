@@ -122,6 +122,8 @@ export class FolderNode<T extends FolderKind> extends BrowserNode {
     groupId: string
     driveId: string
     parentFolderId: string
+    type: string
+    metadata: string
     kind: T
 
     constructor(params: {
@@ -130,6 +132,8 @@ export class FolderNode<T extends FolderKind> extends BrowserNode {
         groupId: string
         parentFolderId: string
         name: string
+        type: string
+        metadata: string
         children?: Array<BrowserNode> | Observable<Array<BrowserNode>>
         kind: T
         origin?: AssetsGateway.Origin
