@@ -42,6 +42,7 @@ export class TreeGroup extends ImmutableTree.State<BrowserNode> {
     public readonly explorerState: ExplorerState
     public readonly homeFolderId: string
     public readonly trashFolderId: string
+    public readonly groupId: string
     public readonly drivesId: string
     public readonly defaultDriveId: string
     public readonly downloadFolderId?: string
@@ -50,6 +51,7 @@ export class TreeGroup extends ImmutableTree.State<BrowserNode> {
         rootNode: GroupNode,
         params: {
             explorerState: ExplorerState
+            groupId: string
             homeFolderId: string
             trashFolderId: string
             defaultDriveId: string
