@@ -213,6 +213,8 @@ export class ExplorerState {
 
     openFolder(folder: AnyFolderNode | DriveNode) {
         this.openFolder$.next({ tree: this.groupsTree[folder.groupId], folder })
+        const treeGroup = this.groupsTree[folder.groupId]
+        treeGroup && treeGroup.selectedNode$.next(treeGroup.getNode(folder.id))
     }
 
     navigateTo(folderId: string) {
