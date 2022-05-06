@@ -2,14 +2,12 @@ import { ImmutableTree } from '@youwol/fv-tree'
 
 import {
     AssetsGateway,
-    CdnSessionsStorage,
     raiseHTTPErrors,
     TreedbBackend,
 } from '@youwol/http-clients'
 import {
     BehaviorSubject,
     combineLatest,
-    from,
     Observable,
     of,
     ReplaySubject,
@@ -19,7 +17,6 @@ import {
     filter,
     map,
     mergeMap,
-    reduce,
     share,
     shareReplay,
     take,
@@ -166,34 +163,9 @@ export class ExplorerState {
                 this.selectedItem$.next(undefined)
             }),
         )
-        new CdnSessionsStorage.CdnSessionsStorageClient()
-            .getData$({
-                packageName: '@youwol/platform-essentials',
-                dataName: 'explorer',
-            })
-            .pipe(
-                raiseHTTPErrors(),
-                take(1),
-                filter((explorerData) =>
-                    Array.isArray(explorerData['favoriteFolders']),
-                ),
-                mergeMap((explorerData) =>
-                    from(
-                        explorerData['favoriteFolders'] as FavoriteFolder[],
-                    ).pipe(
-                        mergeMap(({ folderId }) => {
-                            return new AssetsGateway.AssetsGatewayClient().treedb.getFolder$(
-                                { folderId },
-                            )
-                        }),
-                        raiseHTTPErrors(),
-                    ),
-                ),
-                reduce((acc, e) => [...acc, e], []),
-            )
-            .subscribe((favorites) => {
-                this.favoriteFolders$.next(favorites)
-            })
+        RequestsExecutor.getFavoriteFolders().subscribe((favorites) => {
+            this.favoriteFolders$.next(favorites)
+        })
 
         const os = ChildApplicationAPI.getOsInstance()
         if (os) {
@@ -238,10 +210,8 @@ export class ExplorerState {
     }
 
     navigateTo(folderId: string) {
-        new AssetsGateway.AssetsGatewayClient().treedb
-            .getFolder$({ folderId })
+        RequestsExecutor.getFolder(folderId)
             .pipe(
-                raiseHTTPErrors(),
                 mergeMap((folder) => this.selectGroup$(folder.groupId)),
                 mergeMap((treeGroupState) => {
                     return RequestsExecutor.getPath(folderId).pipe(
@@ -477,17 +447,15 @@ export class ExplorerState {
 
     addFavoriteFolder(folder: AnyFolderNode) {
         const favorites = [...this.favoriteFolders$.getValue(), folder]
-        new CdnSessionsStorage.CdnSessionsStorageClient()
-            .postData$({
-                packageName: '@youwol/platform-essentials',
-                dataName: 'explorer',
-                body: {
-                    favoriteFolders: favorites.map((f) => ({
-                        folderId: f.folderId,
-                    })),
-                },
-            })
-            .subscribe()
+        RequestsExecutor.saveFavoriteFolders(favorites).subscribe()
+        this.favoriteFolders$.next(favorites)
+    }
+
+    removeFavoriteFolder(folder: AnyFolderNode) {
+        const favorites = this.favoriteFolders$
+            .getValue()
+            .filter((f) => f.folderId != folder.id)
+        RequestsExecutor.saveFavoriteFolders(favorites).subscribe()
         this.favoriteFolders$.next(favorites)
     }
 }

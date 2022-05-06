@@ -1,9 +1,10 @@
 import { ImmutableTree } from '@youwol/fv-tree'
-import { Observable, of, Subject } from 'rxjs'
-import { delay, map, tap } from 'rxjs/operators'
+import { from, Observable, of, Subject } from 'rxjs'
+import { delay, map, mergeMap, reduce, tap } from 'rxjs/operators'
 import { v4 as uuidv4 } from 'uuid'
 import {
     AssetsGateway,
+    CdnSessionsStorage,
     dispatchHTTPErrors,
     HTTPError,
     send$,
@@ -477,5 +478,49 @@ export class RequestsExecutor {
                     node.removeStatus({ type: 'request-pending', id: uid }),
             ),
         )
+    }
+
+    static saveFavoriteFolders(favorites: { folderId: string }[]) {
+        return new CdnSessionsStorage.CdnSessionsStorageClient()
+            .postData$({
+                packageName: '@youwol/platform-essentials',
+                dataName: 'explorer',
+                body: {
+                    favoriteFolders: favorites.map((f) => ({
+                        folderId: f.folderId,
+                    })),
+                },
+            })
+            .pipe(dispatchHTTPErrors(this.error$))
+    }
+
+    static getFolder(folderId: string) {
+        return RequestsExecutor.assetsGtwClient.treedb
+            .getFolder$({ folderId })
+            .pipe(dispatchHTTPErrors(this.error$))
+    }
+
+    static getFavoriteFolders() {
+        return new CdnSessionsStorage.CdnSessionsStorageClient()
+            .getData$({
+                packageName: '@youwol/platform-essentials',
+                dataName: 'explorer',
+            })
+            .pipe(
+                dispatchHTTPErrors(this.error$),
+                map((explorerData) =>
+                    Array.isArray(explorerData['favoriteFolders'])
+                        ? explorerData['favoriteFolders']
+                        : [],
+                ),
+                mergeMap((favoriteFolders: { folderId: string }[]) =>
+                    from(favoriteFolders).pipe(
+                        mergeMap(({ folderId }) =>
+                            RequestsExecutor.getFolder(folderId),
+                        ),
+                    ),
+                ),
+                reduce((acc, e) => [...acc, e], []),
+            )
     }
 }
