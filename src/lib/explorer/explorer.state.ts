@@ -99,6 +99,7 @@ export type OpenFolder = {
 }
 
 export interface FavoriteFolder extends TreedbBackend.GetFolderResponse {}
+export interface FavoriteGroup extends AssetsGateway.GroupResponse {}
 
 export class ExplorerState {
     public flux: FluxState
@@ -110,6 +111,7 @@ export class ExplorerState {
     public readonly openFolder$ = new ReplaySubject<OpenFolder>(1)
 
     public readonly favoriteFolders$ = new BehaviorSubject<FavoriteFolder[]>([])
+    public readonly favoriteGroups$ = new BehaviorSubject<FavoriteGroup[]>([])
 
     public readonly userInfo$ = RequestsExecutor.getUserInfo().pipe(
         raiseHTTPErrors(),
@@ -165,6 +167,9 @@ export class ExplorerState {
         )
         RequestsExecutor.getFavoriteFolders().subscribe((favorites) => {
             this.favoriteFolders$.next(favorites)
+        })
+        RequestsExecutor.getFavoriteGroups().subscribe((favorites) => {
+            this.favoriteGroups$.next(favorites)
         })
 
         const os = ChildApplicationAPI.getOsInstance()
@@ -445,17 +450,48 @@ export class ExplorerState {
             })
     }
 
-    addFavoriteFolder(folder: AnyFolderNode) {
-        const favorites = [...this.favoriteFolders$.getValue(), folder]
-        RequestsExecutor.saveFavoriteFolders(favorites).subscribe()
-        this.favoriteFolders$.next(favorites)
+    toggleFavoriteFolder(folder: AnyFolderNode) {
+        const actualFavorites = this.favoriteFolders$.getValue()
+        if (actualFavorites.find((f) => f.folderId == folder.folderId)) {
+            const filteredFolders = actualFavorites.filter(
+                (f) => f.folderId != folder.id,
+            )
+            RequestsExecutor.saveFavorites({
+                favoriteFolders: filteredFolders,
+                favoriteGroups: this.favoriteGroups$.getValue(),
+            }).subscribe()
+            this.favoriteFolders$.next(filteredFolders)
+            return
+        }
+        const favoriteFolders = [...actualFavorites, folder]
+        RequestsExecutor.saveFavorites({
+            favoriteFolders,
+            favoriteGroups: this.favoriteGroups$.getValue(),
+        }).subscribe()
+        this.favoriteFolders$.next(favoriteFolders)
     }
 
-    removeFavoriteFolder(folder: AnyFolderNode) {
-        const favorites = this.favoriteFolders$
-            .getValue()
-            .filter((f) => f.folderId != folder.id)
-        RequestsExecutor.saveFavoriteFolders(favorites).subscribe()
-        this.favoriteFolders$.next(favorites)
+    toggleFavoriteGroup(groupId: string) {
+        const actualFavorites = this.favoriteGroups$.getValue()
+        if (actualFavorites.find((group) => group.id == groupId)) {
+            const favoriteGroups = actualFavorites.filter(
+                (f) => f.id != groupId,
+            )
+            RequestsExecutor.saveFavorites({
+                favoriteGroups,
+                favoriteFolders: this.favoriteFolders$.getValue(),
+            }).subscribe()
+            this.favoriteGroups$.next(favoriteGroups)
+            return
+        }
+        this.userInfo$.subscribe((info) => {
+            const group = info.groups.find((g) => g.id == groupId)
+            const favoriteGroups = [...actualFavorites, group]
+            RequestsExecutor.saveFavorites({
+                favoriteGroups,
+                favoriteFolders: this.favoriteFolders$.getValue(),
+            }).subscribe()
+            this.favoriteGroups$.next(favoriteGroups)
+        })
     }
 }

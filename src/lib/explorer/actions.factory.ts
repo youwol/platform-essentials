@@ -396,7 +396,7 @@ export const GENERIC_ACTIONS: { [k: string]: ActionConstructor } = {
             )
         },
         exe: () => {
-            state.addFavoriteFolder(node as AnyFolderNode)
+            state.toggleFavoriteFolder(node as AnyFolderNode)
         },
     }),
     unFavoriteFolder: (state: ExplorerState, node: BrowserNode) => ({
@@ -413,7 +413,7 @@ export const GENERIC_ACTIONS: { [k: string]: ActionConstructor } = {
             )
         },
         exe: () => {
-            state.removeFavoriteFolder(node as AnyFolderNode)
+            state.toggleFavoriteFolder(node as AnyFolderNode)
         },
     }),
 }

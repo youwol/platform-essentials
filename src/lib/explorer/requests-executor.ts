@@ -480,20 +480,6 @@ export class RequestsExecutor {
         )
     }
 
-    static saveFavoriteFolders(favorites: { folderId: string }[]) {
-        return new CdnSessionsStorage.CdnSessionsStorageClient()
-            .postData$({
-                packageName: '@youwol/platform-essentials',
-                dataName: 'explorer',
-                body: {
-                    favoriteFolders: favorites.map((f) => ({
-                        folderId: f.folderId,
-                    })),
-                },
-            })
-            .pipe(dispatchHTTPErrors(this.error$))
-    }
-
     static getFolder(folderId: string) {
         return RequestsExecutor.assetsGtwClient.treedb
             .getFolder$({ folderId })
@@ -521,6 +507,50 @@ export class RequestsExecutor {
                     ),
                 ),
                 reduce((acc, e) => [...acc, e], []),
+            )
+    }
+
+    static saveFavorites({
+        favoriteGroups,
+        favoriteFolders,
+    }: {
+        favoriteGroups: { id: string }[]
+        favoriteFolders: { folderId: string }[]
+    }) {
+        return new CdnSessionsStorage.CdnSessionsStorageClient()
+            .postData$({
+                packageName: '@youwol/platform-essentials',
+                dataName: 'explorer',
+                body: {
+                    favoriteGroups: favoriteGroups.map((g) => ({
+                        id: g.id,
+                    })),
+                    favoriteFolders: favoriteFolders.map((f) => ({
+                        folderId: f.folderId,
+                    })),
+                },
+            })
+            .pipe(dispatchHTTPErrors(this.error$))
+    }
+
+    static getFavoriteGroups() {
+        return new CdnSessionsStorage.CdnSessionsStorageClient()
+            .getData$({
+                packageName: '@youwol/platform-essentials',
+                dataName: 'explorer',
+            })
+            .pipe(
+                dispatchHTTPErrors(this.error$),
+                map((explorerData) =>
+                    Array.isArray(explorerData['favoriteGroups'])
+                        ? explorerData['favoriteGroups']
+                        : [],
+                ),
+                map((groups: { id: string }[]) => {
+                    return groups.map(({ id }) => {
+                        return { id, path: atob(id) }
+                    })
+                }),
             )
     }
 }
