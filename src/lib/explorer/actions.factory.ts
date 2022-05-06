@@ -399,6 +399,23 @@ export const GENERIC_ACTIONS: { [k: string]: ActionConstructor } = {
             state.addFavoriteFolder(node as AnyFolderNode)
         },
     }),
+    unFavoriteFolder: (state: ExplorerState, node: BrowserNode) => ({
+        sourceEventNode: node,
+        icon: 'fas fa-unlink',
+        name: 'remove favorite',
+        section: 'Disposition',
+        authorized: true,
+        applicable: () => {
+            const favorites = state.favoriteFolders$.getValue()
+            return (
+                node instanceof FolderNode &&
+                favorites.find((f) => f.folderId == node.id) != undefined
+            )
+        },
+        exe: () => {
+            state.removeFavoriteFolder(node as AnyFolderNode)
+        },
+    }),
 }
 
 export function getActions$(
