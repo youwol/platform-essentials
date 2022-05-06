@@ -1,6 +1,6 @@
 import { merge, ReplaySubject } from 'rxjs'
 import { v4 as uuidv4 } from 'uuid'
-import { TreeGroup } from '../../explorer.state'
+import { ExplorerState } from '../../explorer.state'
 import { AnyFolderNode, ItemNode, ProgressNode } from '../../nodes'
 import {
     AssetsGateway,
@@ -15,7 +15,7 @@ type NewAssetResponse =
     AssetsGateway.NewAssetResponse<FilesBackend.UploadResponse>
 
 export class DataState {
-    constructor(public readonly userTree: TreeGroup) {}
+    constructor(public readonly explorerState: ExplorerState) {}
 
     static uploadFile$(node: AnyFolderNode, file: File) {
         const progress$ = new ReplaySubject<RequestEvent>(1)
@@ -47,7 +47,7 @@ export class DataState {
     import(folder: AnyFolderNode, input: HTMLInputElement) {
         const uid = uuidv4()
         folder.addStatus({ type: 'request-pending', id: uid })
-
+        const treeState = this.explorerState.groupsTree[folder.groupId]
         const allProgresses = Array.from(input.files).map((file) => {
             return DataState.uploadFile$(folder, file)
         })
@@ -58,14 +58,14 @@ export class DataState {
                 progress$,
                 direction: 'download',
             })
-            this.userTree.addChild(folder.id, progressNode)
+            treeState.addChild(folder.id, progressNode)
         })
         const responses$ = allProgresses.map(({ response$ }) => response$)
         merge(...responses$)
             .pipe(
                 tap((response) => {
-                    const uploadNode = this.userTree.getNode(response.name)
-                    this.userTree.removeNode(uploadNode)
+                    const uploadNode = treeState.getNode(response.name)
+                    treeState.removeNode(uploadNode)
                     const child = new ItemNode({
                         ...response,
                         kind: 'data',
@@ -77,7 +77,7 @@ export class DataState {
                             remote: false,
                         },
                     })
-                    this.userTree.addChild(folder.id, child)
+                    treeState.addChild(folder.id, child)
                 }),
                 take(responses$.length),
                 reduce((acc, e) => {

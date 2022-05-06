@@ -1,10 +1,10 @@
 import { v4 as uuidv4 } from 'uuid'
 import { AssetsGateway } from '@youwol/http-clients'
-import { TreeGroup } from '../../explorer.state'
+import { ExplorerState } from '../../explorer.state'
 import { AnyFolderNode, FutureItemNode, ItemNode } from '../../nodes'
 
 export class StoryState {
-    constructor(public readonly userTree: TreeGroup) {}
+    constructor(public readonly explorerState: ExplorerState) {}
 
     static newStory$(node: AnyFolderNode) {
         const assetsGtwClient = new AssetsGateway.AssetsGatewayClient()
@@ -15,6 +15,7 @@ export class StoryState {
 
     new(parentNode: AnyFolderNode) {
         const uid = uuidv4()
+        const treeState = this.explorerState.groupsTree[parentNode.groupId]
         parentNode.addStatus({ type: 'request-pending', id: uid })
         const node = new FutureItemNode({
             name: 'new story',
@@ -33,9 +34,9 @@ export class StoryState {
                     borrowed: false,
                     origin: resp.origin,
                 })
-                this.userTree.replaceNode(targetNode, storyNode)
+                treeState.replaceNode(targetNode, storyNode)
             },
         })
-        this.userTree.addChild(parentNode.id, node)
+        treeState.addChild(parentNode.id, node)
     }
 }

@@ -1,10 +1,10 @@
 import { v4 as uuidv4 } from 'uuid'
 import { AssetsGateway } from '@youwol/http-clients'
-import { TreeGroup } from '../../explorer.state'
+import { ExplorerState } from '../../explorer.state'
 import { AnyFolderNode, FutureItemNode, ItemNode } from '../../nodes'
 
 export class FluxState {
-    constructor(public readonly userTree: TreeGroup) {}
+    constructor(public readonly explorerState: ExplorerState) {}
     static newFluxProject$(node: AnyFolderNode) {
         const assetsGtwClient = new AssetsGateway.AssetsGatewayClient()
         return assetsGtwClient.assetsDeprecated.fluxProject.create$(node.id, {
@@ -15,6 +15,7 @@ export class FluxState {
 
     new(parentNode: AnyFolderNode) {
         const uid = uuidv4()
+        const treeState = this.explorerState.groupsTree[parentNode.groupId]
         parentNode.addStatus({ type: 'request-pending', id: uid })
         const node = new FutureItemNode({
             name: 'new project',
@@ -32,9 +33,9 @@ export class FluxState {
                     borrowed: false,
                     origin: resp.origin,
                 })
-                this.userTree.replaceNode(targetNode, projectNode)
+                treeState.replaceNode(targetNode, projectNode)
             },
         })
-        this.userTree.addChild(parentNode.id, node)
+        treeState.addChild(parentNode.id, node)
     }
 }

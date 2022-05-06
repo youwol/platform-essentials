@@ -156,9 +156,9 @@ export class ExplorerState {
                         respDefaultDrive,
                     )
                     this.groupsTree[respDefaultDrive.groupId] = tree
-                    this.flux = new FluxState(tree)
-                    this.story = new StoryState(tree)
-                    this.data = new DataState(tree)
+                    this.flux = new FluxState(this)
+                    this.story = new StoryState(this)
+                    this.data = new DataState(this)
                     this.openFolder(tree.getHomeNode())
                 },
             ),
