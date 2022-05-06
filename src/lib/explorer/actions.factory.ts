@@ -388,7 +388,13 @@ export const GENERIC_ACTIONS: { [k: string]: ActionConstructor } = {
         name: 'add to favorite',
         section: 'Disposition',
         authorized: true,
-        applicable: () => node instanceof FolderNode,
+        applicable: () => {
+            const favorites = state.favoriteFolders$.getValue()
+            return (
+                node instanceof FolderNode &&
+                favorites.find((f) => f.folderId == node.id) == undefined
+            )
+        },
         exe: () => {
             state.addFavoriteFolder(node as AnyFolderNode)
         },
