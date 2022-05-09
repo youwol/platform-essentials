@@ -286,8 +286,8 @@ export class RequestsExecutor {
     }
 
     static purgeDrive(driveId: string) {
-        return RequestsExecutor.assetsGtwClient.explorerDeprecated.drives
-            .purge$(driveId)
+        return RequestsExecutor.assetsGtwClient.treedb
+            .purgeDrive$({ driveId })
             .pipe(dispatchHTTPErrors(this.error$))
     }
 
