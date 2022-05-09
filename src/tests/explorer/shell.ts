@@ -29,10 +29,7 @@ import {
 } from '../../lib/explorer'
 
 import { RowView } from '../../lib/explorer/views/main-panel/folder-content/details.view'
-import {
-    InfoBtnView,
-    ItemView,
-} from '../../lib/explorer/views/main-panel/folder-content/item.view'
+import { ItemView } from '../../lib/explorer/views/main-panel/folder-content/item.view'
 import {
     HeaderPathView,
     PathElementView,
@@ -99,6 +96,11 @@ export class SideBarView {
     extended$
 }
 
+export class InfoBtnView {
+    static ClassSelector: string
+    popupDisplayed$: Observable<boolean>
+    node
+}
 export function shell$<T>() {
     const state = new ExplorerState()
     document.body.innerHTML = ''

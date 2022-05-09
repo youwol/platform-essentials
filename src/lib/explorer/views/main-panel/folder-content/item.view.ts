@@ -1,15 +1,8 @@
 import { attr$, child$, Stream$, VirtualDOM } from '@youwol/flux-view'
 
-import { AssetsGateway } from '@youwol/http-clients'
-import { BehaviorSubject, merge, Observable, of } from 'rxjs'
-import { distinct, map, mergeMap, take } from 'rxjs/operators'
-import {
-    AssetActionsView,
-    AssetPermissionsView,
-    FluxDependenciesView,
-    PackageInfoView,
-    popupAssetModalView,
-} from '../../../../assets'
+import { merge, Observable } from 'rxjs'
+import { filter, map } from 'rxjs/operators'
+
 import { ywSpinnerView } from '../../../../misc-views/youwol-spinner.view'
 import { ExplorerState } from '../../../explorer.state'
 import {
@@ -181,64 +174,5 @@ export class ItemView {
                 }
             },
         }
-    }
-}
-
-export class InfoBtnView implements VirtualDOM {
-    static ClassSelector = 'info-btn-view'
-
-    public readonly tag = 'button'
-    public readonly class = `${InfoBtnView.ClassSelector} fas fv-btn-secondary fa-info-circle fv-text-primary fv-pointer mx-4 rounded p-1`
-
-    public readonly node: AnyItemNode
-    public readonly asset$: Observable<AssetsGateway.Asset>
-    public readonly state: ExplorerState
-
-    public readonly popupDisplayed$ = new BehaviorSubject<boolean>(false)
-
-    public readonly onclick = () => {
-        const withTabs = {
-            Permissions: new AssetPermissionsView({
-                asset: this.node as unknown as AssetsGateway.Asset,
-            }),
-        }
-        if (this.node.kind == 'flux-project') {
-            withTabs['Dependencies'] = new FluxDependenciesView({
-                asset: this.node as unknown as AssetsGateway.Asset,
-            })
-        }
-        if (this.node.kind == 'package') {
-            withTabs['Package Info'] = new PackageInfoView({
-                asset: this.node as unknown as AssetsGateway.Asset,
-            })
-        }
-        this.asset$.pipe(take(1)).subscribe((asset) => {
-            const assetUpdate$ = popupAssetModalView({
-                asset,
-                actionsFactory: (targetAsset) => {
-                    return new AssetActionsView({ asset: targetAsset })
-                },
-                withTabs,
-            })
-            assetUpdate$
-                .pipe(
-                    map(({ name }) => name),
-                    distinct(),
-                )
-                .subscribe((name) => {
-                    this.state.rename(this.node, name, false)
-                })
-            this.popupDisplayed$.next(true)
-        })
-    }
-
-    constructor(params: { state: ExplorerState; node: AnyItemNode }) {
-        Object.assign(this, params)
-
-        this.asset$ = of(this.node).pipe(
-            mergeMap(({ assetId }) => {
-                return RequestsExecutor.getAsset(assetId)
-            }),
-        )
     }
 }

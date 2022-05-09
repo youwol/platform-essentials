@@ -1,5 +1,5 @@
-import { attr$, child$, Stream$, VirtualDOM } from '@youwol/flux-view'
-import { BehaviorSubject, Observable } from 'rxjs'
+import { attr$, Stream$, VirtualDOM } from '@youwol/flux-view'
+import { BehaviorSubject } from 'rxjs'
 import { filter, map, mergeMap, take } from 'rxjs/operators'
 import { ChildApplicationAPI, PlatformSettingsStore } from '../../../../core'
 import { IPlatformHandler } from '../../../../core/platform.state'
@@ -121,63 +121,6 @@ export class RowView implements VirtualDOM {
                         item: this.item,
                         hovered$: this.hoveredRow$,
                     }),
-                ],
-            },
-        ]
-    }
-}
-
-export class CellView implements VirtualDOM {
-    static ClassSelector = 'cell-view'
-    public readonly class = `${CellView.ClassSelector} px-2 col-sm`
-
-    public readonly children: VirtualDOM[]
-
-    public readonly treeId: string
-    public readonly content: string
-    public readonly hoveredRow$: Observable<BrowserNode>
-
-    constructor(params: {
-        treeId: string
-        content: string
-        hoveredRow$: Observable<BrowserNode>
-    }) {
-        Object.assign(this, params)
-
-        this.children = [
-            {
-                class: 'd-flex align-items-center h-100 my-auto mx-auto',
-                style: {
-                    width: 'fit-content',
-                },
-                children: [
-                    {
-                        class: 'mx-auto',
-                        style: {
-                            userSelect: 'none',
-                            textOverflow: 'ellipsis',
-                            whiteSpace: 'nowrap',
-                            maxWidth: '100px',
-                            overflow: 'hidden',
-                            width: 'fit-content',
-                        },
-                        innerText: this.content,
-                    },
-                    child$(this.hoveredRow$, (item) =>
-                        item && this.content && item.id == this.treeId
-                            ? {
-                                  tag: 'button',
-                                  class: `fas fv-btn-secondary fa-copy mr-1 p-1 rounded mx-2`,
-                                  onclick: () => {
-                                      navigator.clipboard
-                                          .writeText(this.content)
-                                          .then(() => {
-                                              /*NOOP*/
-                                          })
-                                  },
-                              }
-                            : {},
-                    ),
                 ],
             },
         ]
