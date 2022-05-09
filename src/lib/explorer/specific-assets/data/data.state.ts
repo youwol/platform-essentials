@@ -71,11 +71,6 @@ export class DataState {
                         kind: 'data',
                         driveId: folder.driveId,
                         borrowed: false,
-                        origin: {
-                            // need to be sent by the server
-                            local: true,
-                            remote: false,
-                        },
                     })
                     treeState.addChild(folder.id, child)
                 }),
