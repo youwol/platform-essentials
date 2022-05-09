@@ -214,26 +214,24 @@ export class ExplorerState {
         treeGroup && treeGroup.selectedNode$.next(treeGroup.getNode(folder.id))
     }
 
-    navigateTo(folderId: string) {
-        RequestsExecutor.getFolder(folderId)
-            .pipe(
-                mergeMap((folder) => this.selectGroup$(folder.groupId)),
-                mergeMap((treeGroupState) => {
-                    return RequestsExecutor.getPath(folderId).pipe(
-                        map((path) => ({ path, treeGroupState })),
+    navigateTo$(folderId: string) {
+        return RequestsExecutor.getFolder(folderId).pipe(
+            mergeMap((folder) => this.selectGroup$(folder.groupId)),
+            mergeMap((treeGroupState) => {
+                return RequestsExecutor.getPath(folderId).pipe(
+                    map((path) => ({ path, treeGroupState })),
+                )
+            }),
+            mergeMap(({ path, treeGroupState }) => {
+                return treeGroupState
+                    .resolvePath(path.folders.map((f) => f.folderId))
+                    .pipe(
+                        map((nodes) => {
+                            return { nodes, treeGroupState }
+                        }),
                     )
-                }),
-                mergeMap(({ path, treeGroupState }) => {
-                    return treeGroupState
-                        .resolvePath(path.folders.map((f) => f.folderId))
-                        .pipe(
-                            map((nodes) => {
-                                return { nodes, treeGroupState }
-                            }),
-                        )
-                }),
-            )
-            .subscribe(({ nodes, treeGroupState }) => {
+            }),
+            tap(({ nodes, treeGroupState }) => {
                 const nodeIds = nodes.map((n) => n.id)
                 const expanded = [
                     ...treeGroupState.expandedNodes$
@@ -243,7 +241,8 @@ export class ExplorerState {
                 ]
                 treeGroupState.expandedNodes$.next(expanded)
                 this.openFolder(nodes.slice(-1)[0] as AnyFolderNode)
-            })
+            }),
+        )
     }
 
     selectItem(item: BrowserNode) {
