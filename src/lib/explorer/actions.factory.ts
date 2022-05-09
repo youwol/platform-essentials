@@ -382,6 +382,32 @@ export const GENERIC_ACTIONS: { [k: string]: ActionConstructor } = {
             popupAssetCardView(node as AnyItemNode)
         },
     }),
+    copyFileId: (state: ExplorerState, node: DataNode) => ({
+        sourceEventNode: node,
+        icon: 'fas fa-clipboard',
+        name: "copy file's id",
+        section: 'Info',
+        authorized: true,
+        applicable: () => node instanceof ItemNode && node.kind == 'data',
+        exe: () => {
+            navigator.clipboard.writeText(node.rawId).then()
+        },
+    }),
+    copyFileUrl: (state: ExplorerState, node: DataNode) => ({
+        sourceEventNode: node,
+        icon: 'fas fa-clipboard',
+        name: "copy file's url",
+        section: 'Info',
+        authorized: true,
+        applicable: () => node instanceof ItemNode && node.kind == 'data',
+        exe: () => {
+            navigator.clipboard
+                .writeText(
+                    `${window.location.host}/api/assets-gateway/files-backend/files/${node.rawId}`,
+                )
+                .then()
+        },
+    }),
     favoriteFolder: (state: ExplorerState, node: BrowserNode) => ({
         sourceEventNode: node,
         icon: 'fas fa-map-pin',
