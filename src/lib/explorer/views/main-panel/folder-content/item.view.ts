@@ -12,7 +12,8 @@ import {
     ProgressNode,
     RegularFolderNode,
 } from '../../../nodes'
-import { RequestsExecutor } from '../../../requests-executor'
+
+import { installContextMenu } from '../../../context-menu/context-menu'
 
 export class ProgressItemView {
     static ClassSelector = 'progress-item-view'
@@ -48,6 +49,7 @@ export class ProgressItemView {
                     {
                         style: attr$(
                             this.item.progress$.pipe(
+                                filter((progress) => progress.totalCount > 0),
                                 map((progress) =>
                                     Math.floor(
                                         (100 * progress.transferredCount) /
@@ -57,7 +59,7 @@ export class ProgressItemView {
                             ),
                             (progress) => ({
                                 backgroundColor: 'green',
-                                width: `${progress}`,
+                                width: `${progress}%`,
                                 height: '5px',
                             }),
                         ),
@@ -82,6 +84,14 @@ export class ItemView {
     public readonly state: ExplorerState
     public readonly item: RegularFolderNode | AnyItemNode
     public readonly hovered$: Observable<BrowserNode>
+
+    public readonly connectedCallback = (elem) => {
+        installContextMenu({
+            state: this.state,
+            div: elem,
+            node: this.item,
+        })
+    }
 
     constructor(params: {
         state: ExplorerState

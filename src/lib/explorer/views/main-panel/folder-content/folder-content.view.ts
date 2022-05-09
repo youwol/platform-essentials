@@ -53,6 +53,7 @@ export class FolderContentView implements VirtualDOM {
                 return new DetailsContentView({
                     state: this.state,
                     items,
+                    folder: this.tree.getNode(this.folderId),
                 })
             }),
         ]

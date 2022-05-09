@@ -5,12 +5,14 @@ import { ChildApplicationAPI, PlatformSettingsStore } from '../../../../core'
 import { IPlatformHandler } from '../../../../core/platform.state'
 import { ExplorerState } from '../../../explorer.state'
 import {
+    AnyFolderNode,
     BrowserNode,
     DriveNode,
     FolderNode,
     ProgressNode,
 } from '../../../nodes'
 import { ItemView, ProgressItemView } from './item.view'
+import { installContextMenu } from '../../../context-menu/context-menu'
 
 export class DetailsContentView {
     public readonly class =
@@ -18,11 +20,27 @@ export class DetailsContentView {
     public readonly style = { 'max-height': '100%' }
     public readonly children: VirtualDOM[]
 
+    public readonly folder: AnyFolderNode
     public readonly items: BrowserNode[]
 
     public readonly state: ExplorerState
+    public readonly onclick = () => this.state.selectedItem$.next(undefined)
+    public readonly oncontextmenu = () =>
+        this.state.selectedItem$.next(undefined)
 
-    constructor(params: { state: ExplorerState; items: BrowserNode[] }) {
+    public readonly connectedCallback = (elem) => {
+        installContextMenu({
+            state: this.state,
+            div: elem,
+            node: this.folder,
+        })
+    }
+
+    constructor(params: {
+        state: ExplorerState
+        items: BrowserNode[]
+        folder: AnyFolderNode
+    }) {
         Object.assign(this, params)
 
         this.children = [
@@ -59,8 +77,9 @@ export class RowView implements VirtualDOM {
     public readonly onmouseleave = () => {
         this.hoveredRow$.next(undefined)
     }
-    public readonly oncontextmenu = () => {
+    public readonly oncontextmenu = (ev) => {
         this.state.selectItem(this.item)
+        ev.stopPropagation()
     }
     public readonly onclick = (ev: PointerEvent) => {
         this.state.selectItem(this.item)
