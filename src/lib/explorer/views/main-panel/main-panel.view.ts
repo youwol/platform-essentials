@@ -36,6 +36,7 @@ export class MainPanelView implements VirtualDOM {
                         ],
                     },
                 ],
+                onclick: () => this.state.selectedItem$.next(undefined),
             },
         ]
     }
