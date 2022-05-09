@@ -1,6 +1,6 @@
 import { ImmutableTree } from '@youwol/fv-tree'
 import { from, Observable, of, Subject } from 'rxjs'
-import { delay, map, mergeMap, reduce, tap } from 'rxjs/operators'
+import { delay, map, mergeMap, reduce, shareReplay, tap } from 'rxjs/operators'
 import { v4 as uuidv4 } from 'uuid'
 import {
     AssetsGateway,
@@ -486,28 +486,32 @@ export class RequestsExecutor {
             .pipe(dispatchHTTPErrors(this.error$))
     }
 
+    static favorites = new CdnSessionsStorage.CdnSessionsStorageClient()
+        .getData$({
+            packageName: '@youwol/platform-essentials',
+            dataName: 'explorer',
+        })
+        .pipe(
+            dispatchHTTPErrors(RequestsExecutor.error$),
+            shareReplay({ bufferSize: 1, refCount: true }),
+        )
+
     static getFavoriteFolders() {
-        return new CdnSessionsStorage.CdnSessionsStorageClient()
-            .getData$({
-                packageName: '@youwol/platform-essentials',
-                dataName: 'explorer',
-            })
-            .pipe(
-                dispatchHTTPErrors(this.error$),
-                map((explorerData) =>
-                    Array.isArray(explorerData['favoriteFolders'])
-                        ? explorerData['favoriteFolders']
-                        : [],
-                ),
-                mergeMap((favoriteFolders: { folderId: string }[]) =>
-                    from(favoriteFolders).pipe(
-                        mergeMap(({ folderId }) =>
-                            RequestsExecutor.getFolder(folderId),
-                        ),
+        return RequestsExecutor.favorites.pipe(
+            map((explorerData) =>
+                Array.isArray(explorerData['favoriteFolders'])
+                    ? explorerData['favoriteFolders']
+                    : [],
+            ),
+            mergeMap((favoriteFolders: { folderId: string }[]) =>
+                from(favoriteFolders).pipe(
+                    mergeMap(({ folderId }) =>
+                        RequestsExecutor.getFolder(folderId),
                     ),
                 ),
-                reduce((acc, e) => [...acc, e], []),
-            )
+            ),
+            reduce((acc, e) => [...acc, e], []),
+        )
     }
 
     static saveFavorites({
@@ -534,23 +538,17 @@ export class RequestsExecutor {
     }
 
     static getFavoriteGroups() {
-        return new CdnSessionsStorage.CdnSessionsStorageClient()
-            .getData$({
-                packageName: '@youwol/platform-essentials',
-                dataName: 'explorer',
-            })
-            .pipe(
-                dispatchHTTPErrors(this.error$),
-                map((explorerData) =>
-                    Array.isArray(explorerData['favoriteGroups'])
-                        ? explorerData['favoriteGroups']
-                        : [],
-                ),
-                map((groups: { id: string }[]) => {
-                    return groups.map(({ id }) => {
-                        return { id, path: atob(id) }
-                    })
-                }),
-            )
+        return RequestsExecutor.favorites.pipe(
+            map((explorerData) =>
+                Array.isArray(explorerData['favoriteGroups'])
+                    ? explorerData['favoriteGroups']
+                    : [],
+            ),
+            map((groups: { id: string }[]) => {
+                return groups.map(({ id }) => {
+                    return { id, path: atob(id) }
+                })
+            }),
+        )
     }
 }
