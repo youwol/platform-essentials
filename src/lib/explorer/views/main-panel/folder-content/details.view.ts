@@ -1,5 +1,4 @@
-import { attr$, Stream$, VirtualDOM } from '@youwol/flux-view'
-import { BehaviorSubject } from 'rxjs'
+import { VirtualDOM } from '@youwol/flux-view'
 import { filter, map, mergeMap, take } from 'rxjs/operators'
 import { ChildApplicationAPI, PlatformSettingsStore } from '../../../../core'
 import { IPlatformHandler } from '../../../../core/platform.state'
@@ -58,33 +57,12 @@ export class DetailsContentView {
 
 export class RowView implements VirtualDOM {
     static ClassSelector = 'row-view'
-    static ClassSelected = 'fv-text-focus'
-
-    public readonly baseClasses = `${RowView.ClassSelector} row w-100 text-center justify-content-between`
-    public readonly class: Stream$<BrowserNode, string>
+    public readonly class = `${RowView.ClassSelector} row w-100 text-center justify-content-between rounded`
     public readonly children: VirtualDOM[]
 
     public readonly state: ExplorerState
     public readonly item: BrowserNode
-
-    public readonly hoveredRow$ = new BehaviorSubject<BrowserNode>(undefined)
-
     public readonly platformHandler: IPlatformHandler
-
-    public readonly onmouseenter = () => {
-        this.hoveredRow$.next(this.item)
-    }
-    public readonly onmouseleave = () => {
-        this.hoveredRow$.next(undefined)
-    }
-    public readonly oncontextmenu = (ev) => {
-        this.state.selectItem(this.item)
-        ev.stopPropagation()
-    }
-    public readonly onclick = (ev: PointerEvent) => {
-        this.state.selectItem(this.item)
-        ev.stopPropagation()
-    }
 
     public readonly ondblclick = (ev) => {
         ev.stopPropagation()
@@ -118,19 +96,6 @@ export class RowView implements VirtualDOM {
 
         this.platformHandler = ChildApplicationAPI.getOsInstance()
 
-        this.class = attr$(
-            this.state.selectedItem$,
-            (node) => {
-                return node && node.id == this.item.id
-                    ? RowView.ClassSelected
-                    : 'fv-hover-bg-background-alt fv-pointer '
-            },
-            {
-                wrapper: (d) => `${d} ${this.baseClasses}`,
-                untilFirst: `waiting fv-hover-bg-background-alt fv-pointer`,
-            },
-        )
-
         this.children = [
             {
                 class: 'col-sm',
@@ -138,7 +103,6 @@ export class RowView implements VirtualDOM {
                     new ItemView({
                         state: this.state,
                         item: this.item,
-                        hovered$: this.hoveredRow$,
                     }),
                 ],
             },
