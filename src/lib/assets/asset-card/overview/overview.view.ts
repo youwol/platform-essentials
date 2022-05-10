@@ -14,7 +14,7 @@ import { AssetWithPermissions } from '../models'
 
 export class AssetOverview implements VirtualDOM {
     static ClassSelector = 'asset-overview'
-    public readonly class = `${AssetOverview.ClassSelector} w-100 p-3 px-5 h-100 overflow-auto fv-text-primary`
+    public readonly class = `${AssetOverview.ClassSelector} w-100 p-3 px-5 h-100 overflow-auto`
     public readonly children: VirtualDOM[]
 
     public readonly asset: AssetWithPermissions
@@ -23,7 +23,6 @@ export class AssetOverview implements VirtualDOM {
     public readonly tags$: BehaviorSubject<string[]>
     public readonly description$: BehaviorSubject<string>
     public readonly images$: BehaviorSubject<string[]>
-    public readonly actionsFactory: (asset: Asset) => VirtualDOM
     public readonly forceReadonly: boolean
 
     public readonly connectedCallback: (
@@ -46,9 +45,12 @@ export class AssetOverview implements VirtualDOM {
         Object.assign(this, params)
         this.name$ = new BehaviorSubject(this.asset.name)
         this.tags$ = new BehaviorSubject(this.asset.tags)
-        this.description$ = new BehaviorSubject(this.asset.description)
+        this.description$ = new BehaviorSubject(
+            this.asset.description.trim() == ''
+                ? 'No description has been provided yet.'
+                : this.asset.description,
+        )
         this.images$ = new BehaviorSubject(this.asset.images)
-        const actionsView = this.actionsFactory(this.asset)
 
         const updatedAsset$ = combineLatest([
             this.name$,
@@ -81,16 +83,12 @@ export class AssetOverview implements VirtualDOM {
                 asset: this.asset,
                 forceReadonly: this.forceReadonly,
             }),
-            actionsView,
-            sectionTitleView('Tags'),
             new AssetTagsView({
                 tags$: this.tags$,
                 asset: this.asset,
                 forceReadonly: this.forceReadonly,
             }),
-            sectionTitleView('ScreenShots'),
             screenShotsView,
-            sectionTitleView('Descriptions'),
             new AssetDescriptionView({
                 description$: this.description$,
                 asset: this.asset,

@@ -2,16 +2,16 @@ import { install } from '@youwol/cdn-client'
 import { attr$, child$, HTMLElement$, VirtualDOM } from '@youwol/flux-view'
 import { BehaviorSubject, from, Observable, of } from 'rxjs'
 import { mapTo, mergeMap } from 'rxjs/operators'
-
-import { AssetsGateway } from '@youwol/http-clients'
 import { IconButtonView } from '../misc.view'
 import { AssetWithPermissions } from '../models'
 
 export class AssetDescriptionView implements VirtualDOM {
     static ClassSelector = 'asset-description-view'
 
-    public readonly class = `${AssetDescriptionView.ClassSelector} w-100`
-    public readonly asset: AssetsGateway.Asset
+    public readonly class = `${AssetDescriptionView.ClassSelector} w-100 border rounded p-2`
+    public readonly style = {
+        backgroundColor: 'rgba(200,200,200,0.5)',
+    }
     public readonly children: VirtualDOM[]
     public readonly description$: BehaviorSubject<string>
     public readonly asset: AssetWithPermissions
@@ -23,16 +23,6 @@ export class AssetDescriptionView implements VirtualDOM {
     }) {
         Object.assign(this, params)
         this.children = [
-            child$(this.description$, (description: string) =>
-                description.trim() == ''
-                    ? {
-                          style: {
-                              fontStyle: 'italic',
-                          },
-                          innerText: 'No description has been provided yet.',
-                      }
-                    : {},
-            ),
             this.asset.permissions.write && !this.forceReadonly
                 ? new DescriptionEditableView({
                       description$: this.description$,
@@ -41,11 +31,14 @@ export class AssetDescriptionView implements VirtualDOM {
         ]
     }
 
-    static readOnlyView(description$: BehaviorSubject<string>) {
+    static readOnlyView(
+        description$: BehaviorSubject<string>,
+        params: { [k: string]: unknown } = {},
+    ) {
         return {
             tag: 'div',
-            class: 'fv-text-primary',
             innerHTML: attr$(description$, (d) => d),
+            ...params,
         }
     }
 }
@@ -113,7 +106,9 @@ class DescriptionEditableView implements VirtualDOM {
                                   )
                               },
                           }
-                        : AssetDescriptionView.readOnlyView(this.description$)
+                        : AssetDescriptionView.readOnlyView(this.description$, {
+                              ondblclick: () => this.editionMode$.next(true),
+                          })
                 },
             ),
             child$(this.editionMode$, (edition) =>
@@ -125,10 +120,7 @@ class DescriptionEditableView implements VirtualDOM {
                           },
                           icon: 'fa-check',
                       })
-                    : new IconButtonView({
-                          onclick: () => this.editionMode$.next(true),
-                          icon: 'fa-edit',
-                      }),
+                    : {},
             ),
         ]
     }

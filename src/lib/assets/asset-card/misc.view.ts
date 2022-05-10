@@ -55,14 +55,6 @@ export class ButtonView extends Button.View {
     }
 }
 
-export function sectionTitleView(title: string): VirtualDOM {
-    return {
-        tag: 'h3',
-        class: 'border-bottom w-100 mt-5',
-        innerText: title,
-    }
-}
-
 export class TextEditableView implements VirtualDOM {
     static ClassSelector = 'text-editable-view'
     public readonly class = `${TextEditableView.ClassSelector} d-flex justify-content-center align-items-center`
@@ -74,6 +66,9 @@ export class TextEditableView implements VirtualDOM {
     public readonly regularView: (text$) => VirtualDOM
     public readonly templateEditionView: VirtualDOM
 
+    public readonly ondblclick = () => {
+        this.editionMode$.next(true)
+    }
     constructor(params: {
         text$: BehaviorSubject<string>
         regularView: (text$) => VirtualDOM
@@ -87,17 +82,11 @@ export class TextEditableView implements VirtualDOM {
         }
         this.attrText$ = attr$(this.text$, (text) => text)
         this.children = [
+            {
+                class: 'fas fa-tag mr-1',
+            },
             child$(this.editionMode$, (isEditing) =>
                 isEditing ? this.editionView() : this.regularView(this.text$),
-            ),
-            child$(this.editionMode$, (isEditing) =>
-                isEditing
-                    ? {}
-                    : new IconButtonView({
-                          onclick: () => this.editionMode$.next(true),
-                          icon: 'fa-edit',
-                          withClasses: 'mx-2',
-                      }),
             ),
         ]
     }
