@@ -10,6 +10,7 @@ import {
     ProgressNode,
 } from '../../../nodes'
 import { DetailsContentView } from './details.view'
+import { installContextMenu } from '../../../context-menu/context-menu'
 
 export class FolderContentView implements VirtualDOM {
     static ClassSelector = 'folder-content-view'
@@ -23,6 +24,15 @@ export class FolderContentView implements VirtualDOM {
 
     public readonly tree: TreeGroup
     public readonly items$: Observable<BrowserNode[]>
+
+    public readonly onclick = () => this.state.selectedItem$.next(undefined)
+    public readonly connectedCallback = (elem) => {
+        installContextMenu({
+            state: this.state,
+            div: elem,
+            node: this.tree.getNode(this.folderId),
+        })
+    }
 
     constructor(params: {
         state: ExplorerState
