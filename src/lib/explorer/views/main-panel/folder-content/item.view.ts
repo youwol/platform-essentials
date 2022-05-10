@@ -1,6 +1,6 @@
 import { attr$, child$, Stream$, VirtualDOM } from '@youwol/flux-view'
 
-import { merge, Observable } from 'rxjs'
+import { BehaviorSubject, combineLatest, Observable } from 'rxjs'
 import { filter, map } from 'rxjs/operators'
 
 import { ywSpinnerView } from '../../../../misc-views/youwol-spinner.view'
@@ -73,43 +73,54 @@ export class ProgressItemView {
 export class ItemView {
     static ClassSelector = 'item-view'
     public readonly baseClasses = `${ItemView.ClassSelector} d-flex align-items-center p-1 rounded fv-hover-bg-background-alt fv-pointer`
-    public readonly class: Stream$<BrowserNode, string>
+    public readonly class: Stream$<[BrowserNode, boolean], string>
     public readonly children: VirtualDOM[]
     public readonly style: Stream$<
         { type: string; id: string }[],
         { [key: string]: string }
     >
-    public readonly onclick: () => void
+    public readonly contextMenuSelection$ = new BehaviorSubject(false)
+    public readonly onclick = (ev: PointerEvent) => {
+        this.state.selectItem(this.item)
+        ev.stopPropagation()
+    }
 
     public readonly state: ExplorerState
     public readonly item: RegularFolderNode | AnyItemNode
-    public readonly hovered$: Observable<BrowserNode>
+
+    public readonly oncontextmenu = (ev) => {
+        ev.stopPropagation()
+    }
 
     public readonly connectedCallback = (elem) => {
-        installContextMenu({
+        const view = installContextMenu({
             state: this.state,
             div: elem,
             node: this.item,
         })
+        view.state.event$
+            .pipe(filter((event) => event == 'displayed'))
+            .subscribe(() => this.contextMenuSelection$.next(true))
+        view.state.event$
+            .pipe(filter((event) => event == 'removed'))
+            .subscribe(() => this.contextMenuSelection$.next(false))
     }
 
-    constructor(params: {
-        state: ExplorerState
-        item: BrowserNode
-        hovered$?: Observable<BrowserNode>
-    }) {
+    constructor(params: { state: ExplorerState; item: BrowserNode }) {
         Object.assign(this, params)
 
-        this.hovered$ = params.hovered$
-            ? merge(params.hovered$, this.state.selectedItem$)
-            : this.state.selectedItem$
-
         this.class = attr$(
-            this.state.selectedItem$,
-            (node) => {
+            combineLatest([
+                this.state.selectedItem$,
+                this.contextMenuSelection$,
+            ]),
+            ([node, rightClick]): string => {
+                const base = `${this.baseClasses} ${
+                    rightClick ? 'fv-bg-background-alt' : ''
+                }`
                 return node && node.id == this.item.id
-                    ? `${this.baseClasses} fv-text-focus`
-                    : `${this.baseClasses}`
+                    ? `${base} fv-text-focus`
+                    : `${base}`
             },
             { untilFirst: this.baseClasses },
         )
@@ -127,7 +138,7 @@ export class ItemView {
 
         this.children = [
             {
-                class: 'col-6 d-flex align-items-center',
+                class: 'col-10 d-flex align-items-center',
                 children: [
                     {
                         class: `fas ${this.item.icon} mr-1`,
@@ -154,7 +165,7 @@ export class ItemView {
 
     originView(node: BrowserNode) {
         return {
-            class: 'd-flex align-items-center mx-1 col-4',
+            class: 'd-flex align-items-center mx-1',
             children: [
                 this.item instanceof ItemNode && this.item.borrowed
                     ? { class: 'fas fa-link pr-1 py-1' }
