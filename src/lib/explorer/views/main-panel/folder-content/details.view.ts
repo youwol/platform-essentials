@@ -15,7 +15,7 @@ import { installContextMenu } from '../../../context-menu/context-menu'
 
 export class DetailsContentView {
     public readonly class =
-        'fv-text-primary w-100 h-100 d-flex flex-column text-center overflow-auto'
+        'fv-text-primary w-50 h-100 d-flex flex-column text-center overflow-auto mx-auto '
     public readonly style = { 'max-height': '100%' }
     public readonly children: VirtualDOM[]
 
