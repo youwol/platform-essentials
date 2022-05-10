@@ -5,6 +5,7 @@ import { mapTo, mergeMap } from 'rxjs/operators'
 
 import { AssetsGateway } from '@youwol/http-clients'
 import { IconButtonView } from '../misc.view'
+import { AssetWithPermissions } from '../models'
 
 export class AssetDescriptionView implements VirtualDOM {
     static ClassSelector = 'asset-description-view'
@@ -13,11 +14,11 @@ export class AssetDescriptionView implements VirtualDOM {
     public readonly asset: AssetsGateway.Asset
     public readonly children: VirtualDOM[]
     public readonly description$: BehaviorSubject<string>
+    public readonly asset: AssetWithPermissions
     public readonly forceReadonly: boolean
-
     constructor(params: {
         description$: BehaviorSubject<string>
-        asset: AssetsGateway.Asset
+        asset: AssetWithPermissions
         forceReadonly?: boolean
     }) {
         Object.assign(this, params)

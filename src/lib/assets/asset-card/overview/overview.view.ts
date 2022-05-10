@@ -1,21 +1,23 @@
 import { HTMLElement$, VirtualDOM } from '@youwol/flux-view'
 import { BehaviorSubject, combineLatest, Subject } from 'rxjs'
 import { mergeMap, shareReplay } from 'rxjs/operators'
-import { AssetsGateway } from '@youwol/http-clients'
-import { sectionTitleView } from '../misc.view'
+import {
+    AssetsBackend,
+    AssetsGateway,
+    raiseHTTPErrors,
+} from '@youwol/http-clients'
 import { AssetDescriptionView } from './description.view'
 import { AssetScreenShotsView } from './screenshots.view'
 import { AssetTagsView } from './tags.view'
 import { AssetTitleView } from './title.view'
-
-type Asset = AssetsGateway.Asset
+import { AssetWithPermissions } from '../models'
 
 export class AssetOverview implements VirtualDOM {
     static ClassSelector = 'asset-overview'
     public readonly class = `${AssetOverview.ClassSelector} w-100 p-3 px-5 h-100 overflow-auto fv-text-primary`
     public readonly children: VirtualDOM[]
 
-    public readonly asset: Asset
+    public readonly asset: AssetWithPermissions
 
     public readonly name$: BehaviorSubject<string>
     public readonly tags$: BehaviorSubject<string[]>
@@ -28,14 +30,15 @@ export class AssetOverview implements VirtualDOM {
         elem: HTMLElement$ & HTMLDivElement,
     ) => void
 
-    public readonly assetOutput$: Subject<Asset>
+    public readonly assetOutput$: Subject<AssetsBackend.GetAssetResponse>
 
-    public readonly assetsGtwClient = new AssetsGateway.AssetsGatewayClient()
+    public readonly assetsClient = new AssetsGateway.AssetsGatewayClient()
+        .assets
 
     constructor(params: {
-        asset: Asset
-        actionsFactory: (asset: Asset) => VirtualDOM
-        assetOutput$: Subject<Asset>
+        asset: AssetWithPermissions
+        actionsFactory: (asset: AssetWithPermissions) => VirtualDOM
+        assetOutput$?: Subject<AssetWithPermissions>
         withTabs?: { [key: string]: VirtualDOM }
         forceReadonly?: boolean
         [key: string]: unknown
@@ -50,19 +53,19 @@ export class AssetOverview implements VirtualDOM {
         const updatedAsset$ = combineLatest([
             this.name$,
             this.tags$,
-            this.images$,
             this.description$,
         ]).pipe(
-            mergeMap(([name, tags, _, description]) => {
-                return this.assetsGtwClient.assetsDeprecated.update$(
-                    this.asset.assetId,
-                    {
+            mergeMap(([name, tags, description]) => {
+                return this.assetsClient.updateAsset$({
+                    assetId: this.asset.assetId,
+                    body: {
                         name,
                         tags,
                         description,
                     },
-                )
+                })
             }),
+            raiseHTTPErrors(),
             shareReplay(1),
         )
 
@@ -96,8 +99,8 @@ export class AssetOverview implements VirtualDOM {
         ]
         this.connectedCallback = (elem) => {
             elem.ownSubscriptions(
-                updatedAsset$.subscribe((asset: Asset) => {
-                    this.assetOutput$.next(asset)
+                updatedAsset$.subscribe((asset) => {
+                    this.assetOutput$ && this.assetOutput$.next(asset)
                 }),
                 screenShotsView.fileUploaded$
                     .pipe(
@@ -106,27 +109,31 @@ export class AssetOverview implements VirtualDOM {
                                 Math.floor(Math.random() * 1e5) +
                                 '.' +
                                 file.name.split('.').slice(-1)
-                            return this.assetsGtwClient.assetsDeprecated.addPicture$(
-                                this.asset.assetId,
-                                id,
-                                file,
-                            )
+                            return this.assetsClient.addImage({
+                                assetId: this.asset.assetId,
+                                filename: id,
+                                body: {
+                                    content: file,
+                                },
+                            })
                         }),
+                        raiseHTTPErrors(),
                     )
-                    .subscribe((asset: Asset) => {
-                        this.assetOutput$.next(asset)
+                    .subscribe((asset) => {
+                        this.assetOutput$ && this.assetOutput$.next(asset)
                     }),
                 screenShotsView.fileRemoved$
                     .pipe(
                         mergeMap(({ imageId }) =>
-                            this.assetsGtwClient.assetsDeprecated.removePicture$(
-                                this.asset.assetId,
-                                imageId,
-                            ),
+                            this.assetsClient.removeImage({
+                                assetId: this.asset.assetId,
+                                filename: imageId,
+                            }),
                         ),
+                        raiseHTTPErrors(),
                     )
-                    .subscribe((asset: Asset) => {
-                        this.assetOutput$.next(asset)
+                    .subscribe((asset) => {
+                        this.assetOutput$ && this.assetOutput$.next(asset)
                     }),
             )
         }

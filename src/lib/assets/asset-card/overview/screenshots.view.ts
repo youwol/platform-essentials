@@ -1,6 +1,6 @@
 import { child$, VirtualDOM } from '@youwol/flux-view'
 import { BehaviorSubject, ReplaySubject } from 'rxjs'
-import { AssetsGateway } from '@youwol/http-clients'
+import { AssetWithPermissions } from '../models'
 
 export class ImagesCarouselView implements VirtualDOM {
     static ClassSelector = 'images-carousel-view'
@@ -91,8 +91,8 @@ export class ImagesCarouselView implements VirtualDOM {
 export class AssetScreenShotsView implements VirtualDOM {
     static ClassSelector = 'asset-screenshots-view'
 
-    public readonly class = `${AssetScreenShotsView.ClassSelector} w-100`
-    public readonly asset: AssetsGateway.Asset
+    public readonly class = `${AssetScreenShotsView.ClassSelector} w-100 my-3`
+    public readonly asset: AssetWithPermissions
     public readonly children: VirtualDOM[]
     public readonly images$: BehaviorSubject<string[]>
     public readonly forceReadonly: boolean
@@ -107,7 +107,7 @@ export class AssetScreenShotsView implements VirtualDOM {
 
     constructor(params: {
         images$: BehaviorSubject<string[]>
-        asset: AssetsGateway.Asset
+        asset: AssetWithPermissions
         forceReadonly?: boolean
     }) {
         Object.assign(this, params)

@@ -6,6 +6,7 @@ import { Subject } from 'rxjs'
 import { v4 as uuidv4 } from 'uuid'
 
 import { AssetOverview } from './overview/overview.view'
+import { AssetWithPermissions } from './models'
 
 class AssetTab extends Tabs.TabData {
     public readonly view: VirtualDOM
@@ -24,13 +25,13 @@ export class AssetCardView implements VirtualDOM {
         height: '75vh',
     }
     public readonly children: VirtualDOM[]
-    public readonly asset: AssetsGateway.Asset
-    public readonly actionsFactory: (asset: AssetsGateway.Asset) => VirtualDOM
+    public readonly asset: AssetWithPermissions
+    public readonly actionsFactory: (asset: AssetWithPermissions) => VirtualDOM
 
     public readonly withTabs: { [key: string]: VirtualDOM } = {}
     public readonly forceReadonly: boolean = false
 
-    public readonly assetOutput$: Subject<AssetsGateway.Asset>
+    public readonly assetOutput$: Subject<AssetWithPermissions>
 
     constructor(params: {
         asset: AssetsGateway.Asset
@@ -66,7 +67,7 @@ export class AssetCardTabs extends Tabs.View {
     public readonly asset: AssetsGateway.Asset
 
     constructor(params: {
-        asset: AssetsGateway.Asset
+        asset: AssetWithPermissions
         actionsFactory
         assetOutput$
         forceReadonly

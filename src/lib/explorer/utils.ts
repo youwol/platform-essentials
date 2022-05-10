@@ -18,7 +18,7 @@ import {
     PackageInfoView,
     popupAssetModalView,
 } from '../assets'
-import { AssetsGateway } from '@youwol/http-clients'
+import { AssetsBackend, AssetsGateway } from '@youwol/http-clients'
 import { distinct, map, mergeMap, take } from 'rxjs/operators'
 import { BehaviorSubject, of } from 'rxjs'
 
@@ -210,7 +210,7 @@ export function processMoveFolder(
 export function popupAssetCardView(node: AnyItemNode) {
     const withTabs = {
         Permissions: new AssetPermissionsView({
-            asset: node as unknown as AssetsGateway.Asset,
+            asset: node as unknown as AssetsBackend.GetAssetResponse,
         }),
     }
     if (node.kind == 'flux-project') {

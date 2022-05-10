@@ -2,11 +2,15 @@ import { child$, VirtualDOM } from '@youwol/flux-view'
 import { Observable } from 'rxjs'
 import { share } from 'rxjs/operators'
 
-import { AssetsGateway, raiseHTTPErrors } from '@youwol/http-clients'
+import {
+    AssetsBackend,
+    AssetsGateway,
+    raiseHTTPErrors,
+} from '@youwol/http-clients'
 import { ExposedGroupState, ExposedGroupView } from './group-permissions.view'
 
-type AccessInfo = AssetsGateway.AccessInfo
-type Asset = AssetsGateway.Asset
+type AccessInfo = AssetsBackend.QueryAccessInfoResponse
+type Asset = AssetsBackend.GetAssetResponse
 
 export class AssetPermissionsView implements VirtualDOM {
     static ClassSelector = 'asset-permissions-view'
@@ -23,10 +27,9 @@ export class AssetPermissionsView implements VirtualDOM {
 
     constructor(params: { asset: Asset }) {
         Object.assign(this, params)
-        this.accessInfo$ =
-            new AssetsGateway.AssetsGatewayClient().assetsDeprecated
-                .getAccess$(this.asset.assetId)
-                .pipe(raiseHTTPErrors(), share())
+        this.accessInfo$ = new AssetsGateway.AssetsGatewayClient().assets
+            .queryAccessInfo$({ assetId: this.asset.assetId })
+            .pipe(raiseHTTPErrors(), share())
         this.children = [
             child$(this.accessInfo$, (accessInfo) => {
                 return {
