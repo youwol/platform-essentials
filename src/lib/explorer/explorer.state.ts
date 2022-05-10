@@ -321,6 +321,7 @@ export class ExplorerState {
             () => ({}),
             { toBeSaved: save },
         )
+        this.selectedItem$.next(this.groupsTree[node.groupId].getNode(node.id))
     }
 
     deleteItemOrFolder(node: RegularFolderNode | AnyItemNode) {
