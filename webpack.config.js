@@ -43,6 +43,7 @@ module.exports = {
             '@youwol/fv-button': '@youwol/fv-button',
             '@youwol/fv-tree': '@youwol/fv-tree',
             '@youwol/fv-tabs': '@youwol/fv-tabs',
+            '@youwol/fv-context-menu': '@youwol/fv-context-menu',
             '@youwol/fv-input': '@youwol/fv-input',
             '@youwol/http-clients': '@youwol/http-clients',
             'js-beautify': 'js_beautify',
