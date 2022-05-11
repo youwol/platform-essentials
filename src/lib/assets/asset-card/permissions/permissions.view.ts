@@ -33,17 +33,29 @@ export class AssetPermissionsView implements VirtualDOM {
         this.children = [
             child$(this.accessInfo$, (accessInfo) => {
                 return {
-                    class: 'w-50 p-4 mx-auto my-auto rounded border',
+                    class: 'w-50 mx-auto my-auto rounded border',
                     style: {
-                        backgroundColor: 'rgba(200,200,200,0.5)',
-                        height: 'fit-content',
+                        position: 'relative',
                     },
                     children: [
-                        new UserPermissionsView({ accessInfo }),
-                        new GroupsPermissionsView({
-                            accessInfo,
-                            asset: this.asset,
-                        }),
+                        {
+                            class: 'fv-bg-background fv-xx-lighter h-100 w-100',
+                            style: {
+                                opacity: '0.5',
+                                position: 'absolute',
+                                zIndex: '-1',
+                            },
+                        },
+                        {
+                            class: 'p-2',
+                            children: [
+                                new UserPermissionsView({ accessInfo }),
+                                new GroupsPermissionsView({
+                                    accessInfo,
+                                    asset: this.asset,
+                                }),
+                            ],
+                        },
                     ],
                 }
             }),
