@@ -8,9 +8,9 @@ import { AssetWithPermissions } from '../models'
 export class AssetDescriptionView implements VirtualDOM {
     static ClassSelector = 'asset-description-view'
 
-    public readonly class = `${AssetDescriptionView.ClassSelector} w-100 border rounded p-2`
+    public readonly class = `${AssetDescriptionView.ClassSelector} w-100 border rounded`
     public readonly style = {
-        backgroundColor: 'rgba(200,200,200,0.5)',
+        position: 'relative',
     }
     public readonly children: VirtualDOM[]
     public readonly description$: BehaviorSubject<string>
@@ -23,6 +23,10 @@ export class AssetDescriptionView implements VirtualDOM {
     }) {
         Object.assign(this, params)
         this.children = [
+            {
+                class: 'fv-bg-background fv-xx-lighter h-100 w-100',
+                style: { opacity: '0.5', position: 'absolute', zIndex: '-1' },
+            },
             this.asset.permissions.write && !this.forceReadonly
                 ? new DescriptionEditableView({
                       description$: this.description$,
