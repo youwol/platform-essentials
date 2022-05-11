@@ -33,6 +33,10 @@ export class AssetOverview implements VirtualDOM {
 
     public readonly assetsClient = new AssetsGateway.AssetsGatewayClient()
         .assets
+    public readonly click$ = new Subject<MouseEvent>()
+    public readonly onclick = (event) => {
+        this.click$.next(event)
+    }
 
     constructor(params: {
         asset: AssetWithPermissions
@@ -93,6 +97,7 @@ export class AssetOverview implements VirtualDOM {
                 description$: this.description$,
                 asset: this.asset,
                 forceReadonly: this.forceReadonly,
+                outsideClick$: this.click$,
             }),
         ]
         this.connectedCallback = (elem) => {
