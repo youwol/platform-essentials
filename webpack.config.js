@@ -46,6 +46,7 @@ module.exports = {
             '@youwol/fv-context-menu': '@youwol/fv-context-menu',
             '@youwol/fv-input': '@youwol/fv-input',
             '@youwol/http-clients': '@youwol/http-clients',
+            marked: 'marked',
             'js-beautify': 'js_beautify',
             lodash: '_',
             uuid: 'uuid',
