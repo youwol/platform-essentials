@@ -1,13 +1,13 @@
-import { attr$, child$ } from '@youwol/flux-view'
-import { forkJoin, Observable, of } from 'rxjs'
-import { map } from 'rxjs/operators'
-import { ChildApplicationAPI, Executable } from '../core'
+import { forkJoin, from, Observable, of } from 'rxjs'
+import { map, mergeMap, take } from 'rxjs/operators'
 import { ExplorerState } from './explorer.state'
 import {
     AssetsGateway,
     AssetsGateway as Gtw,
     raiseHTTPErrors,
 } from '@youwol/http-clients'
+import * as cdnClient from '@youwol/cdn-client'
+
 import {
     AnyFolderNode,
     AnyItemNode,
@@ -24,15 +24,23 @@ import {
     TrashNode,
 } from './nodes'
 import { isLocalYouwol, popupAssetCardView } from './utils'
+import { ExplorerSettings } from './explorer-settings'
 
-export type Section = 'Modify' | 'Move' | 'New' | 'IO' | 'Disposition' | 'Info'
+export type Section =
+    | 'Modify'
+    | 'Move'
+    | 'New'
+    | 'IO'
+    | 'Disposition'
+    | 'Info'
+    | 'CustomActions'
 export interface Action {
     sourceEventNode: BrowserNode
     icon: string
     name: string
     authorized: boolean
-    exe: () => void
-    applicable: () => boolean
+    exe: () => void | Promise<void>
+    applicable: () => boolean | Promise<boolean>
     section: Section
 }
 
@@ -447,7 +455,6 @@ export const GENERIC_ACTIONS: { [k: string]: ActionConstructor } = {
 export function getActions$(
     state: ExplorerState,
     node: BrowserNode,
-    actionsList: ActionConstructor[] = Object.values(GENERIC_ACTIONS),
 ): Observable<Array<Action>> {
     if (node instanceof FutureNode || node instanceof ProgressNode) {
         return of([])
@@ -476,30 +483,35 @@ export function getActions$(
                   }),
               )
 
-    return permissions$.pipe(
-        map((permissions) => {
-            return actionsList
-                .map((action) => action(state, node, permissions))
-                .filter((a) => a.applicable())
+    return forkJoin([
+        permissions$,
+        state.explorerSettings$.pipe(
+            take(1),
+            mergeMap((explorerSettings: () => Promise<ExplorerSettings>) => {
+                return from(explorerSettings())
+            }),
+        ),
+    ]).pipe(
+        map(([permissions, explorerSettings]) => {
+            const customActions: Action[] = explorerSettings
+                .contextMenuActions({
+                    node,
+                    explorer: state,
+                    cdnClient,
+                })
+                .map((action) => {
+                    return {
+                        ...action,
+                        sourceEventNode: node,
+                        section: 'CustomActions',
+                    }
+                })
+            const nativeActions = Object.values(GENERIC_ACTIONS).map((action) =>
+                action(state, node, permissions),
+            )
+            return [...nativeActions, ...customActions].filter((a) =>
+                a.applicable(),
+            )
         }),
     )
-}
-
-export function openWithActionFromExe(app: Executable) {
-    return {
-        icon: child$(app.appMetadata$, ({ icon }) => icon),
-        name: attr$(app.appMetadata$, ({ name }) => name), //app.name,
-        enable: true,
-        exe: () => {
-            ChildApplicationAPI.getOsInstance()
-                .createInstance$({
-                    cdnPackage: app.cdnPackage,
-                    parameters: app.parameters,
-                    focus: true,
-                    version: app.version,
-                })
-                .subscribe()
-        },
-        applicable: () => true,
-    }
 }

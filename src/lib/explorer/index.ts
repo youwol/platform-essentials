@@ -10,4 +10,5 @@ export { FolderContentView } from './views/main-panel/folder-content/folder-cont
 export { RequestsExecutor } from './requests-executor'
 export { Action, getActions$ } from './actions.factory'
 export { installContextMenu } from './context-menu/context-menu'
+export * from './explorer-settings'
 export * from './nodes'

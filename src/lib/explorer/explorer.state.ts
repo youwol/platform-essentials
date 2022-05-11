@@ -23,7 +23,7 @@ import {
     tap,
 } from 'rxjs/operators'
 import { v4 as uuidv4 } from 'uuid'
-import { FutureFolderNode } from '.'
+import { ExplorerSettings, FutureFolderNode } from '.'
 import { ChildApplicationAPI } from '../core'
 import { FileAddedEvent, PlatformEvent } from '../core/platform.events'
 
@@ -142,6 +142,9 @@ export class ExplorerState {
         node: AnyItemNode | AnyFolderNode
     }
 
+    public readonly explorerSettings$ = new ReplaySubject<
+        () => Promise<ExplorerSettings>
+    >(1)
     public readonly subscriptions: Subscription[] = []
 
     constructor() {
@@ -171,7 +174,9 @@ export class ExplorerState {
         RequestsExecutor.getFavoriteGroups().subscribe((favorites) => {
             this.favoriteGroups$.next(favorites)
         })
-
+        RequestsExecutor.getExplorerSettings().subscribe(({ jsSrc }) => {
+            this.explorerSettings$.next(new Function(jsSrc)())
+        })
         const os = ChildApplicationAPI.getOsInstance()
         if (os) {
             this.subscriptions.push(
@@ -493,5 +498,10 @@ export class ExplorerState {
             }).subscribe()
             this.favoriteGroups$.next(favoriteGroups)
         })
+    }
+
+    setExplorerSettingsSrc({ tsSrc, jsSrc }: { tsSrc: string; jsSrc: string }) {
+        RequestsExecutor.saveExplorerSettings({ tsSrc, jsSrc }).subscribe()
+        this.explorerSettings$.next(new Function(jsSrc)())
     }
 }

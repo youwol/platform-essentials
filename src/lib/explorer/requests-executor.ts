@@ -551,4 +551,32 @@ export class RequestsExecutor {
             }),
         )
     }
+
+    static saveExplorerSettings({
+        tsSrc,
+        jsSrc,
+    }: {
+        tsSrc: string
+        jsSrc: string
+    }) {
+        return new CdnSessionsStorage.CdnSessionsStorageClient()
+            .postData$({
+                packageName: '@youwol/platform-essentials',
+                dataName: 'explorerSettings',
+                body: { tsSrc, jsSrc },
+            })
+            .pipe(dispatchHTTPErrors(this.error$))
+    }
+
+    static getExplorerSettings(): Observable<{ tsSrc: string; jsSrc: string }> {
+        return new CdnSessionsStorage.CdnSessionsStorageClient()
+            .getData$({
+                packageName: '@youwol/platform-essentials',
+                dataName: 'explorerSettings',
+            })
+            .pipe(dispatchHTTPErrors(this.error$)) as Observable<{
+            tsSrc: string
+            jsSrc: string
+        }>
+    }
 }

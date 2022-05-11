@@ -1,7 +1,7 @@
 import { attr$, child$, Stream$, VirtualDOM } from '@youwol/flux-view'
 
-import { BehaviorSubject, combineLatest, Observable } from 'rxjs'
-import { filter, map } from 'rxjs/operators'
+import { BehaviorSubject, combineLatest, from, Observable, of } from 'rxjs'
+import { filter, map, mergeMap, take } from 'rxjs/operators'
 
 import { ywSpinnerView } from '../../../../misc-views/youwol-spinner.view'
 import { ExplorerState } from '../../../explorer.state'
@@ -12,8 +12,10 @@ import {
     ProgressNode,
     RegularFolderNode,
 } from '../../../nodes'
-
+import * as cdnClient from '@youwol/cdn-client'
+import * as fluxView from '@youwol/flux-view'
 import { installContextMenu } from '../../../context-menu/context-menu'
+import { ChildApplicationAPI } from '../../../../core'
 
 export class ProgressItemView {
     static ClassSelector = 'progress-item-view'
@@ -84,7 +86,37 @@ export class ItemView {
         this.state.selectItem(this.item)
         ev.stopPropagation()
     }
-
+    public readonly ondblclick = (ev: PointerEvent) => {
+        this.state.explorerSettings$
+            .pipe(
+                take(1),
+                mergeMap((settings) => {
+                    return from(settings())
+                }),
+                map((settings) => {
+                    return settings
+                        .applications({
+                            asset: this.item as any,
+                            cdnClient,
+                            fluxView,
+                        })
+                        .find((assetDefault) => assetDefault.applicable())
+                }),
+                mergeMap((application) => {
+                    return application
+                        ? ChildApplicationAPI.getOsInstance().createInstance$({
+                              cdnPackage: application.cdnPackage,
+                              parameters: application.parameters,
+                              focus: true,
+                              version: 'latest',
+                          })
+                        : of(undefined)
+                }),
+            )
+            .subscribe()
+        this.state.selectItem(this.item)
+        ev.stopPropagation()
+    }
     public readonly state: ExplorerState
     public readonly item: RegularFolderNode | AnyItemNode
 
