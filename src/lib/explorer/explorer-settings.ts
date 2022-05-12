@@ -1,6 +1,6 @@
 import { AnyFolderNode, AnyItemNode } from './nodes'
 import { ExplorerState } from './explorer.state'
-import { AssetsBackend } from '@youwol/http-clients'
+import { AssetsBackend, AssetsGateway } from '@youwol/http-clients'
 import { VirtualDOM } from '@youwol/flux-view'
 
 export interface CdnClient {
@@ -28,12 +28,17 @@ export interface AssetPreview {
     applicable: () => boolean | Promise<boolean>
 }
 
+export interface OpeningApplication {
+    cdnPackage: string
+    parameters: { [k: string]: string }
+    applicable: () => boolean | Promise<boolean>
+}
+
 export interface Application {
     cdnPackage: string
     version: string
-    parameters: { [k: string]: string }
+    name: string
     background: VirtualDOM | Promise<VirtualDOM>
-    applicable: () => boolean | Promise<boolean>
 }
 
 export interface ExplorerSettings {
@@ -41,17 +46,19 @@ export interface ExplorerSettings {
         node: AnyItemNode | AnyFolderNode
         explorer: ExplorerState
         cdnClient: CdnClient
+        assetsGtwClient: AssetsGateway.AssetsGatewayClient
     }) => ContextMenuAction[]
 
     assetPreviews: (params: {
         asset: AssetsBackend.GetAssetResponse
         cdnClient: CdnClient
+        assetsGtwClient: AssetsGateway.AssetsGatewayClient
         fluxView: FluxView
     }) => AssetPreview[]
 
-    applications: (params: {
-        asset: AssetsBackend.GetAssetResponse
-        cdnClient: CdnClient
-        fluxView: FluxView
-    }) => Application[]
+    openWithApps: (params: {
+        node: AnyItemNode | AnyFolderNode
+    }) => OpeningApplication[]
+
+    applications: Application[]
 }
