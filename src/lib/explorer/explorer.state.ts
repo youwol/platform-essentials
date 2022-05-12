@@ -23,7 +23,7 @@ import {
     tap,
 } from 'rxjs/operators'
 import { v4 as uuidv4 } from 'uuid'
-import { ExplorerSettings, FutureFolderNode } from '.'
+import { ExplorerSettings, FutureFolderNode, FutureItemNode, ItemKind } from '.'
 import { ChildApplicationAPI } from '../core'
 import { FileAddedEvent, PlatformEvent } from '../core/platform.events'
 
@@ -307,6 +307,42 @@ export class ExplorerState {
             }),
         })
         tree.addChild(parentNode.id, childFolder)
+    }
+
+    newAsset<T>({
+        parentNode,
+        request,
+        pendingName,
+        kind,
+    }: {
+        parentNode: AnyFolderNode
+        request: Observable<T>
+        pendingName: string
+        kind: ItemKind
+    }) {
+        const uid = uuidv4()
+        const groupTree = this.groupsTree[parentNode.groupId]
+        parentNode.addStatus({ type: 'request-pending', id: uid })
+        const node = new FutureItemNode({
+            name: pendingName,
+            icon: 'fas fa-spinner fa-spin',
+            request: request,
+            onResponse: (resp, targetNode) => {
+                const projectNode = new ItemNode({
+                    kind,
+                    treeId: resp.treeId,
+                    groupId: parentNode.groupId,
+                    driveId: parentNode.driveId,
+                    name: resp.name,
+                    assetId: resp.assetId,
+                    rawId: resp.rawId,
+                    borrowed: false,
+                    origin: resp.origin,
+                })
+                groupTree.replaceNode(targetNode, projectNode)
+            },
+        })
+        groupTree.addChild(parentNode.id, node)
     }
 
     rename(
