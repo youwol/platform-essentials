@@ -34,6 +34,8 @@ export type Section =
     | 'Disposition'
     | 'Info'
     | 'CustomActions'
+    | 'Open'
+
 export interface Action {
     sourceEventNode: BrowserNode
     icon: string
@@ -498,6 +500,7 @@ export function getActions$(
                     node,
                     explorer: state,
                     cdnClient,
+                    assetsGtwClient: new AssetsGateway.AssetsGatewayClient(),
                 })
                 .map((action) => {
                     return {
@@ -506,12 +509,39 @@ export function getActions$(
                         section: 'CustomActions',
                     }
                 })
+            const openWithActions: Action[] = explorerSettings
+                .openWithApps({
+                    node,
+                })
+                .map((openingApp) => {
+                    const appData = explorerSettings.applications.find(
+                        (app) => app.cdnPackage == openingApp.cdnPackage,
+                    )
+                    return {
+                        sourceEventNode: node,
+                        icon: 'fas fa-folder-open',
+                        name: appData.name,
+                        section: 'Open',
+                        authorized: true,
+                        applicable: () => {
+                            return openingApp.applicable()
+                        },
+                        exe: () => {
+                            state.launchApplication({
+                                cdnPackage: openingApp.cdnPackage,
+                                parameters: openingApp.parameters,
+                            })
+                        },
+                    }
+                })
             const nativeActions = Object.values(GENERIC_ACTIONS).map((action) =>
                 action(state, node, permissions),
             )
-            return [...nativeActions, ...customActions].filter((a) =>
-                a.applicable(),
-            )
+            return [
+                ...nativeActions,
+                ...customActions,
+                ...openWithActions,
+            ].filter((a) => a.applicable())
         }),
     )
 }
