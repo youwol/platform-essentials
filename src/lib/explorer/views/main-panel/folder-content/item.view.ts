@@ -1,6 +1,6 @@
 import { attr$, child$, Stream$, VirtualDOM } from '@youwol/flux-view'
 
-import { BehaviorSubject, combineLatest, from, Observable, of } from 'rxjs'
+import { BehaviorSubject, combineLatest, Observable, of } from 'rxjs'
 import { filter, map, mergeMap, take } from 'rxjs/operators'
 
 import { ywSpinnerView } from '../../../../misc-views/youwol-spinner.view'
@@ -12,10 +12,9 @@ import {
     ProgressNode,
     RegularFolderNode,
 } from '../../../nodes'
-import * as cdnClient from '@youwol/cdn-client'
-import * as fluxView from '@youwol/flux-view'
 import { installContextMenu } from '../../../context-menu/context-menu'
 import { ChildApplicationAPI } from '../../../../core'
+import { defaultOpeningApp$ } from '../../../utils'
 
 export class ProgressItemView {
     static ClassSelector = 'progress-item-view'
@@ -87,21 +86,9 @@ export class ItemView {
         ev.stopPropagation()
     }
     public readonly ondblclick = (ev: PointerEvent) => {
-        this.state.explorerSettings$
+        defaultOpeningApp$(this.state, this.item as any)
             .pipe(
                 take(1),
-                mergeMap((settings) => {
-                    return from(settings())
-                }),
-                map((settings) => {
-                    return settings
-                        .applications({
-                            asset: this.item as any,
-                            cdnClient,
-                            fluxView,
-                        })
-                        .find((assetDefault) => assetDefault.applicable())
-                }),
                 mergeMap((application) => {
                     return application
                         ? ChildApplicationAPI.getOsInstance().createInstance$({

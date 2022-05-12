@@ -19,8 +19,8 @@ import {
     popupAssetModalView,
 } from '../assets'
 import { AssetsBackend, AssetsGateway } from '@youwol/http-clients'
-import { distinct, map, mergeMap, take } from 'rxjs/operators'
-import { BehaviorSubject, of } from 'rxjs'
+import { distinct, map, mergeMap, shareReplay, take } from 'rxjs/operators'
+import { BehaviorSubject, from, of } from 'rxjs'
 
 export function isLocalYouwol() {
     return window.location.hostname == 'localhost'
@@ -264,4 +264,27 @@ export function renameFavoriteIfNeeded(
             { ...favoriteFolder, name: newName } as AnyFolderNode,
         ])
     }
+}
+
+export function defaultOpeningApp$<T>(
+    state: ExplorerState,
+    asset: AssetsBackend.GetAssetResponse,
+) {
+    return state.explorerSettings$.pipe(
+        mergeMap((settings) => {
+            return from(settings())
+        }),
+        map((settings) => {
+            const defaultApp = settings
+                .openWithApps({
+                    node: asset as any,
+                })
+                .find((assetDefault) => assetDefault.applicable())
+            const appData = settings.applications.find(
+                (app) => app.cdnPackage == defaultApp.cdnPackage,
+            )
+            return { ...appData, ...defaultApp }
+        }),
+        shareReplay({ bufferSize: 1, refCount: true }),
+    )
 }
