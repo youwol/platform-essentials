@@ -540,4 +540,21 @@ export class ExplorerState {
         RequestsExecutor.saveExplorerSettings({ tsSrc, jsSrc }).subscribe()
         this.explorerSettings$.next(new Function(jsSrc)())
     }
+
+    launchApplication({
+        cdnPackage,
+        parameters,
+    }: {
+        cdnPackage: string
+        parameters: { [_k: string]: string }
+    }) {
+        return ChildApplicationAPI.getOsInstance()
+            .createInstance$({
+                cdnPackage,
+                parameters,
+                focus: true,
+                version: 'latest',
+            })
+            .subscribe()
+    }
 }
