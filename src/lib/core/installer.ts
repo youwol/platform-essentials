@@ -177,12 +177,22 @@ return install
             )
         }
         // we need to install only first layer => all inner dependencies are fetched by design
-        if (depth == 0) await install({ modules: [...this.libraryManifests] })
+        if (depth == 0)
+            await install({
+                modules: [...this.libraryManifests].map(
+                    (path) => path.split('.')[0],
+                ),
+            })
 
         const generatorsFromLibs = await Promise.all(
-            [...this.libraryManifests].map(
-                (libraryName) => window[libraryName].install,
-            ),
+            [...this.libraryManifests].map((libraryPath) => {
+                const libraryName = libraryPath.split('.')[0]
+                const parent = libraryPath
+                    .split('.')
+                    .slice(1)
+                    .reduce((acc, e) => acc[e], window[libraryName])
+                return parent.install
+            }),
         )
         const allGenerators = [
             ...this.generatorManifests,
