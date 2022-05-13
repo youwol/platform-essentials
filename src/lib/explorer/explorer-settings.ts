@@ -40,7 +40,7 @@ export interface Application {
     cdnPackage: string
     version: string
     name: string
-    background: VirtualDOM | Promise<VirtualDOM>
+    background: VirtualDOM
 }
 
 export interface ExplorerSettings {
