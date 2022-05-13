@@ -25,8 +25,8 @@ import {
 } from 'rxjs/operators'
 import { v4 as uuidv4 } from 'uuid'
 import * as cdnClient from '@youwol/cdn-client'
-import { ExplorerSettings, FutureFolderNode, FutureItemNode, ItemKind } from '.'
-import { ChildApplicationAPI } from '../core'
+import { FutureFolderNode, FutureItemNode, ItemKind } from '.'
+import { ChildApplicationAPI, ExplorerSettings } from '../core'
 import { FileAddedEvent, PlatformEvent } from '../core/platform.events'
 
 import {

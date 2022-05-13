@@ -1,5 +1,4 @@
-import { AnyFolderNode, AnyItemNode } from './nodes'
-import { ExplorerState } from './explorer.state'
+import { ExplorerState, AnyFolderNode, AnyItemNode } from '../explorer'
 import { AssetsBackend, AssetsGateway } from '@youwol/http-clients'
 import { VirtualDOM } from '@youwol/flux-view'
 
