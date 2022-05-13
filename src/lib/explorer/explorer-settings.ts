@@ -40,7 +40,11 @@ export interface Application {
     cdnPackage: string
     version: string
     name: string
-    background: VirtualDOM
+    graphics?: {
+        background?: VirtualDOM
+        iconFile?: VirtualDOM
+        iconApp?: VirtualDOM
+    }
 }
 
 export interface ExplorerSettings {
