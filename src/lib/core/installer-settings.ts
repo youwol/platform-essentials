@@ -46,7 +46,7 @@ export interface Application {
     }
 }
 
-export interface ExplorerSettings {
+export interface InstallerSettings {
     contextMenuActions?: (params: {
         node: AnyItemNode | AnyFolderNode
         explorer: ExplorerState

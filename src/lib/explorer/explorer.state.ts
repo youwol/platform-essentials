@@ -26,7 +26,7 @@ import {
 import { v4 as uuidv4 } from 'uuid'
 import * as cdnClient from '@youwol/cdn-client'
 import { FutureFolderNode, FutureItemNode, ItemKind } from '.'
-import { ChildApplicationAPI, ExplorerSettings } from '../core'
+import { ChildApplicationAPI, InstallerSettings } from '../core'
 import { FileAddedEvent, PlatformEvent } from '../core/platform.events'
 
 import {
@@ -144,7 +144,7 @@ export class ExplorerState {
         node: AnyItemNode | AnyFolderNode
     }
 
-    public readonly explorerSettings$ = new ReplaySubject<ExplorerSettings>(1)
+    public readonly explorerSettings$ = new ReplaySubject<InstallerSettings>(1)
     public readonly subscriptions: Subscription[] = []
 
     constructor() {
@@ -178,7 +178,7 @@ export class ExplorerState {
             .pipe(
                 mergeMap(({ jsSrc }) => from(Function(jsSrc)()({ cdnClient }))),
             )
-            .subscribe((settings: ExplorerSettings) => {
+            .subscribe((settings: InstallerSettings) => {
                 this.explorerSettings$.next(settings)
             })
         const os = ChildApplicationAPI.getOsInstance()
