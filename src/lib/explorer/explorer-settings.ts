@@ -3,6 +3,8 @@ import { ExplorerState } from './explorer.state'
 import { AssetsBackend, AssetsGateway } from '@youwol/http-clients'
 import { VirtualDOM } from '@youwol/flux-view'
 
+type Json = any
+
 export interface CdnClient {
     install: unknown
 }
@@ -61,4 +63,8 @@ export interface ExplorerSettings {
     }) => OpeningApplication[]
 
     applications: Application[]
+
+    applicationsData: {
+        [k: string]: Json[] | { [k: string]: Json }
+    }
 }
