@@ -21,7 +21,7 @@ import {
     uploadAsset,
 } from './shell'
 import { forkJoin } from 'rxjs'
-import { RequestsExecutor } from '../../lib/explorer/requests-executor'
+import { RequestsExecutor } from '../../lib/core'
 
 jest.setTimeout(20 * 1000)
 

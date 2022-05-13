@@ -23,7 +23,8 @@ import {
     RegularFolderNode,
     TrashNode,
 } from './nodes'
-import { isLocalYouwol, popupAssetCardView } from './utils'
+import { popupAssetCardView } from './utils'
+import { isLocalYouwol } from '../core/requests-executot'
 
 export type Section =
     | 'Modify'

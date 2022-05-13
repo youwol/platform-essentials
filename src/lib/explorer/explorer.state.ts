@@ -25,7 +25,12 @@ import {
 } from 'rxjs/operators'
 import { v4 as uuidv4 } from 'uuid'
 import { FutureFolderNode, FutureItemNode, ItemKind } from '.'
-import { ChildApplicationAPI, Installer, Manifest } from '../core'
+import {
+    ChildApplicationAPI,
+    Installer,
+    Manifest,
+    RequestsExecutor,
+} from '../core'
 import { FileAddedEvent, PlatformEvent } from '../core/platform.events'
 
 import {
@@ -42,7 +47,7 @@ import {
     RegularFolderNode,
     TrashNode,
 } from './nodes'
-import { RequestsExecutor } from './requests-executor'
+
 import { DataState } from './specific-assets/data/data.state'
 import { FluxState } from './specific-assets/flux/flux.state'
 import { StoryState } from './specific-assets/story/story.state'
@@ -544,7 +549,7 @@ export class ExplorerState {
     }
 
     setExplorerSettingsSrc({ tsSrc, jsSrc }: { tsSrc: string; jsSrc: string }) {
-        RequestsExecutor.saveExplorerSettings({ tsSrc, jsSrc }).subscribe()
+        RequestsExecutor.saveInstallerScript({ tsSrc, jsSrc }).subscribe()
         new Function(jsSrc)()(new Installer())
             .then((installer) => installer.resolve())
             .then((manifest: Manifest) => {

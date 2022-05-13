@@ -3,7 +3,7 @@ import { BehaviorSubject, Observable, Subject } from 'rxjs'
 import { delay, tap } from 'rxjs/operators'
 import { AssetsGateway, RequestEvent } from '@youwol/http-clients'
 import { v4 as uuidv4 } from 'uuid'
-import { debugDelay } from './requests-executor'
+import { debugDelay } from '../core/requests-executot'
 
 type NodeEventType = 'item-added'
 

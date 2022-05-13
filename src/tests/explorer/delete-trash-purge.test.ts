@@ -17,9 +17,9 @@ import {
     Shell,
     shell$,
 } from './shell'
-import { AnyItemNode } from '../../lib/explorer/nodes'
+import { AnyItemNode } from '../../lib/explorer'
 import { mapTo, mergeMap } from 'rxjs/operators'
-import { RequestsExecutor } from '../../lib/explorer/requests-executor'
+import { RequestsExecutor } from '../../lib/core'
 
 beforeEach((done) => {
     resetPyYouwolDbs$().subscribe(() => {

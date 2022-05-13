@@ -10,7 +10,7 @@ import {
     ItemNode,
     RegularFolderNode,
 } from './nodes'
-import { RequestsExecutor } from './requests-executor'
+
 import {
     AssetActionsView,
     AssetPermissionsView,
@@ -21,10 +21,8 @@ import {
 import { AssetsBackend, AssetsGateway } from '@youwol/http-clients'
 import { distinct, map, mergeMap, shareReplay, take } from 'rxjs/operators'
 import { BehaviorSubject, of } from 'rxjs'
-
-export function isLocalYouwol() {
-    return window.location.hostname == 'localhost'
-}
+import { RequestsExecutor } from '../core'
+import { applyUpdate } from './db-actions-factory'
 
 export function createTreeGroup(
     explorerState: ExplorerState,
@@ -118,7 +116,7 @@ export function createTreeGroup(
         downloadFolderId: downloadFolderNode.id,
     })
     tree.directUpdates$.subscribe((updates) => {
-        updates.forEach((update) => RequestsExecutor.execute(update))
+        updates.forEach((update) => applyUpdate(update))
     })
     return tree
 }
