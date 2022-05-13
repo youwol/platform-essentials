@@ -48,27 +48,27 @@ export interface Application {
 }
 
 export interface ExplorerSettings {
-    contextMenuActions: (params: {
+    contextMenuActions?: (params: {
         node: AnyItemNode | AnyFolderNode
         explorer: ExplorerState
         cdnClient: CdnClient
         assetsGtwClient: AssetsGateway.AssetsGatewayClient
     }) => ContextMenuAction[]
 
-    assetPreviews: (params: {
+    assetPreviews?: (params: {
         asset: AssetsBackend.GetAssetResponse
         cdnClient: CdnClient
         assetsGtwClient: AssetsGateway.AssetsGatewayClient
         fluxView: FluxView
     }) => AssetPreview[]
 
-    openWithApps: (params: {
+    openWithApps?: (params: {
         node: AnyItemNode | AnyFolderNode
     }) => OpeningApplication[]
 
-    applications: Application[]
+    applications?: Application[]
 
-    applicationsData: {
+    applicationsData?: {
         [k: string]: Json[] | { [k: string]: Json }
     }
 }
