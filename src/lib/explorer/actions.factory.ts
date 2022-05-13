@@ -1,5 +1,5 @@
-import { forkJoin, from, Observable, of } from 'rxjs'
-import { map, mergeMap, take } from 'rxjs/operators'
+import { forkJoin, Observable, of } from 'rxjs'
+import { map, take } from 'rxjs/operators'
 import { ExplorerState } from './explorer.state'
 import {
     AssetsGateway,
@@ -24,7 +24,6 @@ import {
     TrashNode,
 } from './nodes'
 import { isLocalYouwol, popupAssetCardView } from './utils'
-import { ExplorerSettings } from './explorer-settings'
 
 export type Section =
     | 'Modify'
@@ -485,15 +484,7 @@ export function getActions$(
                   }),
               )
 
-    return forkJoin([
-        permissions$,
-        state.explorerSettings$.pipe(
-            take(1),
-            mergeMap((explorerSettings: () => Promise<ExplorerSettings>) => {
-                return from(explorerSettings())
-            }),
-        ),
-    ]).pipe(
+    return forkJoin([permissions$, state.explorerSettings$.pipe(take(1))]).pipe(
         map(([permissions, explorerSettings]) => {
             const customActions: Action[] = explorerSettings
                 .contextMenuActions({

@@ -20,7 +20,7 @@ import {
 } from '../assets'
 import { AssetsBackend, AssetsGateway } from '@youwol/http-clients'
 import { distinct, map, mergeMap, shareReplay, take } from 'rxjs/operators'
-import { BehaviorSubject, from, of } from 'rxjs'
+import { BehaviorSubject, of } from 'rxjs'
 
 export function isLocalYouwol() {
     return window.location.hostname == 'localhost'
@@ -271,9 +271,6 @@ export function defaultOpeningApp$<T>(
     asset: AssetsBackend.GetAssetResponse,
 ) {
     return state.explorerSettings$.pipe(
-        mergeMap((settings) => {
-            return from(settings())
-        }),
         map((settings) => {
             const defaultApp = settings
                 .openWithApps({
