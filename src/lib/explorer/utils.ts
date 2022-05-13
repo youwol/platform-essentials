@@ -270,14 +270,14 @@ export function defaultOpeningApp$<T>(
     state: ExplorerState,
     asset: AssetsBackend.GetAssetResponse,
 ) {
-    return state.explorerSettings$.pipe(
-        map((settings) => {
-            const defaultApp = settings
+    return state.installManifest$.pipe(
+        map((installManifest) => {
+            const defaultApp = installManifest
                 .openWithApps({
                     node: asset as any,
                 })
                 .find((assetDefault) => assetDefault.applicable())
-            const appData = settings.applications.find(
+            const appData = installManifest.applications.find(
                 (app) => app.cdnPackage == defaultApp.cdnPackage,
             )
             return { ...appData, ...defaultApp }

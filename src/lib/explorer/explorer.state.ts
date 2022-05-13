@@ -24,9 +24,8 @@ import {
     tap,
 } from 'rxjs/operators'
 import { v4 as uuidv4 } from 'uuid'
-import * as cdnClient from '@youwol/cdn-client'
 import { FutureFolderNode, FutureItemNode, ItemKind } from '.'
-import { ChildApplicationAPI, InstallerSettings } from '../core'
+import { ChildApplicationAPI, Installer, Manifest } from '../core'
 import { FileAddedEvent, PlatformEvent } from '../core/platform.events'
 
 import {
@@ -144,7 +143,7 @@ export class ExplorerState {
         node: AnyItemNode | AnyFolderNode
     }
 
-    public readonly explorerSettings$ = new ReplaySubject<InstallerSettings>(1)
+    public readonly installManifest$ = new ReplaySubject<Manifest>(1)
     public readonly subscriptions: Subscription[] = []
 
     constructor() {
@@ -176,10 +175,14 @@ export class ExplorerState {
         })
         RequestsExecutor.getExplorerSettings()
             .pipe(
-                mergeMap(({ jsSrc }) => from(Function(jsSrc)()({ cdnClient }))),
+                mergeMap(({ jsSrc }) =>
+                    from(Function(jsSrc)()(new Installer())),
+                ),
+                mergeMap((installer: Installer) => from(installer.resolve())),
             )
-            .subscribe((settings: InstallerSettings) => {
-                this.explorerSettings$.next(settings)
+            .subscribe((manifest: Manifest) => {
+                console.log('Manifest', manifest)
+                this.installManifest$.next(manifest)
             })
         const os = ChildApplicationAPI.getOsInstance()
         if (os) {
@@ -542,9 +545,12 @@ export class ExplorerState {
 
     setExplorerSettingsSrc({ tsSrc, jsSrc }: { tsSrc: string; jsSrc: string }) {
         RequestsExecutor.saveExplorerSettings({ tsSrc, jsSrc }).subscribe()
-        new Function(jsSrc)()({ cdnClient }).then((settings) => {
-            this.explorerSettings$.next(settings)
-        })
+        new Function(jsSrc)()(new Installer())
+            .then((installer) => installer.resolve())
+            .then((manifest: Manifest) => {
+                console.log('Manifest', manifest)
+                this.installManifest$.next(manifest)
+            })
     }
 
     launchApplication({

@@ -484,9 +484,9 @@ export function getActions$(
                   }),
               )
 
-    return forkJoin([permissions$, state.explorerSettings$.pipe(take(1))]).pipe(
-        map(([permissions, explorerSettings]) => {
-            const customActions: Action[] = explorerSettings
+    return forkJoin([permissions$, state.installManifest$.pipe(take(1))]).pipe(
+        map(([permissions, installManifest]) => {
+            const customActions: Action[] = installManifest
                 .contextMenuActions({
                     node,
                     explorer: state,
@@ -500,12 +500,12 @@ export function getActions$(
                         section: 'CustomActions',
                     }
                 })
-            const openWithActions: Action[] = explorerSettings
+            const openWithActions: Action[] = installManifest
                 .openWithApps({
                     node,
                 })
                 .map((openingApp) => {
-                    const appData = explorerSettings.applications.find(
+                    const appData = installManifest.applications.find(
                         (app) => app.cdnPackage == openingApp.cdnPackage,
                     )
                     return {
