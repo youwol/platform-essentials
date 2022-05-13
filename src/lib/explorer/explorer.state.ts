@@ -8,7 +8,6 @@ import {
 import {
     BehaviorSubject,
     combineLatest,
-    from,
     Observable,
     of,
     ReplaySubject,
@@ -25,12 +24,7 @@ import {
 } from 'rxjs/operators'
 import { v4 as uuidv4 } from 'uuid'
 import { FutureFolderNode, FutureItemNode, ItemKind } from '.'
-import {
-    ChildApplicationAPI,
-    Installer,
-    Manifest,
-    RequestsExecutor,
-} from '../core'
+import { ChildApplicationAPI, RequestsExecutor } from '../core'
 import { FileAddedEvent, PlatformEvent } from '../core/platform.events'
 
 import {
@@ -148,7 +142,6 @@ export class ExplorerState {
         node: AnyItemNode | AnyFolderNode
     }
 
-    public readonly installManifest$ = new ReplaySubject<Manifest>(1)
     public readonly subscriptions: Subscription[] = []
 
     constructor() {
@@ -178,17 +171,7 @@ export class ExplorerState {
         RequestsExecutor.getFavoriteGroups().subscribe((favorites) => {
             this.favoriteGroups$.next(favorites)
         })
-        RequestsExecutor.getExplorerSettings()
-            .pipe(
-                mergeMap(({ jsSrc }) =>
-                    from(Function(jsSrc)()(new Installer())),
-                ),
-                mergeMap((installer: Installer) => from(installer.resolve())),
-            )
-            .subscribe((manifest: Manifest) => {
-                console.log('Manifest', manifest)
-                this.installManifest$.next(manifest)
-            })
+
         const os = ChildApplicationAPI.getOsInstance()
         if (os) {
             this.subscriptions.push(
@@ -546,16 +529,6 @@ export class ExplorerState {
             }).subscribe()
             this.favoriteGroups$.next(favoriteGroups)
         })
-    }
-
-    setExplorerSettingsSrc({ tsSrc, jsSrc }: { tsSrc: string; jsSrc: string }) {
-        RequestsExecutor.saveInstallerScript({ tsSrc, jsSrc }).subscribe()
-        new Function(jsSrc)()(new Installer())
-            .then((installer) => installer.resolve())
-            .then((manifest: Manifest) => {
-                console.log('Manifest', manifest)
-                this.installManifest$.next(manifest)
-            })
     }
 
     launchApplication({

@@ -21,7 +21,7 @@ import {
 import { AssetsBackend, AssetsGateway } from '@youwol/http-clients'
 import { distinct, map, mergeMap, shareReplay, take } from 'rxjs/operators'
 import { BehaviorSubject, of } from 'rxjs'
-import { RequestsExecutor } from '../core'
+import { Installer, RequestsExecutor } from '../core'
 import { applyUpdate } from './db-actions-factory'
 
 export function createTreeGroup(
@@ -264,17 +264,17 @@ export function renameFavoriteIfNeeded(
     }
 }
 
-export function defaultOpeningApp$<T>(
-    state: ExplorerState,
-    asset: AssetsBackend.GetAssetResponse,
-) {
-    return state.installManifest$.pipe(
+export function defaultOpeningApp$<T>(asset: AssetsBackend.GetAssetResponse) {
+    return Installer.getInstallManifest$().pipe(
         map((installManifest) => {
             const defaultApp = installManifest
                 .openWithApps({
                     node: asset as any,
                 })
                 .find((assetDefault) => assetDefault.applicable())
+            if (!defaultApp) {
+                return undefined
+            }
             const appData = installManifest.applications.find(
                 (app) => app.cdnPackage == defaultApp.cdnPackage,
             )

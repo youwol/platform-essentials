@@ -3,6 +3,9 @@ import { AssetsBackend, AssetsGateway } from '@youwol/http-clients'
 import { VirtualDOM } from '@youwol/flux-view'
 import { install } from '@youwol/cdn-client'
 import * as cdnClient from '@youwol/cdn-client'
+import { from, ReplaySubject } from 'rxjs'
+import { RequestsExecutor } from './requests-executot'
+import { map, mergeMap } from 'rxjs/operators'
 
 type Json = any
 
@@ -85,6 +88,55 @@ export class Installer {
     public readonly generatorManifests = new Set<TInstaller>()
     public readonly resolvedManifests = new Set<Manifest>()
     public readonly cdnClient = cdnClient
+
+    static installManifest$: ReplaySubject<Manifest>
+
+    static defaultInstallJsScript = `
+async function install(installer){
+    return installer.with({
+        fromLibraries:["@youwol/installer-youwol-dev"]
+    })
+}
+return install
+`
+    static setInstallerScript({
+        tsSrc,
+        jsSrc,
+    }: {
+        tsSrc: string
+        jsSrc: string
+    }) {
+        RequestsExecutor.saveInstallerScript({ tsSrc, jsSrc }).subscribe()
+        new Function(jsSrc)()(new Installer())
+            .then((installer) => installer.resolve())
+            .then((manifest: Manifest) => {
+                Installer.getInstallManifest$().next(manifest)
+            })
+    }
+
+    static getInstallManifest$() {
+        if (Installer.installManifest$) {
+            return Installer.installManifest$
+        }
+        Installer.installManifest$ = new ReplaySubject<Manifest>(1)
+
+        RequestsExecutor.getInstallerScript()
+            .pipe(
+                map(({ jsSrc }) =>
+                    jsSrc
+                        ? { jsSrc }
+                        : { jsSrc: Installer.defaultInstallJsScript },
+                ),
+                mergeMap(({ jsSrc }) =>
+                    from(Function(jsSrc)()(new Installer())),
+                ),
+                mergeMap((installer: Installer) => from(installer.resolve())),
+            )
+            .subscribe((manifest: Manifest) => {
+                Installer.installManifest$.next(manifest)
+            })
+        return Installer.installManifest$
+    }
 
     constructor(
         params: {

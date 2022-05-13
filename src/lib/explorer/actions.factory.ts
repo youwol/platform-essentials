@@ -25,6 +25,7 @@ import {
 } from './nodes'
 import { popupAssetCardView } from './utils'
 import { isLocalYouwol } from '../core/requests-executot'
+import { Installer } from '../core'
 
 export type Section =
     | 'Modify'
@@ -485,7 +486,10 @@ export function getActions$(
                   }),
               )
 
-    return forkJoin([permissions$, state.installManifest$.pipe(take(1))]).pipe(
+    return forkJoin([
+        permissions$,
+        Installer.getInstallManifest$().pipe(take(1)),
+    ]).pipe(
         map(([permissions, installManifest]) => {
             const customActions: Action[] = installManifest
                 .contextMenuActions({

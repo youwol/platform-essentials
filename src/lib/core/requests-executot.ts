@@ -367,7 +367,7 @@ export class RequestsExecutor {
             .pipe(dispatchHTTPErrors(this.error$))
     }
 
-    static getExplorerSettings(): Observable<{ tsSrc: string; jsSrc: string }> {
+    static getInstallerScript(): Observable<{ tsSrc: string; jsSrc: string }> {
         return new CdnSessionsStorage.CdnSessionsStorageClient()
             .getData$({
                 packageName: '@youwol/platform-essentials',

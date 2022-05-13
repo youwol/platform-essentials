@@ -86,7 +86,7 @@ export class ItemView {
         ev.stopPropagation()
     }
     public readonly ondblclick = (ev: PointerEvent) => {
-        defaultOpeningApp$(this.state, this.item as any)
+        defaultOpeningApp$(this.item as any)
             .pipe(
                 take(1),
                 mergeMap((application) => {
