@@ -133,6 +133,7 @@ return install
                 mergeMap((installer: Installer) => from(installer.resolve())),
             )
             .subscribe((manifest: Manifest) => {
+                console.log('Manifest install', manifest)
                 Installer.installManifest$.next(manifest)
             })
         return Installer.installManifest$
@@ -170,7 +171,10 @@ return install
         })
     }
 
-    async resolve(depth = 0, installed: unknown[] = []): Promise<Manifest> {
+    async resolve(
+        depth = 0,
+        installed: unknown[] = [],
+    ): Promise<Manifest | Manifest[]> {
         if (depth == 100) {
             throw Error(
                 "Maximum recursion depth reached during installer's resolution",
@@ -209,18 +213,18 @@ return install
                 )
             }),
         )
-        const resolved = [
-            ...this.resolvedManifests,
-            ...generatorManifests,
-        ].filter((g) => g != undefined)
+        const resolved = [...this.resolvedManifests, ...generatorManifests]
+            .filter((g) => g != undefined)
+            .flat()
 
+        if (depth != 0) {
+            return resolved
+        }
         const resolvedSet = [...new Set(resolved)].filter(
             (value, index, self) =>
                 self.map((s) => s.id).indexOf(value.id) === index,
         )
-
-        const id = resolvedSet.map((r) => r.id).flat()
-
+        const id = resolvedSet.map((r) => r.id)
         return {
             id,
             contextMenuActions: (p) =>
