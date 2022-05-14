@@ -157,7 +157,8 @@ export class ItemView {
 
         this.children = [
             {
-                class: 'col-10 d-flex align-items-center',
+                class: 'd-flex align-items-center flex-grow-1',
+                style: { minWidth: '0px' },
                 children: [
                     {
                         class: `fas ${this.item.icon} mr-1`,
@@ -165,7 +166,15 @@ export class ItemView {
                     child$(this.item.status$, (statusList) =>
                         statusList.find((s) => s.type == 'renaming')
                             ? this.editView()
-                            : { innerText: this.item.name, class: 'pr-3' },
+                            : {
+                                  innerText: this.item.name,
+                                  class: 'mr-2',
+                                  style: {
+                                      textOverflow: 'ellipsis',
+                                      whiteSpace: 'nowrap',
+                                      overflow: 'hidden',
+                                  },
+                              },
                     ),
                 ],
             },
@@ -184,7 +193,7 @@ export class ItemView {
 
     originView(node: BrowserNode) {
         return {
-            class: 'd-flex align-items-center mx-1',
+            class: 'd-flex align-items-center ml-auto',
             children: [
                 this.item instanceof ItemNode && this.item.borrowed
                     ? { class: 'fas fa-link pr-1 py-1' }

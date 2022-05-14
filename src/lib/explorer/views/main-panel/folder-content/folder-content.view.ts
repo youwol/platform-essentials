@@ -14,7 +14,7 @@ import { installContextMenu } from '../../../context-menu/context-menu'
 
 export class FolderContentView implements VirtualDOM {
     static ClassSelector = 'folder-content-view'
-    public readonly class = `${FolderContentView.ClassSelector} flex-grow-1 fv-text-primary h-100`
+    public readonly class = `${FolderContentView.ClassSelector} flex-grow-1 fv-text-primary w-100 h-100 px-3`
 
     public readonly state: ExplorerState
     public readonly folderId: string

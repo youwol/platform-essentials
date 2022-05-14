@@ -15,7 +15,7 @@ import { installContextMenu } from '../../../context-menu/context-menu'
 
 export class DetailsContentView {
     public readonly class =
-        'fv-text-primary w-50 h-100 d-flex flex-column text-center overflow-auto mx-auto '
+        'fv-text-primary w-100 h-100 d-flex flex-column text-center overflow-auto'
     public readonly style = { 'max-height': '100%' }
     public readonly children: VirtualDOM[]
 
@@ -57,7 +57,7 @@ export class DetailsContentView {
 
 export class RowView implements VirtualDOM {
     static ClassSelector = 'row-view'
-    public readonly class = `${RowView.ClassSelector} row w-100 text-center justify-content-between rounded`
+    public readonly class = `${RowView.ClassSelector} justify-content-between rounded`
     public readonly children: VirtualDOM[]
 
     public readonly state: ExplorerState
@@ -98,7 +98,6 @@ export class RowView implements VirtualDOM {
 
         this.children = [
             {
-                class: 'col-sm',
                 children: [
                     new ItemView({
                         state: this.state,
