@@ -43,8 +43,7 @@ import {
 } from './nodes'
 
 import { DataState } from './specific-assets/data/data.state'
-import { FluxState } from './specific-assets/flux/flux.state'
-import { StoryState } from './specific-assets/story/story.state'
+
 import {
     createTreeGroup,
     processBorrowItem,
@@ -102,8 +101,6 @@ export interface FavoriteFolder extends TreedbBackend.GetFolderResponse {}
 export interface FavoriteGroup extends AssetsGateway.GroupResponse {}
 
 export class ExplorerState {
-    public flux: FluxState
-    public story: StoryState
     public data: DataState
 
     public readonly selectedItem$ = new BehaviorSubject<BrowserNode>(undefined)
@@ -155,8 +152,6 @@ export class ExplorerState {
                         respDefaultDrive,
                     )
                     this.groupsTree[respDefaultDrive.groupId] = tree
-                    this.flux = new FluxState(this)
-                    this.story = new StoryState(this)
                     this.data = new DataState(this)
                     this.openFolder(tree.getHomeNode())
                 },

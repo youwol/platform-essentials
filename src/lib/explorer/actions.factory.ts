@@ -250,36 +250,6 @@ export const GENERIC_ACTIONS: { [k: string]: ActionConstructor } = {
             state.purgeDrive(node as TrashNode)
         },
     }),
-    newFluxProject: (
-        state: ExplorerState,
-        node: BrowserNode,
-        permissions: OverallPermissions,
-    ) => ({
-        sourceEventNode: node,
-        icon: 'fas fa-sitemap',
-        name: 'new app',
-        section: 'New',
-        authorized: hasGroupModifyPermissions(permissions),
-        applicable: () => instanceOfStandardFolder(node),
-        exe: () => {
-            state.flux.new(node as AnyFolderNode)
-        },
-    }),
-    newStory: (
-        state: ExplorerState,
-        node: BrowserNode,
-        permissions: OverallPermissions,
-    ) => ({
-        sourceEventNode: node,
-        icon: 'fas fa-book',
-        name: 'new story',
-        section: 'New',
-        authorized: hasGroupModifyPermissions(permissions),
-        applicable: () => instanceOfStandardFolder(node),
-        exe: () => {
-            state.story.new(node as AnyFolderNode)
-        },
-    }),
     paste: (
         state: ExplorerState,
         node: BrowserNode,
