@@ -2,10 +2,10 @@ import { child$, VirtualDOM } from '@youwol/flux-view'
 import { Button } from '@youwol/fv-button'
 import { map, shareReplay } from 'rxjs/operators'
 import { AssetsGateway, HTTPError } from '@youwol/http-clients'
-import { PlatformSettingsStore } from '../core'
 import { ChildApplicationAPI, isPlatformInstance } from '../core/platform.state'
 import { UserMenuView } from './user-menu.view'
 import { YouwolMenuView } from './youwol-menu.view'
+import { PlatformSettingsStore } from '../core/platform-settings'
 
 export class YouwolBannerState {
     static signedIn$ = new AssetsGateway.AssetsGatewayClient()
@@ -68,7 +68,6 @@ export class YouwolBannerView implements VirtualDOM {
         customActionsView?: VirtualDOM
         userMenuView?: VirtualDOM
         youwolMenuView?: VirtualDOM
-        applicationName?: string
     }) {
         Object.assign(this, params)
         const instanceId = ChildApplicationAPI.getAppInstanceId()

@@ -69,7 +69,6 @@ class RunningAppBannerView extends YouwolBannerView {
     constructor(state: PlatformState, app: RunningApp) {
         super({
             state: state.topBannerState,
-            applicationName: app.cdnPackage,
             customActionsView: {
                 class: 'my-auto d-flex justify-content-between flex-grow-1',
                 style: { minWidth: '0px' },
