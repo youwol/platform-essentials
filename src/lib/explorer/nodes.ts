@@ -1,7 +1,11 @@
 import { ImmutableTree } from '@youwol/fv-tree'
 import { BehaviorSubject, Observable, Subject } from 'rxjs'
 import { delay, tap } from 'rxjs/operators'
-import { AssetsGateway, RequestEvent } from '@youwol/http-clients'
+import {
+    AssetsGateway,
+    RequestEvent,
+    TreedbBackend,
+} from '@youwol/http-clients'
 import { v4 as uuidv4 } from 'uuid'
 import { debugDelay } from '../core/requests-executot'
 
@@ -200,6 +204,17 @@ export class ItemNode<T extends ItemKind> extends BrowserNode {
 
         Object.assign(this, params)
         this.icon = ItemNode.iconsFactory[this.kind]
+    }
+
+    static fromTreedbResponse(response: TreedbBackend.GetItemResponse) {
+        return new ItemNode({
+            ...response,
+            assetId: JSON.parse(response.metadata).assetId,
+            borrowed: JSON.parse(response.metadata).borrowed,
+            rawId: JSON.parse(response.metadata).relatedId,
+            treeId: response.itemId,
+            kind: response.type,
+        })
     }
 }
 
