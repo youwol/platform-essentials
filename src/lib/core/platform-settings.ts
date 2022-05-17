@@ -1,18 +1,17 @@
-import { VirtualDOM } from '@youwol/flux-view'
-import { Observable, of, ReplaySubject } from 'rxjs'
+import { Observable, ReplaySubject } from 'rxjs'
 import { map } from 'rxjs/operators'
 import { AUTO_GENERATED } from '../../auto_generated'
 
 import { CdnSessionsStorage, raiseHTTPErrors } from '@youwol/http-clients'
 
-import { Parametrization, PlatformSettings } from './platform-settings.models'
-import { BrowserNode } from '../explorer/nodes'
+import { PlatformSettings } from './platform-settings.models'
+import { ApplicationInfo } from './installer'
 
 export interface Executable {
     cdnPackage: string
     version: string
     parameters: { [key: string]: string }
-    appMetadata$: Observable<{ name: string; icon: VirtualDOM }>
+    appMetadata$: Observable<ApplicationInfo>
 }
 
 export function getExeUrl(exe: { cdnPackage; version; parameters }) {
@@ -59,80 +58,6 @@ export class PlatformSettingsStore {
                 )}")`,
             },
         },
-        browserApplications: [
-            {
-                package: '@youwol/flux-runner',
-                version: 'latest',
-                icon: { class: 'fas fa-play' },
-                displayName: 'flux-runner',
-                execution: {
-                    standalone: false,
-                    parametrized: [
-                        {
-                            match: { kind: 'flux-project' },
-                            parameters: { id: 'rawId' },
-                        },
-                    ],
-                },
-            },
-            {
-                package: '@youwol/flux-builder',
-                version: 'latest',
-                icon: { class: 'fas fa-play' },
-                displayName: 'flux-builder',
-                execution: {
-                    standalone: false,
-                    parametrized: [
-                        {
-                            match: { kind: 'flux-project' },
-                            parameters: { id: 'rawId' },
-                        },
-                    ],
-                },
-            },
-            {
-                package: '@youwol/stories',
-                version: 'latest',
-                icon: { class: 'fas fa-book' },
-                displayName: 'Story',
-                execution: {
-                    standalone: false,
-                    parametrized: [
-                        {
-                            match: { kind: 'story' },
-                            parameters: { id: 'rawId' },
-                        },
-                    ],
-                },
-            },
-            {
-                package: '@youwol/explorer',
-                version: 'latest',
-                icon: { class: 'fas fa-folder' },
-                displayName: 'Explorer',
-                execution: {
-                    standalone: true,
-                },
-            },
-            {
-                package: '@youwol/developer-portal',
-                version: 'latest',
-                icon: { class: 'fas fa-code' },
-                displayName: 'Dev. Portal',
-                execution: {
-                    standalone: true,
-                },
-            },
-            {
-                package: '@youwol/exhibition-halls',
-                version: 'latest',
-                icon: { class: 'fas fa-shopping-cart' },
-                displayName: 'Discover',
-                execution: {
-                    standalone: true,
-                },
-            },
-        ],
     }
 
     static settings$ = new ReplaySubject<PlatformSettings>(1)
@@ -156,97 +81,16 @@ export class PlatformSettingsStore {
                     const appearance =
                         settings['appearance'] ||
                         PlatformSettingsStore.default.appearance
-                    let browserApps =
-                        settings['browserApplications'] ||
-                        PlatformSettingsStore.default.browserApplications
-                    const missingDefaults =
-                        PlatformSettingsStore.default.browserApplications.filter(
-                            (defaultApp) => {
-                                return (
-                                    browserApps.find(
-                                        (included) =>
-                                            included.package ==
-                                            defaultApp.package,
-                                    ) == undefined
-                                )
-                            },
-                        )
-                    browserApps = [...browserApps, ...missingDefaults]
+
                     return {
                         you,
                         appearance,
-                        browserApplications: browserApps,
                     } as PlatformSettings
                 }),
             )
             .subscribe((settings) => {
                 PlatformSettingsStore.settings$.next(settings)
             })
-    }
-
-    static getDockerBarApps$(): Observable<Executable[]> {
-        return this.settings$.pipe(
-            map((s: PlatformSettings) => {
-                return s.browserApplications
-                    .filter((app) => app.execution.standalone)
-                    .map((app) => {
-                        return {
-                            version: app.version,
-                            cdnPackage: app.package,
-                            parameters: {},
-                            appMetadata$: of({
-                                icon: app.icon,
-                                name: app.displayName,
-                            }),
-                        }
-                    })
-            }),
-        )
-    }
-
-    static getOpeningApps$(targetAsset: BrowserNode): Observable<Executable[]> {
-        const parametrizationMatch = (
-            asset: BrowserNode,
-            parametrization: Parametrization,
-        ) =>
-            Object.entries(parametrization.match).reduce(
-                (acc, [key, target]) => {
-                    return acc && asset[key] == target
-                },
-                true,
-            )
-
-        return this.settings$.pipe(
-            map((s: PlatformSettings) => {
-                return s.browserApplications
-                    .map((app) =>
-                        (app.execution.parametrized || [])
-                            .filter((parametrized) =>
-                                parametrizationMatch(targetAsset, parametrized),
-                            )
-                            .map((parametrized) => {
-                                const params = Object.entries(
-                                    parametrized.parameters,
-                                )
-                                    .map(([k, v]) => [k, targetAsset[v]])
-                                    .reduce(
-                                        (acc, [k, v]) => ({ ...acc, [k]: v }),
-                                        {},
-                                    )
-                                return {
-                                    version: app.version,
-                                    cdnPackage: app.package,
-                                    parameters: params,
-                                    appMetadata$: of({
-                                        name: app.displayName,
-                                        icon: app.icon,
-                                    }),
-                                }
-                            }),
-                    )
-                    .flat()
-            }),
-        )
     }
 
     static save(_settings: PlatformSettings) {

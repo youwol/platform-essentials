@@ -1,6 +1,5 @@
 import { VirtualDOM } from '@youwol/flux-view'
-import { filter, map, mergeMap, take } from 'rxjs/operators'
-import { ChildApplicationAPI, PlatformSettingsStore } from '../../../../core'
+import { ChildApplicationAPI } from '../../../../core'
 import { IPlatformHandler } from '../../../../core/platform.state'
 import { ExplorerState } from '../../../explorer.state'
 import {
@@ -68,27 +67,7 @@ export class RowView implements VirtualDOM {
         ev.stopPropagation()
         if (this.item instanceof FolderNode || this.item instanceof DriveNode) {
             this.state.openFolder(this.item)
-            return
         }
-
-        PlatformSettingsStore.getOpeningApps$(this.item)
-            .pipe(
-                take(1),
-                filter((apps) => apps.length > 0),
-                map((apps) => apps[0]),
-                mergeMap((app) => {
-                    return this.platformHandler.createInstance$({
-                        version: app.version,
-                        cdnPackage: app.cdnPackage,
-                        parameters: app.parameters,
-                        title: this.item.name,
-                        focus: true,
-                    })
-                }),
-            )
-            .subscribe(() => {
-                /* NOOP **/
-            })
     }
 
     constructor(params: { state: ExplorerState; item: BrowserNode }) {
