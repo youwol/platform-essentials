@@ -125,7 +125,6 @@ export function popupAssetCardView({
             map(([assetResp, shell]: [AssetsGateway.Asset, Shell]) => {
                 const view = new AssetCardView({
                     asset: assetResp,
-                    actionsFactory: () => ({}),
                     assetOutput$: shell.assetOutput$,
                     forceReadonly: true,
                     withTabs: Object.entries(withTabs).reduce(

@@ -6,7 +6,6 @@ import { render } from '@youwol/flux-view'
 import { Subject } from 'rxjs'
 import { take } from 'rxjs/operators'
 import {
-    AssetActionsView,
     AssetCardView,
     AssetOverview,
     AssetPermissionsView,
@@ -35,9 +34,6 @@ test('create asset card view', (done) => {
     const assetOutput$ = new Subject<AssetsGateway.Asset>()
     const view = new AssetCardView({
         asset: asset as any,
-        actionsFactory: (asset) => {
-            return new AssetActionsView({ asset })
-        },
         assetOutput$,
         forceReadonly: false,
         withTabs: {

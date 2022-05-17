@@ -40,7 +40,6 @@ export class AssetOverview implements VirtualDOM {
 
     constructor(params: {
         asset: AssetWithPermissions
-        actionsFactory: (asset: AssetWithPermissions) => VirtualDOM
         assetOutput$?: Subject<AssetWithPermissions>
         withTabs?: { [key: string]: VirtualDOM }
         forceReadonly?: boolean

@@ -13,7 +13,6 @@ import { AssetCardView } from './asset-card'
  */
 export function popupAssetModalView(parameters: {
     asset: AssetsGateway.Asset
-    actionsFactory: (asset: AssetsGateway.Asset) => VirtualDOM
     withTabs?: { [key: string]: VirtualDOM }
     forceReadonly?: boolean
 }) {

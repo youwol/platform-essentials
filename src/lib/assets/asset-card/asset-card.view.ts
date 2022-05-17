@@ -26,7 +26,6 @@ export class AssetCardView implements VirtualDOM {
     }
     public readonly children: VirtualDOM[]
     public readonly asset: AssetWithPermissions
-    public readonly actionsFactory: (asset: AssetWithPermissions) => VirtualDOM
 
     public readonly withTabs: { [key: string]: VirtualDOM } = {}
     public readonly forceReadonly: boolean = false
@@ -35,7 +34,6 @@ export class AssetCardView implements VirtualDOM {
 
     constructor(params: {
         asset: AssetsGateway.Asset
-        actionsFactory: (asset: AssetsGateway.Asset) => VirtualDOM
         assetOutput$: Subject<AssetsGateway.Asset>
         withTabs?: { [key: string]: VirtualDOM }
         forceReadonly?: boolean
@@ -46,14 +44,12 @@ export class AssetCardView implements VirtualDOM {
             Object.keys(this.withTabs).length > 0
                 ? new AssetCardTabs({
                       asset: this.asset,
-                      actionsFactory: this.actionsFactory,
                       assetOutput$: this.assetOutput$,
                       forceReadonly: this.forceReadonly,
                       withTabs: this.withTabs,
                   })
                 : new AssetOverview({
                       asset: this.asset,
-                      actionsFactory: this.actionsFactory,
                       assetOutput$: this.assetOutput$,
                       forceReadonly: this.forceReadonly,
                       class: 'overflow-auto h-100 p-3',
@@ -68,17 +64,14 @@ export class AssetCardTabs extends Tabs.View {
 
     constructor(params: {
         asset: AssetWithPermissions
-        actionsFactory
         assetOutput$
         forceReadonly
         withTabs
     }) {
-        const { asset, actionsFactory, assetOutput$, forceReadonly, withTabs } =
-            params
+        const { asset, assetOutput$, forceReadonly, withTabs } = params
 
         const mainView = new AssetOverview({
             asset,
-            actionsFactory: actionsFactory,
             assetOutput$: assetOutput$,
             forceReadonly: forceReadonly,
             class: `${AssetOverview.ClassSelector} overflow-auto h-100 p-3`,

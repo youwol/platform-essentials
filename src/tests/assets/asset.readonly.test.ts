@@ -23,7 +23,6 @@ test('create asset card view', (done) => {
     const assetOutput$ = new Subject<AssetsGateway.Asset>()
     const view = new AssetCardView({
         asset,
-        actionsFactory: () => ({}),
         assetOutput$,
         forceReadonly: true,
     })
