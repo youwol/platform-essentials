@@ -1,7 +1,7 @@
 import { attr$, child$, Stream$, VirtualDOM } from '@youwol/flux-view'
 
-import { BehaviorSubject, combineLatest, Observable, of } from 'rxjs'
-import { filter, map, mergeMap, take } from 'rxjs/operators'
+import { BehaviorSubject, combineLatest, Observable } from 'rxjs'
+import { filter, map } from 'rxjs/operators'
 
 import { ywSpinnerView } from '../../../../misc-views/youwol-spinner.view'
 import { ExplorerState } from '../../../explorer.state'
@@ -15,11 +15,10 @@ import {
 import { installContextMenu } from '../../../context-menu/context-menu'
 import {
     ApplicationInfo,
-    ChildApplicationAPI,
-    evaluateParameters,
     OpenWithParametrization,
+    defaultOpeningApp$,
+    tryOpenWithDefault$,
 } from '../../../../core'
-import { defaultOpeningApp$ } from '../../../utils'
 
 export class ProgressItemView {
     static ClassSelector = 'progress-item-view'
@@ -99,24 +98,8 @@ export class ItemView {
     }
 
     public readonly ondblclick = (ev: PointerEvent) => {
-        this.defaultOpeningApp$
-            .pipe(
-                take(1),
-                mergeMap((info: { appInfo; parametrization } | undefined) => {
-                    return info && this.item instanceof ItemNode
-                        ? ChildApplicationAPI.getOsInstance().createInstance$({
-                              cdnPackage: info.appInfo.cdnPackage,
-                              parameters: evaluateParameters(
-                                  this.item,
-                                  info.parametrization,
-                              ),
-                              focus: true,
-                              version: 'latest',
-                          })
-                        : of(undefined)
-                }),
-            )
-            .subscribe()
+        if (this.item instanceof ItemNode)
+            tryOpenWithDefault$(this.item).subscribe()
         this.state.selectItem(this.item)
         ev.stopPropagation()
     }

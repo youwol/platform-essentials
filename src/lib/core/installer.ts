@@ -3,9 +3,10 @@ import { AssetsBackend, AssetsGateway } from '@youwol/http-clients'
 import { VirtualDOM } from '@youwol/flux-view'
 import { install } from '@youwol/cdn-client'
 import * as cdnClient from '@youwol/cdn-client'
-import { forkJoin, from, of, ReplaySubject } from 'rxjs'
+import { forkJoin, from, Observable, of, ReplaySubject } from 'rxjs'
 import { RequestsExecutor } from './requests-executot'
-import { map, mergeMap } from 'rxjs/operators'
+import { map, mergeMap, shareReplay, take } from 'rxjs/operators'
+import { ChildApplicationAPI } from './platform.state'
 
 type Json = any
 
@@ -370,4 +371,68 @@ function mergeApplicationsData(data: { [k: string]: ApplicationDataValue }[]) {
         }, {})
         return { ...acc, [id]: mergedPackageData }
     }, {})
+}
+
+function getFlatParametrizationList(appsInfo: ApplicationInfo[]) {
+    return appsInfo
+        .map((appInfo) =>
+            appInfo.execution.parametrized.map((parametrization) => {
+                return { appInfo, parametrization }
+            }),
+        )
+        .flat()
+}
+
+export function defaultOpeningApp$<T>(assetNode: AnyItemNode): Observable<
+    | {
+          appInfo: ApplicationInfo
+          parametrization: OpenWithParametrization
+      }
+    | undefined
+> {
+    return Installer.getApplicationsInfo$().pipe(
+        map((appsInfo) => {
+            return getFlatParametrizationList(appsInfo).find(
+                ({ appInfo, parametrization }) =>
+                    evaluateMatch(assetNode, parametrization),
+            )
+        }),
+        shareReplay({ bufferSize: 1, refCount: true }),
+    )
+}
+
+export function openingApps$<T>(assetNode: AnyItemNode): Observable<
+    {
+        appInfo: ApplicationInfo
+        parametrization: OpenWithParametrization
+    }[]
+> {
+    return Installer.getApplicationsInfo$().pipe(
+        map((appsInfo) => {
+            return getFlatParametrizationList(appsInfo).filter(
+                ({ appInfo, parametrization }) =>
+                    evaluateMatch(assetNode, parametrization),
+            )
+        }),
+        shareReplay({ bufferSize: 1, refCount: true }),
+    )
+}
+
+export function tryOpenWithDefault$(assetNode: AnyItemNode) {
+    return defaultOpeningApp$(assetNode).pipe(
+        take(1),
+        mergeMap((info: { appInfo; parametrization } | undefined) => {
+            return info
+                ? ChildApplicationAPI.getOsInstance().createInstance$({
+                      cdnPackage: info.appInfo.cdnPackage,
+                      parameters: evaluateParameters(
+                          assetNode,
+                          info.parametrization,
+                      ),
+                      focus: true,
+                      version: 'latest',
+                  })
+                : of(undefined)
+        }),
+    )
 }

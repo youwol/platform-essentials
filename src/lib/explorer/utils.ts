@@ -1,4 +1,4 @@
-import { ExplorerState, FavoriteFolder, TreeGroup } from './explorer.state'
+import { ExplorerState, TreeGroup } from './explorer.state'
 import {
     AnyFolderNode,
     AnyItemNode,
@@ -259,47 +259,4 @@ export function renameFavoriteIfNeeded(
         ])
     }
 }
-
-function getFlatParametrizationList(appsInfo: ApplicationInfo[]) {
-    return appsInfo
-        .map((appInfo) =>
-            appInfo.execution.parametrized.map((parametrization) => {
-                return { appInfo, parametrization }
-            }),
-        )
-        .flat()
-}
-export function defaultOpeningApp$<T>(assetNode: AnyItemNode): Observable<
-    | {
-          appInfo: ApplicationInfo
-          parametrization: OpenWithParametrization
-      }
-    | undefined
-> {
-    return Installer.getApplicationsInfo$().pipe(
-        map((appsInfo) => {
-            return getFlatParametrizationList(appsInfo).find(
-                ({ appInfo, parametrization }) =>
-                    evaluateMatch(assetNode, parametrization),
-            )
-        }),
-        shareReplay({ bufferSize: 1, refCount: true }),
-    )
-}
-
-export function openingApps$<T>(assetNode: AnyItemNode): Observable<
-    {
-        appInfo: ApplicationInfo
-        parametrization: OpenWithParametrization
-    }[]
-> {
-    return Installer.getApplicationsInfo$().pipe(
-        map((appsInfo) => {
-            return getFlatParametrizationList(appsInfo).filter(
-                ({ appInfo, parametrization }) =>
-                    evaluateMatch(assetNode, parametrization),
-            )
-        }),
-        shareReplay({ bufferSize: 1, refCount: true }),
-    )
-}
+*/
