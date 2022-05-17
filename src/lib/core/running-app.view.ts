@@ -1,9 +1,10 @@
 import { attr$, HTMLElement$, VirtualDOM } from '@youwol/flux-view'
 import { ReplaySubject } from 'rxjs'
 import { v4 as uuidv4 } from 'uuid'
-import { AssetsGateway } from '@youwol/http-clients'
+import { AssetsGateway, raiseHTTPErrors } from '@youwol/http-clients'
 import { PlatformState } from './platform.state'
 import { Executable } from './platform-settings'
+import { ApplicationInfo } from './installer'
 
 class IframeAppView implements VirtualDOM {
     tag = 'iframe'
@@ -27,10 +28,7 @@ export class RunningApp implements Executable {
     public readonly version: string
     public readonly url: string
     public readonly parameters: { [key: string]: string }
-    public readonly appMetadata$ = new ReplaySubject<{
-        name: string
-        icon: VirtualDOM
-    }>(1)
+    public readonly appMetadata$ = new ReplaySubject<ApplicationInfo>(1)
 
     public readonly instanceId: string
 
@@ -57,32 +55,20 @@ export class RunningApp implements Executable {
         parameters?: { [key: string]: string }
     }) {
         Object.assign(this, params)
-        const rawId = window.btoa(unescape(encodeURIComponent(this.cdnPackage)))
-        if (params.metadata) {
-            this.appMetadata$.next(params.metadata)
-        }
-        if (params.title) {
-            this.snippet$.next({ innerText: params.title })
-            this.header$.next(new HeaderView({ title: params.title }))
-        }
-        if (!params.title || !params.metadata) {
-            new AssetsGateway.AssetsGatewayClient().rawDeprecated.package
-                .getResource$(rawId, `${this.version}/.yw_metadata.json`)
-                .subscribe((resp) => {
-                    const title = resp['displayName'] || this.cdnPackage
-                    const appMetadata = {
-                        name: title,
-                        icon: resp['icon'] || {},
-                    }
-                    if (!params.title) {
-                        this.snippet$.next({ innerText: title })
-                        this.header$.next(new HeaderView({ title }))
-                    }
-                    if (!params.metadata) {
-                        this.appMetadata$.next(appMetadata)
-                    }
-                })
-        }
+        new AssetsGateway.AssetsGatewayClient().cdn
+            .getResource$<ApplicationInfo>({
+                libraryId: btoa(this.cdnPackage),
+                version: 'latest',
+                restOfPath: '.yw_metadata.json',
+            })
+            .pipe(raiseHTTPErrors())
+            .subscribe((appInfo) => {
+                this.appMetadata$.next(appInfo)
+                this.snippet$.next({ innerText: appInfo.displayName })
+                this.header$.next(
+                    new HeaderView({ title: appInfo.displayName }),
+                )
+            })
 
         this.version = this.version || 'latest'
         this.instanceId = this.instanceId || uuidv4()
@@ -120,10 +106,11 @@ export class RunningApp implements Executable {
 }
 
 class HeaderView implements VirtualDOM {
-    public readonly class = 'border-bottom px-1 fv-text-focus'
+    public readonly class = 'px-1'
     public readonly style = {
         fontFamily: 'serif',
         fontSize: 'x-large',
+        fontWeight: 'bold',
     }
     public readonly innerText: string
     public readonly title: string

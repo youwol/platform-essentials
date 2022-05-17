@@ -31,6 +31,9 @@ export class PlatformView implements VirtualDOM {
             new PlatformBannerView({
                 state: this.state,
                 class: 'fv-bg-background',
+                style: {
+                    opacity: 0.9,
+                },
             }),
             {
                 class: 'd-flex align-items-center h-100 w-100',

@@ -1,5 +1,7 @@
-import { VirtualDOM } from '@youwol/flux-view'
-import { ExpandableMenu } from './menu.view'
+import { HTMLElement$, render, VirtualDOM } from '@youwol/flux-view'
+import { Modal } from '@youwol/fv-group'
+import { merge } from 'rxjs'
+import { take } from 'rxjs/operators'
 
 /**
  * Encapsulates YouWol logo with optional badges & YouWol menu.
@@ -11,7 +13,7 @@ export class YouwolMenuView implements VirtualDOM {
         '@youwol/flux-youwol-essentials',
     )}/latest/assets/images/logo_YouWol_Platform_white.png`
 
-    public readonly class = `d-flex my-auto  fv-pointer ${YouwolMenuView.ClassSelector}`
+    public readonly class = `d-flex my-auto  p-2 rounded fv-hover-bg-background-alt fv-pointer ${YouwolMenuView.ClassSelector}`
 
     public readonly children: VirtualDOM[]
     public readonly badgesView?: VirtualDOM
@@ -31,13 +33,26 @@ export class YouwolMenuView implements VirtualDOM {
         youwolMenuView: VirtualDOM
     }) {
         Object.assign(this, parameters)
-        const expandableMenu = new ExpandableMenu({
-            contentView: this.youwolMenuView,
-            style: { opacity: '0.9' },
-        })
-        this.onclick = () =>
-            expandableMenu.showMenu$.next(!expandableMenu.showMenu$.getValue())
-        this.onmouseleave = () => expandableMenu.showMenu$.next(false)
+
+        this.onclick = () => {
+            const modalState = new Modal.State()
+            const view = new Modal.View({
+                state: modalState,
+                contentView: () => this.youwolMenuView,
+                connectedCallback: (elem: HTMLDivElement & HTMLElement$) => {
+                    elem.children[0].classList.add('w-100')
+                    // https://stackoverflow.com/questions/63719149/merge-deprecation-warning-confusion
+                    merge(...[modalState.cancel$, modalState.ok$])
+                        .pipe(take(1))
+                        .subscribe(() => {
+                            modalDiv.remove()
+                        })
+                },
+            })
+            const modalDiv = render(view)
+            document.querySelector('body').appendChild(modalDiv)
+        }
+
         this.children = [
             {
                 style: {
@@ -57,19 +72,6 @@ export class YouwolMenuView implements VirtualDOM {
                     },
                 ],
             },
-            {
-                class: 'd-flex flex-column h-100 px-1 fv-text-secondary',
-                children: [
-                    this.badgesView || {
-                        class: 'fas fa-caret-down h-50',
-                        style: { opacity: '0' },
-                    },
-                    {
-                        class: 'fas fa-caret-down h-50',
-                    },
-                ],
-            },
-            expandableMenu,
         ]
     }
 }

@@ -2,7 +2,7 @@ import { child$, VirtualDOM } from '@youwol/flux-view'
 import { Button } from '@youwol/fv-button'
 import { map, shareReplay } from 'rxjs/operators'
 import { AssetsGateway, HTTPError } from '@youwol/http-clients'
-import { PlatformSettingsStore } from '../core/platform-settings'
+import { PlatformSettingsStore } from '../core'
 import { ChildApplicationAPI, isPlatformInstance } from '../core/platform.state'
 import { UserMenuView } from './user-menu.view'
 import { YouwolMenuView } from './youwol-menu.view'
@@ -41,7 +41,7 @@ export class YouwolBannerState {
 export class YouwolBannerView implements VirtualDOM {
     static ClassSelector = 'youwol-banner-view'
 
-    public readonly class = `w-100 position-relative fv-text-primary justify-content-between align-self-center  px-3  border-bottom ${YouwolBannerView.ClassSelector}`
+    public readonly class = `w-100 position-relative fv-text-primary justify-content-between align-self-center  border-bottom ${YouwolBannerView.ClassSelector}`
     public readonly style = {
         minHeight: '50px',
         display: 'd-flex',
@@ -68,10 +68,12 @@ export class YouwolBannerView implements VirtualDOM {
         customActionsView?: VirtualDOM
         userMenuView?: VirtualDOM
         youwolMenuView?: VirtualDOM
+        applicationName?: string
     }) {
         Object.assign(this, params)
         const instanceId = ChildApplicationAPI.getAppInstanceId()
         const youwolOS = ChildApplicationAPI.getOsInstance()
+
         if (instanceId && isPlatformInstance(youwolOS)) {
             youwolOS.setTopBannerViews(instanceId, {
                 actionsView: this.customActionsView,
