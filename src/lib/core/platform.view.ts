@@ -1,5 +1,7 @@
 import {
     attr$,
+    child$,
+    children$,
     childrenAppendOnly$,
     Stream$,
     VirtualDOM,
@@ -9,6 +11,14 @@ import { PlatformBannerView } from './platform-banner.view'
 import { PlatformSettingsStore } from './platform-settings'
 import { PlatformState } from './platform.state'
 import { RunningApp } from './running-app.view'
+import {
+    ApplicationInfo,
+    defaultOpeningApp$,
+    tryOpenWithDefault$,
+} from './installer'
+import { Favorites } from './favorites'
+import { TreedbBackend } from '@youwol/http-clients'
+import { AnyItemNode, ItemNode } from '../explorer'
 
 export class PlatformView implements VirtualDOM {
     public readonly class = 'h-100 w-100 d-flex flex-column fv-text-primary'
@@ -39,8 +49,12 @@ export class PlatformView implements VirtualDOM {
             }),
             {
                 class: 'd-flex align-items-center h-100 w-100',
-
-                children: [new RunningAppView({ state: this.state })],
+                children: [
+                    new RunningAppView({ state: this.state }),
+                    child$(this.state.runningApplication$, (runningApp) => {
+                        return runningApp ? {} : new DesktopFavoritesView()
+                    }),
+                ],
             },
         ]
     }
@@ -73,5 +87,63 @@ export class RunningAppView implements VirtualDOM {
                 return view
             },
         )
+    }
+}
+
+export class DesktopFavoritesView implements VirtualDOM {
+    public readonly class = 'w-100 h-100 p-2'
+    public readonly children: VirtualDOM[]
+
+    constructor() {
+        this.children = [
+            {
+                class: 'w-100 h-100 d-flex flex-wrap',
+                children: children$(Favorites.getDesktopItems$(), (items) => {
+                    return items.map((item) => {
+                        return new DesktopFavoriteView({
+                            entityResponse: item,
+                        })
+                    })
+                }),
+            },
+        ]
+    }
+}
+
+export class DesktopFavoriteView implements VirtualDOM {
+    public readonly class =
+        'rounded p-2 d-flex flex-column align-items-center fv-pointer fv-hover-border-focus'
+    public readonly style = {
+        width: 'fit-content',
+        height: 'fit-content',
+        backgroundColor: 'rgba(0,0,0,0.5)',
+    }
+    public readonly itemNode: AnyItemNode
+    public readonly entityResponse: TreedbBackend.GetEntityResponse
+    public readonly children: VirtualDOM[]
+    public readonly defaultOpeningApp$
+    public readonly ondblclick = () => {
+        tryOpenWithDefault$(this.itemNode).subscribe()
+    }
+    constructor(params: { entityResponse: TreedbBackend.GetEntityResponse }) {
+        Object.assign(this, params)
+        const itemResponse = this.entityResponse
+            .entity as TreedbBackend.GetItemResponse
+        this.itemNode = ItemNode.fromTreedbResponse(itemResponse)
+        this.defaultOpeningApp$ = defaultOpeningApp$(this.itemNode)
+        this.children = [
+            child$(
+                this.defaultOpeningApp$,
+                (defaultResp: { appInfo: ApplicationInfo } | undefined) => {
+                    if (!defaultResp) {
+                        return { class: 'fas fa-file fa-2x' }
+                    }
+                    return defaultResp.appInfo.graphics.appIcon
+                },
+            ),
+            {
+                innerText: this.entityResponse.entity.name,
+            },
+        ]
     }
 }
