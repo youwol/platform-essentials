@@ -1,10 +1,6 @@
 import { ImmutableTree } from '@youwol/fv-tree'
 
-import {
-    AssetsGateway,
-    raiseHTTPErrors,
-    TreedbBackend,
-} from '@youwol/http-clients'
+import { AssetsGateway, raiseHTTPErrors } from '@youwol/http-clients'
 import {
     BehaviorSubject,
     combineLatest,
@@ -335,7 +331,15 @@ export class ExplorerState {
             () => ({}),
             { toBeSaved: save },
         )
-        this.selectedItem$.next(this.groupsTree[node.groupId].getNode(node.id))
+        if (node instanceof ItemNode)
+            this.selectedItem$.next(
+                this.groupsTree[node.groupId].getNode(node.id),
+            )
+        this.openFolder$.pipe(take(1)).subscribe((f) => {
+            if (f.folder.id == node.id) {
+                this.openFolder(this.groupsTree[node.groupId].getNode(node.id))
+            }
+        })
     }
 
     deleteItemOrFolder(node: RegularFolderNode | AnyItemNode) {
