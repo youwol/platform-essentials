@@ -17,15 +17,9 @@ import {
     popupAssetModalView,
 } from '../assets'
 import { AssetsBackend, AssetsGateway } from '@youwol/http-clients'
-import { distinct, map, mergeMap, shareReplay, take } from 'rxjs/operators'
-import { BehaviorSubject, Observable, of } from 'rxjs'
-import {
-    ApplicationInfo,
-    evaluateMatch,
-    Installer,
-    OpenWithParametrization,
-    RequestsExecutor,
-} from '../core'
+import { distinct, map, mergeMap, take } from 'rxjs/operators'
+import { of } from 'rxjs'
+import { RequestsExecutor } from '../core'
 import { applyUpdate } from './db-actions-factory'
 
 export function createTreeGroup(
@@ -243,20 +237,3 @@ export function popupAssetCardView(node: AnyItemNode) {
                 })
         })
 }
-
-export function renameFavoriteIfNeeded(
-    favorites$: BehaviorSubject<FavoriteFolder[]>,
-    { folderId, newName }: { folderId: string; newName: string },
-) {
-    const favorites = favorites$.getValue()
-    const favoriteFolder = favorites.find(
-        (folder) => folder.folderId == folderId,
-    )
-    if (favoriteFolder) {
-        favorites$.next([
-            ...favorites.filter((f) => f.folderId != folderId),
-            { ...favoriteFolder, name: newName } as AnyFolderNode,
-        ])
-    }
-}
-*/
