@@ -20,7 +20,7 @@ class RegularBannerView extends YouwolBannerView {
 
 class RunningAppTitleView implements VirtualDOM {
     public readonly class =
-        'd-flex align-items-center mx-3 px-2 py-1 rounded fv-bg-background-alt my-auto'
+        'd-flex align-items-center mx-3 px-2 py-1 rounded fv-border-primary my-auto'
     public readonly style = {
         height: 'fit-content',
     }

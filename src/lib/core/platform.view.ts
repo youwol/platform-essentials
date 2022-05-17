@@ -32,7 +32,9 @@ export class PlatformView implements VirtualDOM {
                 state: this.state,
                 class: 'fv-bg-background',
                 style: {
-                    opacity: 0.9,
+                    background:
+                        'linear-gradient(rgba(0,0,0,0.9), rgba(0,0,0,0.7))',
+                    zIndex: 0,
                 },
             }),
             {
