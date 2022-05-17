@@ -14,6 +14,7 @@ import {
 
 import { debugDelay, RequestsExecutor } from '../core/requests-executot'
 import { v4 as uuidv4 } from 'uuid'
+import { Favorites } from '../core'
 
 function isToProcess({ update, targetCmd }) {
     if (!(update.command instanceof targetCmd)) {
@@ -52,6 +53,7 @@ export const databaseActionsFactory = {
                 .pipe(delay(debugDelay))
                 .subscribe(() => {
                     node.removeStatus({ type: 'request-pending', id: uid })
+                    Favorites.refresh(node.id)
                 })
         },
     }),
@@ -79,6 +81,7 @@ export const databaseActionsFactory = {
                 .pipe(delay(debugDelay))
                 .subscribe(() => {
                     node.removeStatus({ type: 'request-pending', id: uid })
+                    Favorites.refresh(node.id)
                 })
         },
     }),
@@ -112,6 +115,7 @@ export const databaseActionsFactory = {
                 .pipe(delay(debugDelay))
                 .subscribe(() => {
                     parent.removeStatus({ type: 'request-pending', id: uid })
+                    Favorites.remove(node.id)
                 })
         },
     }),
@@ -175,6 +179,7 @@ export const databaseActionsFactory = {
                 .pipe(delay(debugDelay))
                 .subscribe(() => {
                     parent.removeStatus({ type: 'request-pending', id: uid })
+                    Favorites.remove(node.id)
                 })
         },
     }),

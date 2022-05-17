@@ -49,7 +49,6 @@ import {
     processBorrowItem,
     processMoveFolder,
     processMoveItem,
-    renameFavoriteIfNeeded,
 } from './utils'
 
 export class TreeGroup extends ImmutableTree.State<BrowserNode> {
@@ -97,18 +96,12 @@ export type OpenFolder = {
     folder: AnyFolderNode | DriveNode
 }
 
-export interface FavoriteFolder extends TreedbBackend.GetFolderResponse {}
-export interface FavoriteGroup extends AssetsGateway.GroupResponse {}
-
 export class ExplorerState {
     public data: DataState
 
     public readonly selectedItem$ = new BehaviorSubject<BrowserNode>(undefined)
 
     public readonly openFolder$ = new ReplaySubject<OpenFolder>(1)
-
-    public readonly favoriteFolders$ = new BehaviorSubject<FavoriteFolder[]>([])
-    public readonly favoriteGroups$ = new BehaviorSubject<FavoriteGroup[]>([])
 
     public readonly userInfo$ = RequestsExecutor.getUserInfo().pipe(
         raiseHTTPErrors(),
@@ -160,12 +153,6 @@ export class ExplorerState {
                 this.selectedItem$.next(undefined)
             }),
         )
-        RequestsExecutor.getFavoriteFolders().subscribe((favorites) => {
-            this.favoriteFolders$.next(favorites)
-        })
-        RequestsExecutor.getFavoriteGroups().subscribe((favorites) => {
-            this.favoriteGroups$.next(favorites)
-        })
 
         const os = ChildApplicationAPI.getOsInstance()
         if (os) {
@@ -341,10 +328,6 @@ export class ExplorerState {
         save = true,
     ) {
         node.removeStatus({ type: 'renaming' })
-        renameFavoriteIfNeeded(this.favoriteFolders$, {
-            folderId: node.id,
-            newName,
-        })
         this.groupsTree[node.groupId].replaceAttributes(
             node,
             { name: newName },
@@ -479,51 +462,6 @@ export class ExplorerState {
                     this.refresh(folder)
                 }
             })
-    }
-
-    toggleFavoriteFolder(folder: AnyFolderNode) {
-        const actualFavorites = this.favoriteFolders$.getValue()
-        if (actualFavorites.find((f) => f.folderId == folder.folderId)) {
-            const filteredFolders = actualFavorites.filter(
-                (f) => f.folderId != folder.id,
-            )
-            RequestsExecutor.saveFavorites({
-                favoriteFolders: filteredFolders,
-                favoriteGroups: this.favoriteGroups$.getValue(),
-            }).subscribe()
-            this.favoriteFolders$.next(filteredFolders)
-            return
-        }
-        const favoriteFolders = [...actualFavorites, folder]
-        RequestsExecutor.saveFavorites({
-            favoriteFolders,
-            favoriteGroups: this.favoriteGroups$.getValue(),
-        }).subscribe()
-        this.favoriteFolders$.next(favoriteFolders)
-    }
-
-    toggleFavoriteGroup(groupId: string) {
-        const actualFavorites = this.favoriteGroups$.getValue()
-        if (actualFavorites.find((group) => group.id == groupId)) {
-            const favoriteGroups = actualFavorites.filter(
-                (f) => f.id != groupId,
-            )
-            RequestsExecutor.saveFavorites({
-                favoriteGroups,
-                favoriteFolders: this.favoriteFolders$.getValue(),
-            }).subscribe()
-            this.favoriteGroups$.next(favoriteGroups)
-            return
-        }
-        this.userInfo$.subscribe((info) => {
-            const group = info.groups.find((g) => g.id == groupId)
-            const favoriteGroups = [...actualFavorites, group]
-            RequestsExecutor.saveFavorites({
-                favoriteGroups,
-                favoriteFolders: this.favoriteFolders$.getValue(),
-            }).subscribe()
-            this.favoriteGroups$.next(favoriteGroups)
-        })
     }
 
     launchApplication({

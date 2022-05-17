@@ -23,9 +23,15 @@ import {
     RegularFolderNode,
     TrashNode,
 } from './nodes'
-import { openingApps$, popupAssetCardView } from './utils'
+import { popupAssetCardView } from './utils'
 import { isLocalYouwol } from '../core/requests-executot'
-import { Installer, evaluateMatch, evaluateParameters } from '../core'
+import {
+    Installer,
+    evaluateMatch,
+    evaluateParameters,
+    openingApps$,
+} from '../core'
+import { Favorites } from '../core/favorites'
 
 export type Section =
     | 'Modify'
@@ -392,35 +398,70 @@ export const GENERIC_ACTIONS: { [k: string]: ActionConstructor } = {
     favoriteFolder: (state: ExplorerState, node: BrowserNode) => ({
         sourceEventNode: node,
         icon: 'fas fa-map-pin',
-        name: 'add to favorite',
+        name: 'add to favorites',
         section: 'Disposition',
         authorized: true,
         applicable: () => {
-            const favorites = state.favoriteFolders$.getValue()
+            const favorites = Favorites.latest.folders$
             return (
                 node instanceof FolderNode &&
-                favorites.find((f) => f.folderId == node.id) == undefined
+                favorites.find((f) => f.id == node.id) == undefined
             )
         },
         exe: () => {
-            state.toggleFavoriteFolder(node as AnyFolderNode)
+            Favorites.toggleFavoriteFolder(node.id)
         },
     }),
     unFavoriteFolder: (state: ExplorerState, node: BrowserNode) => ({
         sourceEventNode: node,
         icon: 'fas fa-unlink',
-        name: 'remove favorite',
+        name: 'un-favorite',
         section: 'Disposition',
         authorized: true,
         applicable: () => {
-            const favorites = state.favoriteFolders$.getValue()
+            const favorites = Favorites.latest.folders$
+            console.log('latestFolders', favorites)
             return (
                 node instanceof FolderNode &&
-                favorites.find((f) => f.folderId == node.id) != undefined
+                favorites.find((f) => f.id == node.id) != undefined
             )
         },
         exe: () => {
-            state.toggleFavoriteFolder(node as AnyFolderNode)
+            Favorites.toggleFavoriteFolder(node.id)
+        },
+    }),
+    favoriteDesktopItem: (state: ExplorerState, node: BrowserNode) => ({
+        sourceEventNode: node,
+        icon: 'fas fa-map-pin',
+        name: 'add to desktop',
+        section: 'Disposition',
+        authorized: true,
+        applicable: () => {
+            const favorites = Favorites.latest.desktopItems$
+            return (
+                node instanceof ItemNode &&
+                favorites.find((i) => i.id == node.id) == undefined
+            )
+        },
+        exe: () => {
+            Favorites.toggleFavoriteItem(node.id)
+        },
+    }),
+    unFavoriteDesktopItem: (state: ExplorerState, node: BrowserNode) => ({
+        sourceEventNode: node,
+        icon: 'fas fa-unlink',
+        name: 'remove from desktop',
+        section: 'Disposition',
+        authorized: true,
+        applicable: () => {
+            const favorites = Favorites.latest.desktopItems$
+            return (
+                node instanceof ItemNode &&
+                favorites.find((i) => i.id == node.id) != undefined
+            )
+        },
+        exe: () => {
+            Favorites.toggleFavoriteItem(node.id)
         },
     }),
 }
