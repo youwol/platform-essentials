@@ -12,16 +12,20 @@ import {
 } from './nodes'
 
 import {
-    AssetActionsView,
     AssetPermissionsView,
-    FluxDependenciesView,
     PackageInfoView,
     popupAssetModalView,
 } from '../assets'
 import { AssetsBackend, AssetsGateway } from '@youwol/http-clients'
 import { distinct, map, mergeMap, shareReplay, take } from 'rxjs/operators'
-import { BehaviorSubject, of } from 'rxjs'
-import { Installer, RequestsExecutor } from '../core'
+import { BehaviorSubject, Observable, of } from 'rxjs'
+import {
+    ApplicationInfo,
+    evaluateMatch,
+    Installer,
+    OpenWithParametrization,
+    RequestsExecutor,
+} from '../core'
 import { applyUpdate } from './db-actions-factory'
 
 export function createTreeGroup(
@@ -264,21 +268,45 @@ export function renameFavoriteIfNeeded(
     }
 }
 
-export function defaultOpeningApp$<T>(asset: AssetsBackend.GetAssetResponse) {
-    return Installer.getInstallManifest$().pipe(
-        map((installManifest) => {
-            const defaultApp = installManifest
-                .openWithApps({
-                    node: asset as any,
-                })
-                .find((assetDefault) => assetDefault.applicable())
-            if (!defaultApp) {
-                return undefined
-            }
-            const appData = installManifest.applications.find(
-                (app) => app.cdnPackage == defaultApp.cdnPackage,
+function getFlatParametrizationList(appsInfo: ApplicationInfo[]) {
+    return appsInfo
+        .map((appInfo) =>
+            appInfo.execution.parametrized.map((parametrization) => {
+                return { appInfo, parametrization }
+            }),
+        )
+        .flat()
+}
+export function defaultOpeningApp$<T>(assetNode: AnyItemNode): Observable<
+    | {
+          appInfo: ApplicationInfo
+          parametrization: OpenWithParametrization
+      }
+    | undefined
+> {
+    return Installer.getApplicationsInfo$().pipe(
+        map((appsInfo) => {
+            return getFlatParametrizationList(appsInfo).find(
+                ({ appInfo, parametrization }) =>
+                    evaluateMatch(assetNode, parametrization),
             )
-            return { ...appData, ...defaultApp }
+        }),
+        shareReplay({ bufferSize: 1, refCount: true }),
+    )
+}
+
+export function openingApps$<T>(assetNode: AnyItemNode): Observable<
+    {
+        appInfo: ApplicationInfo
+        parametrization: OpenWithParametrization
+    }[]
+> {
+    return Installer.getApplicationsInfo$().pipe(
+        map((appsInfo) => {
+            return getFlatParametrizationList(appsInfo).filter(
+                ({ appInfo, parametrization }) =>
+                    evaluateMatch(assetNode, parametrization),
+            )
         }),
         shareReplay({ bufferSize: 1, refCount: true }),
     )

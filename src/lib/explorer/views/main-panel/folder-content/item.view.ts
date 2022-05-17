@@ -13,7 +13,12 @@ import {
     RegularFolderNode,
 } from '../../../nodes'
 import { installContextMenu } from '../../../context-menu/context-menu'
-import { ChildApplicationAPI } from '../../../../core'
+import {
+    ApplicationInfo,
+    ChildApplicationAPI,
+    evaluateParameters,
+    OpenWithParametrization,
+} from '../../../../core'
 import { defaultOpeningApp$ } from '../../../utils'
 
 export class ProgressItemView {
@@ -81,19 +86,30 @@ export class ItemView {
         { [key: string]: string }
     >
     public readonly contextMenuSelection$ = new BehaviorSubject(false)
+    public readonly defaultOpeningApp$: Observable<
+        | {
+              appInfo: ApplicationInfo
+              parametrization: OpenWithParametrization
+          }
+        | undefined
+    >
     public readonly onclick = (ev: PointerEvent) => {
         this.state.selectItem(this.item)
         ev.stopPropagation()
     }
+
     public readonly ondblclick = (ev: PointerEvent) => {
-        defaultOpeningApp$(this.item as any)
+        this.defaultOpeningApp$
             .pipe(
                 take(1),
-                mergeMap((application) => {
-                    return application
+                mergeMap((info: { appInfo; parametrization } | undefined) => {
+                    return info && this.item instanceof ItemNode
                         ? ChildApplicationAPI.getOsInstance().createInstance$({
-                              cdnPackage: application.cdnPackage,
-                              parameters: application.parameters,
+                              cdnPackage: info.appInfo.cdnPackage,
+                              parameters: evaluateParameters(
+                                  this.item,
+                                  info.parametrization,
+                              ),
                               focus: true,
                               version: 'latest',
                           })
@@ -127,7 +143,7 @@ export class ItemView {
 
     constructor(params: { state: ExplorerState; item: BrowserNode }) {
         Object.assign(this, params)
-
+        this.defaultOpeningApp$ = defaultOpeningApp$(this.item as any)
         this.class = attr$(
             combineLatest([
                 this.state.selectedItem$,
@@ -160,15 +176,19 @@ export class ItemView {
                 class: 'd-flex align-items-center flex-grow-1',
                 style: { minWidth: '0px' },
                 children: [
-                    {
-                        class: `fas ${this.item.icon} mr-1`,
-                    },
+                    child$(this.defaultOpeningApp$, (appData) => {
+                        return appData &&
+                            appData.appInfo.graphics &&
+                            appData.appInfo.graphics.fileIcon
+                            ? appData.appInfo.graphics.fileIcon
+                            : { class: `mr-1 fas ${this.item.icon}` }
+                    }),
                     child$(this.item.status$, (statusList) =>
                         statusList.find((s) => s.type == 'renaming')
                             ? this.editView()
                             : {
                                   innerText: this.item.name,
-                                  class: 'mr-2',
+                                  class: 'mx-2',
                                   style: {
                                       textOverflow: 'ellipsis',
                                       whiteSpace: 'nowrap',

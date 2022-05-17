@@ -23,9 +23,9 @@ import {
     RegularFolderNode,
     TrashNode,
 } from './nodes'
-import { popupAssetCardView } from './utils'
+import { openingApps$, popupAssetCardView } from './utils'
 import { isLocalYouwol } from '../core/requests-executot'
-import { Installer } from '../core'
+import { Installer, evaluateMatch, evaluateParameters } from '../core'
 
 export type Section =
     | 'Modify'
@@ -459,8 +459,9 @@ export function getActions$(
     return forkJoin([
         permissions$,
         Installer.getInstallManifest$().pipe(take(1)),
+        node instanceof ItemNode ? openingApps$(node).pipe(take(1)) : of([]),
     ]).pipe(
-        map(([permissions, installManifest]) => {
+        map(([permissions, installManifest, openingApps]) => {
             const customActions: Action[] = installManifest
                 .contextMenuActions({
                     node,
@@ -475,31 +476,31 @@ export function getActions$(
                         section: 'CustomActions',
                     }
                 })
-            const openWithActions: Action[] = installManifest
-                .openWithApps({
-                    node,
-                })
-                .map((openingApp) => {
-                    const appData = installManifest.applications.find(
-                        (app) => app.cdnPackage == openingApp.cdnPackage,
-                    )
-                    return {
-                        sourceEventNode: node,
-                        icon: 'fas fa-folder-open',
-                        name: appData.name,
-                        section: 'Open',
-                        authorized: true,
-                        applicable: () => {
-                            return openingApp.applicable()
-                        },
-                        exe: () => {
-                            state.launchApplication({
-                                cdnPackage: openingApp.cdnPackage,
-                                parameters: openingApp.parameters,
-                            })
-                        },
-                    }
-                })
+            const openWithActions: Action[] = openingApps.map(
+                ({ appInfo, parametrization }) => ({
+                    sourceEventNode: node,
+                    icon: 'fas fa-folder-open',
+                    name: `${appInfo.displayName} (${parametrization.name})`,
+                    section: 'Open',
+                    authorized: true,
+                    applicable: () => {
+                        return evaluateMatch(
+                            node as AnyItemNode,
+                            parametrization,
+                        )
+                    },
+                    exe: () => {
+                        state.launchApplication({
+                            cdnPackage: appInfo.cdnPackage,
+                            parameters: evaluateParameters(
+                                node as AnyItemNode,
+                                parametrization,
+                            ),
+                        })
+                    },
+                }),
+            )
+
             const nativeActions = Object.values(GENERIC_ACTIONS).map((action) =>
                 action(state, node, permissions),
             )

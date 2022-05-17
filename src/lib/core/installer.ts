@@ -3,7 +3,7 @@ import { AssetsBackend, AssetsGateway } from '@youwol/http-clients'
 import { VirtualDOM } from '@youwol/flux-view'
 import { install } from '@youwol/cdn-client'
 import * as cdnClient from '@youwol/cdn-client'
-import { from, ReplaySubject } from 'rxjs'
+import { forkJoin, from, of, ReplaySubject } from 'rxjs'
 import { RequestsExecutor } from './requests-executot'
 import { map, mergeMap } from 'rxjs/operators'
 
@@ -44,6 +44,8 @@ export interface Application {
     cdnPackage: string
     version: string
     name: string
+    standalone: boolean
+    disabled?: boolean
     graphics?: {
         background?: VirtualDOM
         iconFile?: VirtualDOM
@@ -74,14 +76,60 @@ export interface Manifest {
         node: AnyItemNode | AnyFolderNode
     }) => OpeningApplication[]
 
-    applications?: Application[]
+    applications?: string[]
 
     applicationsData?: {
         [k: string]: ApplicationDataValue
     }
 }
 
+export interface OpenWithParametrization {
+    name?: string
+    match: { [k: string]: string } | string
+    parameters: { [k: string]: string } | string
+}
+
+export interface AppExecutionInfo {
+    standalone: boolean
+    parametrized: OpenWithParametrization[]
+}
+
+export interface ApplicationInfo {
+    cdnPackage: string
+    displayName: string
+    graphics?: {
+        background?: VirtualDOM
+        fileIcon?: VirtualDOM
+        appIcon?: VirtualDOM
+    }
+    execution: AppExecutionInfo
+}
+
 type TInstaller = (installer: Installer) => Promise<Installer>
+
+export function evaluateMatch(
+    node: AnyItemNode,
+    parametrization: OpenWithParametrization,
+) {
+    if (typeof parametrization.match == 'string') {
+        return new Function(parametrization.match)()(node)
+    }
+    return Object.entries(parametrization.match).reduce((acc, [k, v]) => {
+        return acc && node[k] == v
+    }, true)
+}
+
+export function evaluateParameters(
+    node: AnyItemNode,
+    parametrization: OpenWithParametrization,
+) {
+    if (typeof parametrization.parameters == 'string') {
+        return new Function(parametrization.parameters)()(node)
+    }
+    return Object.entries(parametrization.parameters).reduce((acc, [k, v]) => {
+        return { ...acc, [k]: node[v] }
+    }, {})
+}
 
 export class Installer {
     public readonly libraryManifests = new Set<string>()
@@ -90,6 +138,7 @@ export class Installer {
     public readonly cdnClient = cdnClient
 
     static installManifest$: ReplaySubject<Manifest>
+    static applicationsInfo$: ReplaySubject<ApplicationInfo[]>
 
     static defaultInstallJsScript = `
 async function install(installer){
@@ -137,6 +186,45 @@ return install
                 Installer.installManifest$.next(manifest)
             })
         return Installer.installManifest$
+    }
+
+    static getApplicationsInfo$() {
+        if (Installer.applicationsInfo$) {
+            return Installer.applicationsInfo$
+        }
+        Installer.applicationsInfo$ = new ReplaySubject<ApplicationInfo[]>(1)
+        this.getInstallManifest$()
+            .pipe(
+                mergeMap((manifest) => {
+                    const client = new AssetsGateway.AssetsGatewayClient().cdn
+                    console.log('Installed Applications', manifest.applications)
+                    if (manifest.applications.length == 0) {
+                        return of([])
+                    }
+                    return forkJoin(
+                        manifest.applications.map((cdnPackage) => {
+                            return client
+                                .getResource$({
+                                    libraryId: btoa(cdnPackage),
+                                    version: 'latest',
+                                    restOfPath: '.yw_metadata.json',
+                                })
+                                .pipe(
+                                    map((resp: any) => {
+                                        return {
+                                            ...resp,
+                                            cdnPackage,
+                                        } as unknown as ApplicationInfo
+                                    }),
+                                )
+                        }),
+                    )
+                }),
+            )
+            .subscribe((d) => {
+                Installer.applicationsInfo$.next(d)
+            })
+        return Installer.applicationsInfo$
     }
 
     constructor(
