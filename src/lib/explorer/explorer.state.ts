@@ -184,7 +184,7 @@ export class ExplorerState {
 
                         const node = new ItemNode({
                             ...response,
-                            kind: 'flux-project',
+                            kind: response.kind,
                         })
                         try {
                             tree.addChild(response.folderId, node)
