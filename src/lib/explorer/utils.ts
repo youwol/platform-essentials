@@ -215,11 +215,6 @@ export function popupAssetCardView(node: AnyItemNode) {
             asset: node as unknown as AssetsBackend.GetAssetResponse,
         }),
     }
-    if (node.kind == 'flux-project') {
-        withTabs['Dependencies'] = new FluxDependenciesView({
-            asset: node as unknown as AssetsGateway.Asset,
-        })
-    }
     if (node.kind == 'package') {
         withTabs['Package Info'] = new PackageInfoView({
             asset: node as unknown as AssetsGateway.Asset,
@@ -235,9 +230,6 @@ export function popupAssetCardView(node: AnyItemNode) {
         .subscribe((asset) => {
             const assetUpdate$ = popupAssetModalView({
                 asset,
-                actionsFactory: (targetAsset) => {
-                    return new AssetActionsView({ asset: targetAsset })
-                },
                 withTabs,
             })
             assetUpdate$

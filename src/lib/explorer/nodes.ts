@@ -167,13 +167,11 @@ export function instanceOfStandardFolder(folder: BrowserNode) {
     )
 }
 
-export type ItemKind = 'data' | 'story' | 'flux-project' | 'package'
+export type ItemKind = string
 
 export class ItemNode<T extends ItemKind> extends BrowserNode {
     static iconsFactory: Record<ItemKind, string> = {
         data: 'fas fa-database',
-        story: 'fas fa-book',
-        'flux-project': 'fas fa-play',
         package: 'fas fa-box',
     }
     id: string
@@ -206,8 +204,6 @@ export class ItemNode<T extends ItemKind> extends BrowserNode {
 }
 
 export type DataNode = ItemNode<'data'>
-export type FluxProjectNode = ItemNode<'flux-project'>
-export type StoryNode = ItemNode<'story'>
 export type AnyItemNode = ItemNode<ItemKind>
 
 export class FutureNode extends BrowserNode {
