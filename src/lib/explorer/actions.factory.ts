@@ -30,8 +30,8 @@ import {
     evaluateMatch,
     evaluateParameters,
     openingApps$,
+    getFavoritesSingleton,
 } from '../core'
-import { Favorites } from '../core/favorites'
 
 export type Section =
     | 'Modify'
@@ -391,14 +391,14 @@ export const GENERIC_ACTIONS: { [k: string]: ActionConstructor } = {
         section: 'Disposition',
         authorized: true,
         applicable: () => {
-            const favorites = Favorites.latest.folders$
+            const favorites = getFavoritesSingleton().latest.folders$
             return (
                 node instanceof FolderNode &&
                 favorites.find((f) => f.id == node.id) == undefined
             )
         },
         exe: () => {
-            Favorites.toggleFavoriteFolder(node.id)
+            getFavoritesSingleton().toggleFavoriteFolder(node.id)
         },
     }),
     unFavoriteFolder: (state: ExplorerState, node: BrowserNode) => ({
@@ -408,15 +408,14 @@ export const GENERIC_ACTIONS: { [k: string]: ActionConstructor } = {
         section: 'Disposition',
         authorized: true,
         applicable: () => {
-            const favorites = Favorites.latest.folders$
-            console.log('latestFolders', favorites)
+            const favorites = getFavoritesSingleton().latest.folders$
             return (
                 node instanceof FolderNode &&
                 favorites.find((f) => f.id == node.id) != undefined
             )
         },
         exe: () => {
-            Favorites.toggleFavoriteFolder(node.id)
+            getFavoritesSingleton().toggleFavoriteFolder(node.id)
         },
     }),
     favoriteDesktopItem: (state: ExplorerState, node: BrowserNode) => ({
@@ -426,14 +425,14 @@ export const GENERIC_ACTIONS: { [k: string]: ActionConstructor } = {
         section: 'Disposition',
         authorized: true,
         applicable: () => {
-            const favorites = Favorites.latest.desktopItems$
+            const favorites = getFavoritesSingleton().latest.desktopItems$
             return (
                 node instanceof ItemNode &&
                 favorites.find((i) => i.id == node.id) == undefined
             )
         },
         exe: () => {
-            Favorites.toggleFavoriteItem(node.id)
+            getFavoritesSingleton().toggleFavoriteItem(node.id)
         },
     }),
     unFavoriteDesktopItem: (state: ExplorerState, node: BrowserNode) => ({
@@ -443,14 +442,14 @@ export const GENERIC_ACTIONS: { [k: string]: ActionConstructor } = {
         section: 'Disposition',
         authorized: true,
         applicable: () => {
-            const favorites = Favorites.latest.desktopItems$
+            const favorites = getFavoritesSingleton().latest.desktopItems$
             return (
                 node instanceof ItemNode &&
                 favorites.find((i) => i.id == node.id) != undefined
             )
         },
         exe: () => {
-            Favorites.toggleFavoriteItem(node.id)
+            getFavoritesSingleton().toggleFavoriteItem(node.id)
         },
     }),
 }

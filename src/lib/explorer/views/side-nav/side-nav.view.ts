@@ -3,7 +3,7 @@ import { GroupsTab, GroupTab, MySpaceTab } from './side-nav-tabs.view'
 import { BehaviorSubject } from 'rxjs'
 import { map, shareReplay } from 'rxjs/operators'
 import { ExplorerState } from '../../explorer.state'
-import { Favorites } from '../../../core'
+import { getFavoritesSingleton } from '../../../core'
 
 export class SideNavState extends DockableTabs.State {
     public readonly explorerState: ExplorerState
@@ -20,25 +20,27 @@ export class SideNavState extends DockableTabs.State {
             selectedTab$: selectedTabGroup$,
         })
 
-        const tabs$ = Favorites.getGroups$().pipe(
-            map((groups) => {
-                return [
-                    userDriveTab,
-                    ...groups.map((group) => {
-                        if (!groupTabsCached[group.id]) {
-                            groupTabsCached[group.id] = new GroupTab({
-                                state: this.explorerState,
-                                group,
-                                selectedTab$: selectedTabGroup$,
-                            })
-                        }
-                        return groupTabsCached[group.id]
-                    }),
-                    groupsTab,
-                ]
-            }),
-            shareReplay({ bufferSize: 1, refCount: true }),
-        )
+        const tabs$ = getFavoritesSingleton()
+            .getGroups$()
+            .pipe(
+                map((groups) => {
+                    return [
+                        userDriveTab,
+                        ...groups.map((group) => {
+                            if (!groupTabsCached[group.id]) {
+                                groupTabsCached[group.id] = new GroupTab({
+                                    state: this.explorerState,
+                                    group,
+                                    selectedTab$: selectedTabGroup$,
+                                })
+                            }
+                            return groupTabsCached[group.id]
+                        }),
+                        groupsTab,
+                    ]
+                }),
+                shareReplay({ bufferSize: 1, refCount: true }),
+            )
 
         super({
             disposition: 'left',

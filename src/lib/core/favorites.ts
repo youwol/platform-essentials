@@ -33,6 +33,31 @@ export interface GetGroupResponse {
 type GetFolderResponse = TreedbBackend.GetFolderResponse
 type GetEntityResponse = TreedbBackend.GetEntityResponse
 
+export function getFavoritesSingleton(): IFavorites {
+    return parent['@youwol/platform-essentials'].Core.Favorites != Favorites
+        ? parent['@youwol/platform-essentials'].Core.getFavoritesSingleton()
+        : Favorites
+}
+
+export interface IFavorites {
+    latest: {
+        folders$: FavoriteFolder[]
+        groups$: FavoriteGroup[]
+        desktopItems$: FavoriteDesktopItem[]
+    }
+
+    getFolders$(): ReplaySubject<GetFolderResponse[]>
+    getGroups$(): ReplaySubject<GetGroupResponse[]>
+    getDesktopItems$(): ReplaySubject<GetEntityResponse[]>
+
+    toggleFavoriteFolder(folderId: string)
+    toggleFavoriteGroup(id: string)
+    toggleFavoriteItem(treeId: string)
+
+    refresh(modifiedId: string)
+    remove(deletedId: string)
+}
+
 export class Favorites {
     static initialFavorites$: Observable<{
         favoriteGroups: FavoriteGroup[]

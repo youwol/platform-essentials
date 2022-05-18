@@ -19,7 +19,11 @@ import {
     RegularFolderNode,
     TreeGroup,
 } from '../..'
-import { Favorite, Favorites, GetGroupResponse } from '../../../core'
+import {
+    Favorite,
+    getFavoritesSingleton,
+    GetGroupResponse,
+} from '../../../core'
 
 const leftNavClasses = 'fv-bg-background fv-x-lighter h-100 overflow-auto'
 const leftNavStyle = {
@@ -159,7 +163,7 @@ export class GroupView implements VirtualDOM {
     }) {
         Object.assign(this, params)
         this.children = [
-            child$(Favorites.getFolders$(), (favoritesFolder) => {
+            child$(getFavoritesSingleton().getFolders$(), (favoritesFolder) => {
                 return new FavoritesView({
                     explorerState: this.explorerState,
                     favoritesFolder: favoritesFolder.filter(
@@ -302,7 +306,7 @@ export class GroupPinBtn implements VirtualDOM {
     public readonly groupId: string
 
     public readonly onclick = () => {
-        Favorites.toggleFavoriteGroup(this.groupId)
+        getFavoritesSingleton().toggleFavoriteGroup(this.groupId)
     }
     constructor(params: { explorerState: ExplorerState; groupId: string }) {
         Object.assign(this, params)
@@ -312,14 +316,16 @@ export class GroupPinBtn implements VirtualDOM {
         this.children = [
             {
                 class: attr$(
-                    Favorites.getGroups$().pipe(
-                        map(
-                            (groups: Favorite[]) =>
-                                groups.find(
-                                    (group) => group.id == this.groupId,
-                                ) != undefined,
+                    getFavoritesSingleton()
+                        .getGroups$()
+                        .pipe(
+                            map(
+                                (groups: Favorite[]) =>
+                                    groups.find(
+                                        (group) => group.id == this.groupId,
+                                    ) != undefined,
+                            ),
                         ),
-                    ),
                     (activated): string => (activated ? 'fv-text-focus' : ''),
                     { wrapper: (d) => `${d} ${baseClass}` },
                 ),
