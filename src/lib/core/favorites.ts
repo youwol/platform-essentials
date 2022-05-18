@@ -159,7 +159,7 @@ export class Favorites {
                     this.toggleFavoriteFolder(deletedId)
                 }
                 if (items.find((i) => getId('desktopItems$', i) == deletedId)) {
-                    this.toggleFavoriteItem(deletedId)
+                    this.toggleFavoriteDesktopItem(deletedId)
                 }
             })
     }
@@ -172,7 +172,7 @@ export class Favorites {
         Favorites.toggleFavorites('groups$', { id })
     }
 
-    static toggleFavoriteItem(treeId: string) {
+    static toggleFavoriteDesktopItem(treeId: string) {
         Favorites.toggleFavorites('desktopItems$', { id: treeId })
     }
 
