@@ -23,7 +23,7 @@ import {
     RegularFolderNode,
     TrashNode,
 } from './nodes'
-import { popupAssetCardView } from './utils'
+
 import { isLocalYouwol } from '../core/requests-executot'
 import {
     Installer,
@@ -356,17 +356,6 @@ export const GENERIC_ACTIONS: { [k: string]: ActionConstructor } = {
         applicable: () => node instanceof FolderNode,
         exe: () => {
             state.refresh(node as AnyFolderNode)
-        },
-    }),
-    info: (state: ExplorerState, node: BrowserNode) => ({
-        sourceEventNode: node,
-        icon: 'fas fa-info-circle',
-        name: 'info',
-        section: 'Info',
-        authorized: true,
-        applicable: () => node instanceof ItemNode,
-        exe: () => {
-            popupAssetCardView(node as AnyItemNode)
         },
     }),
     copyFileId: (state: ExplorerState, node: DataNode) => ({

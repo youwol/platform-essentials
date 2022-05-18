@@ -11,14 +11,6 @@ import {
     RegularFolderNode,
 } from './nodes'
 
-import {
-    AssetPermissionsView,
-    PackageInfoView,
-    popupAssetModalView,
-} from '../assets'
-import { AssetsBackend, AssetsGateway } from '@youwol/http-clients'
-import { distinct, map, mergeMap, take } from 'rxjs/operators'
-import { of } from 'rxjs'
 import { RequestsExecutor } from '../core'
 import { applyUpdate } from './db-actions-factory'
 
@@ -201,39 +193,4 @@ export function processMoveFolder(
         request: RequestsExecutor.move(nodeSelected, destination),
     })
     treeDestination.addChild(destination.id, childNode)
-}
-
-export function popupAssetCardView(node: AnyItemNode) {
-    const withTabs = {
-        Permissions: new AssetPermissionsView({
-            asset: node as unknown as AssetsBackend.GetAssetResponse,
-        }),
-    }
-    if (node.kind == 'package') {
-        withTabs['Package Info'] = new PackageInfoView({
-            asset: node as unknown as AssetsGateway.Asset,
-        })
-    }
-    of(node)
-        .pipe(
-            mergeMap(({ assetId }) => {
-                return RequestsExecutor.getAsset(assetId)
-            }),
-            take(1),
-        )
-        .subscribe((asset) => {
-            const assetUpdate$ = popupAssetModalView({
-                asset,
-                withTabs,
-            })
-            assetUpdate$
-                .pipe(
-                    map(({ name }) => name),
-                    distinct(),
-                )
-                .subscribe(() => {
-                    console.warn('Asset may need rename')
-                    //this.state.rename(this.node, name, false)
-                })
-        })
 }
