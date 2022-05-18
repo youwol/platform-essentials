@@ -132,14 +132,27 @@ export function evaluateParameters(
     }, {})
 }
 
+export function getEnvironmentSingleton(): IEnvironment {
+    return parent['@youwol/platform-essentials'].Core.Environment != Environment
+        ? parent['@youwol/platform-essentials'].Core.getEnvironmentSingleton()
+        : Environment
+}
+
+export class IEnvironment {
+    installManifest$: ReplaySubject<Manifest>
+    applicationsInfo$: ReplaySubject<ApplicationInfo[]>
+}
+
+export class Environment {
+    static installManifest$: ReplaySubject<Manifest>
+    static applicationsInfo$: ReplaySubject<ApplicationInfo[]>
+}
+
 export class Installer {
     public readonly libraryManifests = new Set<string>()
     public readonly generatorManifests = new Set<TInstaller>()
     public readonly resolvedManifests = new Set<Manifest>()
     public readonly cdnClient = cdnClient
-
-    static installManifest$: ReplaySubject<Manifest>
-    static applicationsInfo$: ReplaySubject<ApplicationInfo[]>
 
     static defaultInstallJsScript = `
 async function install(installer){
@@ -165,10 +178,11 @@ return install
     }
 
     static getInstallManifest$() {
-        if (Installer.installManifest$) {
-            return Installer.installManifest$
+        if (getEnvironmentSingleton().installManifest$) {
+            return getEnvironmentSingleton().installManifest$
         }
-        Installer.installManifest$ = new ReplaySubject<Manifest>(1)
+        getEnvironmentSingleton().installManifest$ =
+            new ReplaySubject<Manifest>(1)
 
         RequestsExecutor.getInstallerScript()
             .pipe(
@@ -184,16 +198,18 @@ return install
             )
             .subscribe((manifest: Manifest) => {
                 console.log('Manifest install', manifest)
-                Installer.installManifest$.next(manifest)
+                getEnvironmentSingleton().installManifest$.next(manifest)
             })
-        return Installer.installManifest$
+        return getEnvironmentSingleton().installManifest$
     }
 
     static getApplicationsInfo$() {
-        if (Installer.applicationsInfo$) {
-            return Installer.applicationsInfo$
+        if (getEnvironmentSingleton().applicationsInfo$) {
+            return getEnvironmentSingleton().applicationsInfo$
         }
-        Installer.applicationsInfo$ = new ReplaySubject<ApplicationInfo[]>(1)
+        getEnvironmentSingleton().applicationsInfo$ = new ReplaySubject<
+            ApplicationInfo[]
+        >(1)
         this.getInstallManifest$()
             .pipe(
                 mergeMap((manifest) => {
@@ -223,9 +239,9 @@ return install
                 }),
             )
             .subscribe((d) => {
-                Installer.applicationsInfo$.next(d)
+                getEnvironmentSingleton().applicationsInfo$.next(d)
             })
-        return Installer.applicationsInfo$
+        return getEnvironmentSingleton().applicationsInfo$
     }
 
     constructor(
