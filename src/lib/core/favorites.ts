@@ -1,4 +1,11 @@
-import { combineLatest, forkJoin, Observable, of, ReplaySubject } from 'rxjs'
+import {
+    combineLatest,
+    forkJoin,
+    Observable,
+    of,
+    ReplaySubject,
+    Subject,
+} from 'rxjs'
 import { RequestsExecutor } from './requests-executot'
 import { map, mergeMap, shareReplay, take, tap } from 'rxjs/operators'
 import {
@@ -105,8 +112,22 @@ export class Favorites {
     }
 
     static refresh(modifiedId: string) {
-        function filter<T>(target: Target, array: T[]): T[] {
-            return array.filter((f) => getId(target, f) != modifiedId)
+        function updateIfNeeded<TResp>(
+            target: Target,
+            elements: TResp[],
+            getFunction$: () => Subject<TResp[]>,
+        ) {
+            if (!elements.find((g) => getId(target, g) == modifiedId)) {
+                return
+            }
+            getFavoriteResponse$<TResp>(target, modifiedId).subscribe(
+                (group) => {
+                    const filtered = elements.filter(
+                        (f) => getId(target, f) != modifiedId,
+                    )
+                    getFunction$().next(filtered.concat(group))
+                },
+            )
         }
         combineLatest([
             Favorites.getGroups$(),
@@ -115,32 +136,21 @@ export class Favorites {
         ])
             .pipe(take(1))
             .subscribe(([groups, folders, items]) => {
-                if (groups.map((g) => g.id).includes(modifiedId)) {
-                    Favorites.getGroups$().next(groups)
-                }
-                if (folders.find((f) => f.folderId == modifiedId)) {
-                    getFavoriteResponse$<GetFolderResponse>(
-                        'folders$',
-                        modifiedId,
-                    ).subscribe((folder) => {
-                        Favorites.getFolders$().next(
-                            filter('folders$', folders).concat(folder),
-                        )
-                    })
-                }
-                if (
-                    items.find((i) => getId('desktopItems$', i) == modifiedId)
-                ) {
-                    getFavoriteResponse$<GetEntityResponse>(
-                        'desktopItems$',
-                        modifiedId,
-                    ).subscribe((item: GetEntityResponse) => {
-                        Favorites.getDesktopItems$().next(
-                            filter('desktopItems$', items).concat(item),
-                        )
-                    })
-                    Favorites.getDesktopItems$().next(items)
-                }
+                updateIfNeeded<GetGroupResponse>(
+                    'groups$',
+                    groups,
+                    Favorites.getGroups$,
+                )
+                updateIfNeeded<GetFolderResponse>(
+                    'folders$',
+                    folders,
+                    Favorites.getFolders$,
+                )
+                updateIfNeeded<GetEntityResponse>(
+                    'desktopItems$',
+                    items,
+                    Favorites.getDesktopItems$,
+                )
             })
     }
 
