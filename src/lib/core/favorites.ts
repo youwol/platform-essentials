@@ -19,7 +19,10 @@ export interface FavoriteDesktopItem extends Favorite {
 type Target = 'groups$' | 'folders$' | 'desktopItems$'
 type TargetBody = 'favoriteGroups' | 'favoriteFolders' | 'favoriteDesktopItems'
 
-type GetGroupResponse = FavoriteGroup
+export interface GetGroupResponse {
+    id: string
+    path: string
+}
 type GetFolderResponse = TreedbBackend.GetFolderResponse
 type GetEntityResponse = TreedbBackend.GetEntityResponse
 
@@ -260,7 +263,7 @@ function getFavoriteResponse$<T>(target: Target, id: string): Observable<T> {
                 .getFolder$({ folderId: id })
                 .pipe(raiseHTTPErrors()) as Observable<T>
         case 'groups$':
-            return of({ id } as unknown) as Observable<T>
+            return of({ id, path: atob(id) } as unknown) as Observable<T>
     }
     return of(undefined)
 }
