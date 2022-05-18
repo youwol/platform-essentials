@@ -8,16 +8,14 @@ import { YouwolMenuView } from './youwol-menu.view'
 import { PlatformSettingsStore } from '../core/platform-settings'
 
 export class YouwolBannerState {
-    static signedIn$ = new AssetsGateway.AssetsGatewayClient()
-        .getHealthz$()
-        .pipe(
-            map(
-                (resp) =>
-                    !(resp instanceof HTTPError) &&
-                    resp.status == 'assets-gateway ok',
-            ),
-            shareReplay(1),
-        )
+    static signedIn$ = new AssetsGateway.Client().getHealthz$().pipe(
+        map(
+            (resp) =>
+                !(resp instanceof HTTPError) &&
+                resp.status == 'assets-gateway ok',
+        ),
+        shareReplay(1),
+    )
 
     constructor(params = {}) {
         Object.assign(this, params)

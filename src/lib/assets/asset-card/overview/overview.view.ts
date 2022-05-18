@@ -31,8 +31,7 @@ export class AssetOverview implements VirtualDOM {
 
     public readonly assetOutput$: Subject<AssetsBackend.GetAssetResponse>
 
-    public readonly assetsClient = new AssetsGateway.AssetsGatewayClient()
-        .assets
+    public readonly assetsClient = new AssetsGateway.Client().assets
     public readonly click$ = new Subject<MouseEvent>()
     public readonly onclick = (event) => {
         this.click$.next(event)

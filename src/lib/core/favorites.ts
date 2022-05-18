@@ -249,7 +249,7 @@ export class Favorites {
 }
 
 function getFavoriteResponse$<T>(target: Target, id: string): Observable<T> {
-    const client = new AssetsGateway.AssetsGatewayClient().treedb
+    const client = new AssetsGateway.Client().treedb
     switch (target) {
         case 'desktopItems$':
             return client

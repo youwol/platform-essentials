@@ -21,7 +21,7 @@ export class DataState {
         const progress$ = new ReplaySubject<RequestEvent>(1)
         const response$ = new ReplaySubject<NewAssetResponse>(1)
 
-        const client = new AssetsGateway.AssetsGatewayClient().files
+        const client = new AssetsGateway.Client().files
         client
             .upload$({
                 body: { fileName: file.name, content: file },

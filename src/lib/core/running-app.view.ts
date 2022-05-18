@@ -55,7 +55,7 @@ export class RunningApp implements Executable {
         parameters?: { [key: string]: string }
     }) {
         Object.assign(this, params)
-        new AssetsGateway.AssetsGatewayClient().cdn
+        new AssetsGateway.Client().cdn
             .getResource$<ApplicationInfo>({
                 libraryId: btoa(this.cdnPackage),
                 version: 'latest',

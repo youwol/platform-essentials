@@ -13,7 +13,7 @@ export class ExposedGroupState {
     public readonly groupId: string
     public readonly groupAccess$: BehaviorSubject<AssetsBackend.ExposingGroup>
     public readonly loading$ = new BehaviorSubject<boolean>(false)
-    public readonly client = new AssetsGateway.AssetsGatewayClient().assets
+    public readonly client = new AssetsGateway.Client().assets
 
     constructor(
         public readonly assetId: string,
@@ -42,7 +42,7 @@ export class ExposedGroupState {
 
     refresh() {
         this.loading$.next(true)
-        new AssetsGateway.AssetsGatewayClient().assetsDeprecated
+        new AssetsGateway.Client().assetsDeprecated
             .getAccess$(this.assetId)
             .pipe(raiseHTTPErrors())
             .subscribe((info) => {

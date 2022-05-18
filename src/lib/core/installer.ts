@@ -197,7 +197,7 @@ return install
         this.getInstallManifest$()
             .pipe(
                 mergeMap((manifest) => {
-                    const client = new AssetsGateway.AssetsGatewayClient().cdn
+                    const client = new AssetsGateway.Client().cdn
                     console.log('Installed Applications', manifest.applications)
                     if (manifest.applications.length == 0) {
                         return of([])

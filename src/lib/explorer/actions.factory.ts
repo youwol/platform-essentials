@@ -88,7 +88,7 @@ function fetchItemPermissions$(node: AnyItemNode) {
             share: false,
         })
     }
-    return new Gtw.AssetsGatewayClient().assets
+    return new Gtw.Client().assets
         .getPermissions$({
             assetId: node.assetId,
         })
@@ -508,7 +508,7 @@ export function getActions$(
                     node,
                     explorer: state,
                     cdnClient,
-                    assetsGtwClient: new AssetsGateway.AssetsGatewayClient(),
+                    assetsGtwClient: new AssetsGateway.Client(),
                 })
                 .map((action) => {
                     return {

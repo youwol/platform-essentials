@@ -15,7 +15,7 @@ export class ExplorerState {
     public readonly items$: Observable<CdnBackend.QueryExplorerResponse>
     public readonly selectedFolder$ = new BehaviorSubject<string>('')
 
-    public readonly client = new AssetsGateway.AssetsGatewayClient().cdn
+    public readonly client = new AssetsGateway.Client().cdn
 
     constructor(params: { asset: AssetsGateway.Asset; version: string }) {
         Object.assign(this, params)

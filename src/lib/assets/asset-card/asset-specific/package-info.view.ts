@@ -107,7 +107,7 @@ export class PackageInfoState {
     public readonly selectedLink$ = new BehaviorSubject<string>(
         PackageInfoState.nativeExplorerId,
     )
-    public readonly client = new AssetsGateway.AssetsGatewayClient().cdn
+    public readonly client = new AssetsGateway.Client().cdn
 
     constructor(params: { asset: Asset }) {
         Object.assign(this, params)

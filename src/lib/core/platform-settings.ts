@@ -66,7 +66,7 @@ export class PlatformSettingsStore {
         /*
         Called at least when the file is loaded, see below
          */
-        const sessionStorage = new CdnSessionsStorage.CdnSessionsStorageClient()
+        const sessionStorage = new CdnSessionsStorage.Client()
         sessionStorage
             .getData$({
                 packageName: AUTO_GENERATED.name,

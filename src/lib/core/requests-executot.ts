@@ -33,7 +33,7 @@ export function isLocalYouwol() {
 
 export class RequestsExecutor {
     static error$ = new Subject<HTTPError>()
-    static assetsGtwClient = new AssetsGateway.AssetsGatewayClient()
+    static assetsGtwClient = new AssetsGateway.Client()
 
     static renameFolder(folderId: string, newName: string) {
         return RequestsExecutor.assetsGtwClient.explorerDeprecated.folders.rename$(
@@ -150,7 +150,7 @@ export class RequestsExecutor {
     }
 
     static getPath(folderId: string) {
-        return new AssetsGateway.AssetsGatewayClient().treedb
+        return new AssetsGateway.Client().treedb
             .getPathFolder$({
                 folderId,
             })
@@ -295,7 +295,7 @@ export class RequestsExecutor {
         favoriteFolders: Favorite[]
         favoriteDesktopItems: Favorite[]
     }) {
-        return new CdnSessionsStorage.CdnSessionsStorageClient()
+        return new CdnSessionsStorage.Client()
             .postData$({
                 packageName: '@youwol/platform-essentials',
                 dataName: 'explorer',
@@ -309,7 +309,7 @@ export class RequestsExecutor {
     }
 
     static getFavorites() {
-        return new CdnSessionsStorage.CdnSessionsStorageClient()
+        return new CdnSessionsStorage.Client()
             .getData$({
                 packageName: '@youwol/platform-essentials',
                 dataName: 'explorer',
@@ -338,7 +338,7 @@ export class RequestsExecutor {
         tsSrc: string
         jsSrc: string
     }) {
-        return new CdnSessionsStorage.CdnSessionsStorageClient()
+        return new CdnSessionsStorage.Client()
             .postData$({
                 packageName: '@youwol/platform-essentials',
                 dataName: 'explorerSettings',
@@ -348,7 +348,7 @@ export class RequestsExecutor {
     }
 
     static getInstallerScript(): Observable<{ tsSrc: string; jsSrc: string }> {
-        return new CdnSessionsStorage.CdnSessionsStorageClient()
+        return new CdnSessionsStorage.Client()
             .getData$({
                 packageName: '@youwol/platform-essentials',
                 dataName: 'explorerSettings',
