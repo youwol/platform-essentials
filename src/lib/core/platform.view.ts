@@ -19,6 +19,7 @@ import {
 import { Favorites } from './favorites'
 import { TreedbBackend } from '@youwol/http-clients'
 import { AnyItemNode, ItemNode } from '../explorer'
+import { BehaviorSubject } from 'rxjs'
 
 export class PlatformView implements VirtualDOM {
     public readonly class = 'h-100 w-100 d-flex flex-column fv-text-primary'
@@ -113,24 +114,44 @@ export class DesktopFavoritesView implements VirtualDOM {
 export class DesktopFavoriteView implements VirtualDOM {
     public readonly class =
         'rounded p-2 d-flex flex-column align-items-center fv-pointer fv-hover-border-focus'
-    public readonly style = {
+    public readonly baseStyle = {
         width: 'fit-content',
         height: 'fit-content',
-        backgroundColor: 'rgba(0,0,0,0.5)',
     }
+    public readonly style: Stream$<boolean, { [k: string]: string }>
     public readonly itemNode: AnyItemNode
     public readonly entityResponse: TreedbBackend.GetEntityResponse
     public readonly children: VirtualDOM[]
     public readonly defaultOpeningApp$
+    public readonly hovered$ = new BehaviorSubject(false)
     public readonly ondblclick = () => {
         tryOpenWithDefault$(this.itemNode).subscribe()
     }
+
+    public readonly onmouseenter = () => {
+        this.hovered$.next(true)
+    }
+    public readonly onmouseleave = () => {
+        this.hovered$.next(false)
+    }
+
     constructor(params: { entityResponse: TreedbBackend.GetEntityResponse }) {
         Object.assign(this, params)
         const itemResponse = this.entityResponse
             .entity as TreedbBackend.GetItemResponse
         this.itemNode = ItemNode.fromTreedbResponse(itemResponse)
         this.defaultOpeningApp$ = defaultOpeningApp$(this.itemNode)
+        this.style = attr$(
+            this.hovered$,
+            (hovered) => {
+                return hovered
+                    ? { backgroundColor: 'rgba(0,0,0,0.6)' }
+                    : { backgroundColor: 'rgba(0,0,0,0.4)' }
+            },
+            {
+                wrapper: (d) => ({ ...this.baseStyle, ...d }),
+            },
+        )
         this.children = [
             child$(
                 this.defaultOpeningApp$,
@@ -139,6 +160,17 @@ export class DesktopFavoriteView implements VirtualDOM {
                         return { class: 'fas fa-file fa-2x' }
                     }
                     return defaultResp.appInfo.graphics.appIcon
+                },
+                {
+                    untilFirst: {
+                        class: 'd-flex align-items-center position-relative',
+                        children: [
+                            { class: 'fas fa-file fa-2x' },
+                            {
+                                class: 'fas fa-spinner w-100 fa-spin fv-text-secondary text-center position-absolute',
+                            },
+                        ],
+                    },
                 },
             ),
             {
