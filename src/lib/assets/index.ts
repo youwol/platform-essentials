@@ -7,5 +7,4 @@
  */
 export { AssetSnippetView } from './asset-snippet.view'
 export { AssetsListView } from './assets-list.view'
-export { popupAssetModalView } from './asset-modal.view'
 export * from './asset-card'
