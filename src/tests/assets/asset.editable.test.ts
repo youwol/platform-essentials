@@ -5,11 +5,7 @@ import '../mock-requests'
 import { render } from '@youwol/flux-view'
 import { Subject } from 'rxjs'
 import { take } from 'rxjs/operators'
-import {
-    AssetCardView,
-    AssetOverview,
-    AssetPermissionsView,
-} from '../../lib/assets'
+import { AssetOverview, AssetPermissionsView } from '../../lib/assets'
 import { AssetCardTabs } from '../../lib/assets/asset-card/asset-card.view'
 import {
     GroupsPermissionsView,
@@ -29,6 +25,11 @@ beforeAll((done) => {
             done()
         })
 })
+
+class AssetCardView {
+    static ClassSelector
+    constructor(p) {}
+}
 
 test('create asset card view', (done) => {
     const assetOutput$ = new Subject<AssetsGateway.Asset>()

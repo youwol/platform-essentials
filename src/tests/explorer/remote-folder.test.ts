@@ -26,7 +26,7 @@ import { RequestsExecutor } from '../../lib/core'
 jest.setTimeout(20 * 1000)
 
 beforeEach((done) => {
-    const youwolClient = new PyYouwol.PyYouwolClient()
+    const youwolClient = new PyYouwol.Client()
     resetPyYouwolDbs$()
         .pipe(
             mergeMap((defaultDrive) => {

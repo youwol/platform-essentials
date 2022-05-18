@@ -10,7 +10,6 @@ import {
     take,
     tap,
 } from 'rxjs/operators'
-import { AssetCardView } from '../../lib/assets'
 
 import { OpenFolder } from '../../lib/explorer/explorer.state'
 import {
@@ -39,6 +38,14 @@ import { expectAttributes, getFromDocument, queryFromDocument } from '../common'
 import { raiseHTTPErrors } from '@youwol/http-clients'
 
 export class NoContext {}
+
+export class AssetCardView {
+    asset: any
+    withTabs: any
+
+    static ClassSelector
+    constructor(p) {}
+}
 
 export class Shell<T = NoContext> {
     folder: AnyFolderNode | DriveNode | GroupNode

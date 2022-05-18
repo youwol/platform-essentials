@@ -7,8 +7,8 @@ export function getPyYouwolBasePath() {
 }
 
 export function resetPyYouwolDbs$() {
-    const youwol = new PyYouwol.PyYouwolClient()
-    const gtw = new AssetsGateway.AssetsGatewayClient()
+    const youwol = new PyYouwol.Client()
+    const gtw = new AssetsGateway.Client()
     return youwol.admin.environment
         .login$({ body: { email: 'int_tests_yw-users@test-user' } })
         .pipe(
@@ -29,7 +29,7 @@ export function resetPyYouwolDbs$() {
 export function createStory(
     title: string,
 ): (src: Observable<unknown>) => Observable<AssetsGateway.Asset> {
-    const client = new AssetsGateway.AssetsGatewayClient()
+    const client = new AssetsGateway.Client()
     return (source$: Observable<unknown>) => {
         return source$.pipe(
             mergeMap(() => client.explorerDeprecated.getDefaultUserDrive$()),

@@ -12,7 +12,7 @@ import {
 } from 'rxjs/operators'
 import { readFileSync } from 'fs'
 import path from 'path'
-import { AssetCardView } from '../../lib/assets'
+
 import { render, VirtualDOM } from '@youwol/flux-view'
 import { getFromDocument, queryFromDocument } from '../common'
 import {
@@ -24,6 +24,14 @@ import {
     FolderView,
     PathElementView,
 } from '../../lib/assets/asset-card/asset-specific/package-explorer.view'
+
+export class AssetCardView {
+    asset: any
+    withTabs: any
+
+    static ClassSelector
+    constructor(p) {}
+}
 
 export class Shell {
     public readonly defaultUserDrive: AssetsGateway.DefaultDriveResponse
@@ -43,7 +51,7 @@ export class Shell {
 }
 
 export function shell$() {
-    const assetsGtw = new AssetsGateway.AssetsGatewayClient()
+    const assetsGtw = new AssetsGateway.Client()
 
     return assetsGtw.explorerDeprecated.getDefaultUserDrive$().pipe(
         raiseHTTPErrors(),
