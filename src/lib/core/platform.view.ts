@@ -120,7 +120,7 @@ export class DesktopFavoritesView implements VirtualDOM {
 
 export class DesktopFavoriteView implements VirtualDOM {
     public readonly class =
-        'rounded p-2 d-flex flex-column align-items-center fv-pointer fv-hover-border-focus'
+        'rounded p-2 d-flex flex-column align-items-center fv-pointer fv-hover-border-focus m-2'
     public readonly baseStyle = {
         width: 'fit-content',
         height: 'fit-content',
