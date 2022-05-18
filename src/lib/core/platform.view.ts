@@ -52,9 +52,7 @@ export class PlatformView implements VirtualDOM {
                 class: 'd-flex align-items-center h-100 w-100',
                 children: [
                     new RunningAppView({ state: this.state }),
-                    child$(this.state.runningApplication$, (runningApp) => {
-                        return runningApp ? {} : new DesktopFavoritesView()
-                    }),
+                    new DesktopFavoritesView({ state: this.state }),
                 ],
             },
         ]
@@ -92,13 +90,22 @@ export class RunningAppView implements VirtualDOM {
 }
 
 export class DesktopFavoritesView implements VirtualDOM {
-    public readonly class = 'w-100 h-100 p-2'
+    public readonly class: Stream$<RunningApp, string>
     public readonly children: VirtualDOM[]
+    public readonly state: PlatformState
 
-    constructor() {
+    constructor(params: { state: PlatformState }) {
+        Object.assign(this, params)
+        this.class = attr$(
+            this.state.runningApplication$,
+            (runningApp): string => (runningApp ? 'd-none' : 'd-flex'),
+            {
+                wrapper: (d) => `w-100 h-100 p-2 ${d}`,
+            },
+        )
         this.children = [
             {
-                class: 'w-100 h-100 d-flex flex-wrap',
+                class: `w-100 h-100 d-flex flex-wrap`,
                 children: children$(Favorites.getDesktopItems$(), (items) => {
                     return items.map((item) => {
                         return new DesktopFavoriteView({
