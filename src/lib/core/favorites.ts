@@ -52,7 +52,7 @@ export interface IFavorites {
 
     toggleFavoriteFolder(folderId: string)
     toggleFavoriteGroup(id: string)
-    toggleFavoriteItem(treeId: string)
+    toggleFavoriteDesktopItem(treeId: string)
 
     refresh(modifiedId: string)
     remove(deletedId: string)
