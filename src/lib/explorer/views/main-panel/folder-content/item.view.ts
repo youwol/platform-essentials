@@ -1,15 +1,8 @@
 import { attr$, child$, Stream$, VirtualDOM } from '@youwol/flux-view'
 
-import { AssetsGateway } from '@youwol/http-clients'
-import { BehaviorSubject, merge, Observable, of } from 'rxjs'
-import { distinct, map, mergeMap, take } from 'rxjs/operators'
-import {
-    AssetActionsView,
-    AssetPermissionsView,
-    FluxDependenciesView,
-    PackageInfoView,
-    popupAssetModalView,
-} from '../../../../assets'
+import { BehaviorSubject, combineLatest, Observable } from 'rxjs'
+import { filter, map } from 'rxjs/operators'
+
 import { ywSpinnerView } from '../../../../misc-views/youwol-spinner.view'
 import { ExplorerState } from '../../../explorer.state'
 import {
@@ -19,7 +12,12 @@ import {
     ProgressNode,
     RegularFolderNode,
 } from '../../../nodes'
-import { RequestsExecutor } from '../../../requests-executor'
+import { installContextMenu } from '../../../context-menu/context-menu'
+import { defaultOpeningApp$, tryOpenWithDefault$ } from '../../../../core'
+import {
+    ApplicationInfo,
+    OpenWithParametrization,
+} from '../../../../core/environment'
 
 export class ProgressItemView {
     static ClassSelector = 'progress-item-view'
@@ -55,6 +53,7 @@ export class ProgressItemView {
                     {
                         style: attr$(
                             this.item.progress$.pipe(
+                                filter((progress) => progress.totalCount > 0),
                                 map((progress) =>
                                     Math.floor(
                                         (100 * progress.transferredCount) /
@@ -64,7 +63,7 @@ export class ProgressItemView {
                             ),
                             (progress) => ({
                                 backgroundColor: 'green',
-                                width: `${progress}`,
+                                width: `${progress}%`,
                                 height: '5px',
                             }),
                         ),
@@ -77,36 +76,68 @@ export class ProgressItemView {
 
 export class ItemView {
     static ClassSelector = 'item-view'
-    public readonly baseClasses = `${ItemView.ClassSelector} d-flex align-items-center p-1 rounded m-3 fv-hover-bg-background-alt fv-pointer`
-    public readonly class: Stream$<BrowserNode, string>
+    public readonly baseClasses = `${ItemView.ClassSelector} d-flex align-items-center p-1 rounded fv-hover-bg-background-alt fv-pointer`
+    public readonly class: Stream$<[BrowserNode, boolean], string>
     public readonly children: VirtualDOM[]
     public readonly style: Stream$<
         { type: string; id: string }[],
         { [key: string]: string }
     >
-    public readonly onclick: () => void
+    public readonly contextMenuSelection$ = new BehaviorSubject(false)
+    public readonly defaultOpeningApp$: Observable<
+        | {
+              appInfo: ApplicationInfo
+              parametrization: OpenWithParametrization
+          }
+        | undefined
+    >
+    public readonly onclick = (ev: PointerEvent) => {
+        this.state.selectItem(this.item)
+        ev.stopPropagation()
+    }
 
+    public readonly ondblclick = (ev: PointerEvent) => {
+        if (this.item instanceof ItemNode)
+            tryOpenWithDefault$(this.item).subscribe()
+        this.state.selectItem(this.item)
+        ev.stopPropagation()
+    }
     public readonly state: ExplorerState
     public readonly item: RegularFolderNode | AnyItemNode
-    public readonly hovered$: Observable<BrowserNode>
 
-    constructor(params: {
-        state: ExplorerState
-        item: BrowserNode
-        hovered$?: Observable<BrowserNode>
-    }) {
+    public readonly oncontextmenu = (ev) => {
+        ev.stopPropagation()
+    }
+
+    public readonly connectedCallback = (elem) => {
+        const view = installContextMenu({
+            state: this.state,
+            div: elem,
+            node: this.item,
+        })
+        view.state.event$
+            .pipe(filter((event) => event == 'displayed'))
+            .subscribe(() => this.contextMenuSelection$.next(true))
+        view.state.event$
+            .pipe(filter((event) => event == 'removed'))
+            .subscribe(() => this.contextMenuSelection$.next(false))
+    }
+
+    constructor(params: { state: ExplorerState; item: BrowserNode }) {
         Object.assign(this, params)
-
-        this.hovered$ = params.hovered$
-            ? merge(params.hovered$, this.state.selectedItem$)
-            : this.state.selectedItem$
-
+        this.defaultOpeningApp$ = defaultOpeningApp$(this.item as any)
         this.class = attr$(
-            this.state.selectedItem$,
-            (node) => {
+            combineLatest([
+                this.state.selectedItem$,
+                this.contextMenuSelection$,
+            ]),
+            ([node, rightClick]): string => {
+                const base = `${this.baseClasses} ${
+                    rightClick ? 'fv-bg-background-alt' : ''
+                }`
                 return node && node.id == this.item.id
-                    ? `${this.baseClasses} fv-text-focus`
-                    : `${this.baseClasses}`
+                    ? `${base} fv-text-focus`
+                    : `${base}`
             },
             { untilFirst: this.baseClasses },
         )
@@ -123,15 +154,33 @@ export class ItemView {
         )
 
         this.children = [
-            this.originView(this.item),
             {
-                class: `fas ${this.item.icon} mr-1`,
+                class: 'd-flex align-items-center flex-grow-1',
+                style: { minWidth: '0px' },
+                children: [
+                    child$(this.defaultOpeningApp$, (appData) => {
+                        return appData &&
+                            appData.appInfo.graphics &&
+                            appData.appInfo.graphics.fileIcon
+                            ? appData.appInfo.graphics.fileIcon
+                            : { class: `mr-1 fas ${this.item.icon}` }
+                    }),
+                    child$(this.item.status$, (statusList) =>
+                        statusList.find((s) => s.type == 'renaming')
+                            ? this.editView()
+                            : {
+                                  innerText: this.item.name,
+                                  class: 'mx-2',
+                                  style: {
+                                      textOverflow: 'ellipsis',
+                                      whiteSpace: 'nowrap',
+                                      overflow: 'hidden',
+                                  },
+                              },
+                    ),
+                ],
             },
-            child$(this.item.status$, (statusList) =>
-                statusList.find((s) => s.type == 'renaming')
-                    ? this.editView()
-                    : { innerText: this.item.name },
-            ),
+            this.originView(this.item),
             child$(this.item.status$, (status) => {
                 return status.find((s) => s.type == 'request-pending')
                     ? ywSpinnerView({
@@ -141,18 +190,12 @@ export class ItemView {
                       })
                     : {}
             }),
-            child$(this.hovered$, (node) => {
-                return this.infosView(node)
-            }),
         ]
     }
 
     originView(node: BrowserNode) {
         return {
-            class: 'd-flex flex-column align-items-center mx-1',
-            style: {
-                transform: 'scale(0.7)',
-            },
+            class: 'd-flex align-items-center ml-auto',
             children: [
                 this.item instanceof ItemNode && this.item.borrowed
                     ? { class: 'fas fa-link pr-1 py-1' }
@@ -165,16 +208,6 @@ export class ItemView {
                     : undefined,
             ],
         }
-    }
-
-    infosView(node: BrowserNode) {
-        if (!(node instanceof ItemNode)) {
-            return {}
-        }
-
-        return node.id == this.item.id
-            ? new InfoBtnView({ state: this.state, node: node })
-            : {}
     }
 
     editView() {
@@ -192,64 +225,5 @@ export class ItemView {
                 }
             },
         }
-    }
-}
-
-export class InfoBtnView implements VirtualDOM {
-    static ClassSelector = 'info-btn-view'
-
-    public readonly tag = 'button'
-    public readonly class = `${InfoBtnView.ClassSelector} fas fv-btn-secondary fa-info-circle fv-text-primary fv-pointer mx-4 rounded p-1`
-
-    public readonly node: AnyItemNode
-    public readonly asset$: Observable<AssetsGateway.Asset>
-    public readonly state: ExplorerState
-
-    public readonly popupDisplayed$ = new BehaviorSubject<boolean>(false)
-
-    public readonly onclick = () => {
-        const withTabs = {
-            Permissions: new AssetPermissionsView({
-                asset: this.node as unknown as AssetsGateway.Asset,
-            }),
-        }
-        if (this.node.kind == 'flux-project') {
-            withTabs['Dependencies'] = new FluxDependenciesView({
-                asset: this.node as unknown as AssetsGateway.Asset,
-            })
-        }
-        if (this.node.kind == 'package') {
-            withTabs['Package Info'] = new PackageInfoView({
-                asset: this.node as unknown as AssetsGateway.Asset,
-            })
-        }
-        this.asset$.pipe(take(1)).subscribe((asset) => {
-            const assetUpdate$ = popupAssetModalView({
-                asset,
-                actionsFactory: (targetAsset) => {
-                    return new AssetActionsView({ asset: targetAsset })
-                },
-                withTabs,
-            })
-            assetUpdate$
-                .pipe(
-                    map(({ name }) => name),
-                    distinct(),
-                )
-                .subscribe((name) => {
-                    this.state.rename(this.node, name, false)
-                })
-            this.popupDisplayed$.next(true)
-        })
-    }
-
-    constructor(params: { state: ExplorerState; node: AnyItemNode }) {
-        Object.assign(this, params)
-
-        this.asset$ = of(this.node).pipe(
-            mergeMap(({ assetId }) => {
-                return RequestsExecutor.getAsset(assetId)
-            }),
-        )
     }
 }

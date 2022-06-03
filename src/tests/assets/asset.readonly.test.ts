@@ -4,12 +4,15 @@
 import '../mock-requests'
 import { render } from '@youwol/flux-view'
 import { Subject } from 'rxjs'
-import { AssetCardView } from '../../lib/assets'
 import { AssetsGateway } from '@youwol/http-clients'
 import { createStory, getFromDocument, resetPyYouwolDbs$ } from '../common'
 
 let asset: AssetsGateway.Asset
 
+class AssetCardView {
+    static ClassSelector
+    constructor(p) {}
+}
 beforeAll((done) => {
     resetPyYouwolDbs$()
         .pipe(createStory('test'))
@@ -23,7 +26,6 @@ test('create asset card view', (done) => {
     const assetOutput$ = new Subject<AssetsGateway.Asset>()
     const view = new AssetCardView({
         asset,
-        actionsFactory: () => ({}),
         assetOutput$,
         forceReadonly: true,
     })

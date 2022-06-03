@@ -1,30 +1,39 @@
 import { child$, HTMLElement$, VirtualDOM } from '@youwol/flux-view'
 import { Select } from '@youwol/fv-input'
-import { AssetsGateway, raiseHTTPErrors } from '@youwol/http-clients'
+import {
+    AssetsBackend,
+    AssetsGateway,
+    raiseHTTPErrors,
+} from '@youwol/http-clients'
 import { BehaviorSubject, combineLatest, Subject } from 'rxjs'
 import { distinct, map, skip } from 'rxjs/operators'
 
 export class ExposedGroupState {
     public readonly groupName: string
     public readonly groupId: string
-    public readonly groupAccess$: BehaviorSubject<AssetsGateway.ExposingGroup>
+    public readonly groupAccess$: BehaviorSubject<AssetsBackend.ExposingGroup>
     public readonly loading$ = new BehaviorSubject<boolean>(false)
+    public readonly client = new AssetsGateway.Client().assets
 
     constructor(
-        public readonly assetId,
-        public readonly data: AssetsGateway.ExposingGroup,
+        public readonly assetId: string,
+        public readonly data: AssetsBackend.ExposingGroup,
     ) {
         this.groupId = data.groupId
         this.groupName = data.name
-        this.groupAccess$ = new BehaviorSubject<AssetsGateway.ExposingGroup>(
+        this.groupAccess$ = new BehaviorSubject<AssetsBackend.ExposingGroup>(
             data,
         )
     }
 
-    update(body: AssetsGateway.AccessPolicyBody) {
+    update(body: AssetsBackend.UpsertAccessPolicyBody) {
         this.loading$.next(true)
-        new AssetsGateway.AssetsGatewayClient().assetsDeprecated
-            .updateAccess$(this.assetId, this.groupId, body)
+        this.client
+            .upsertAccessPolicy$({
+                assetId: this.assetId,
+                groupId: this.groupId,
+                body,
+            })
             // XXX:  Why groupAccess is not used ?
             .subscribe((_groupAccess) => {
                 this.loading$.next(false)
@@ -33,7 +42,7 @@ export class ExposedGroupState {
 
     refresh() {
         this.loading$.next(true)
-        new AssetsGateway.AssetsGatewayClient().assetsDeprecated
+        new AssetsGateway.Client().assetsDeprecated
             .getAccess$(this.assetId)
             .pipe(raiseHTTPErrors())
             .subscribe((info) => {
@@ -153,7 +162,7 @@ export class ExposedGroupView implements VirtualDOM {
         this.connectedCallback = (elem) => {
             elem.ownSubscriptions(
                 bodyPost$.subscribe((body) =>
-                    state.update(body as AssetsGateway.AccessPolicyBody),
+                    state.update(body as AssetsBackend.UpsertAccessPolicyBody),
                 ),
             )
         }

@@ -1,21 +1,21 @@
-import { TreeGroup } from './explorer.state'
+import { ExplorerState, TreeGroup } from './explorer.state'
 import {
     AnyFolderNode,
     AnyItemNode,
     DriveNode,
     FolderNode,
-    FutureNode,
+    FutureFolderNode,
+    FutureItemNode,
     GroupNode,
     ItemNode,
     RegularFolderNode,
 } from './nodes'
-import { RequestsExecutor } from './requests-executor'
 
-export function isLocalYouwol() {
-    return window.location.hostname == 'localhost'
-}
+import { RequestsExecutor } from '../core'
+import { applyUpdate } from './db-actions-factory'
 
 export function createTreeGroup(
+    explorerState: ExplorerState,
     groupName: string,
     respUserDrives,
     respDefaultDrive,
@@ -96,14 +96,19 @@ export function createTreeGroup(
         children: [defaultDrive, ...userDrives],
         kind: 'user',
     })
-
-    return new TreeGroup(userGroup, {
+    const tree = new TreeGroup(userGroup, {
+        explorerState,
+        groupId: respDefaultDrive.groupId,
         homeFolderId: homeFolderNode.id,
         trashFolderId: trashFolderNode.id,
         defaultDriveId: defaultDrive.id,
         drivesId: userDrives.map((d) => d.id),
         downloadFolderId: downloadFolderNode.id,
     })
+    tree.directUpdates$.subscribe((updates) => {
+        updates.forEach((update) => applyUpdate(update))
+    })
+    return tree
 }
 
 export function processBorrowItem(
@@ -111,7 +116,7 @@ export function processBorrowItem(
     treeDestination: TreeGroup,
     destination: AnyFolderNode | DriveNode,
 ) {
-    const childNode = new FutureNode({
+    const childNode = new FutureItemNode({
         icon: ItemNode.iconsFactory[nodeSelected.kind],
         name: nodeSelected.name,
         onResponse: (resp) => {
@@ -134,7 +139,7 @@ export function processMoveItem(
     treeDestination: TreeGroup,
     destination: AnyFolderNode | DriveNode,
 ) {
-    const childNode = new FutureNode({
+    const childNode = new FutureItemNode({
         icon: ItemNode.iconsFactory[nodeSelected.kind],
         name: nodeSelected.name,
         onResponse: (resp) => {
@@ -164,7 +169,7 @@ export function processMoveFolder(
     treeDestination: TreeGroup,
     destination: AnyFolderNode | DriveNode,
 ) {
-    const childNode = new FutureNode({
+    const childNode = new FutureFolderNode({
         icon: FolderNode.iconsFactory[nodeSelected.kind],
         name: nodeSelected.name,
         onResponse: (resp) => {

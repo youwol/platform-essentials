@@ -2,11 +2,15 @@ import { child$, VirtualDOM } from '@youwol/flux-view'
 import { Observable } from 'rxjs'
 import { share } from 'rxjs/operators'
 
-import { AssetsGateway, raiseHTTPErrors } from '@youwol/http-clients'
+import {
+    AssetsBackend,
+    AssetsGateway,
+    raiseHTTPErrors,
+} from '@youwol/http-clients'
 import { ExposedGroupState, ExposedGroupView } from './group-permissions.view'
 
-type AccessInfo = AssetsGateway.AccessInfo
-type Asset = AssetsGateway.Asset
+type AccessInfo = AssetsBackend.QueryAccessInfoResponse
+type Asset = AssetsBackend.GetAssetResponse
 
 export class AssetPermissionsView implements VirtualDOM {
     static ClassSelector = 'asset-permissions-view'
@@ -23,20 +27,35 @@ export class AssetPermissionsView implements VirtualDOM {
 
     constructor(params: { asset: Asset }) {
         Object.assign(this, params)
-        this.accessInfo$ =
-            new AssetsGateway.AssetsGatewayClient().assetsDeprecated
-                .getAccess$(this.asset.assetId)
-                .pipe(raiseHTTPErrors(), share())
+        this.accessInfo$ = new AssetsGateway.Client().assets
+            .queryAccessInfo$({ assetId: this.asset.assetId })
+            .pipe(raiseHTTPErrors(), share())
         this.children = [
             child$(this.accessInfo$, (accessInfo) => {
                 return {
-                    class: 'w-50 h-100 p-4 fv-text-primary mx-auto',
+                    class: 'w-50 mx-auto my-auto rounded border',
+                    style: {
+                        position: 'relative',
+                    },
                     children: [
-                        new UserPermissionsView({ accessInfo }),
-                        new GroupsPermissionsView({
-                            accessInfo,
-                            asset: this.asset,
-                        }),
+                        {
+                            class: 'fv-bg-background fv-xx-lighter h-100 w-100',
+                            style: {
+                                opacity: '0.5',
+                                position: 'absolute',
+                                zIndex: '-1',
+                            },
+                        },
+                        {
+                            class: 'p-2',
+                            children: [
+                                new UserPermissionsView({ accessInfo }),
+                                new GroupsPermissionsView({
+                                    accessInfo,
+                                    asset: this.asset,
+                                }),
+                            ],
+                        },
                     ],
                 }
             }),
@@ -64,6 +83,9 @@ export class UserPermissionsView implements VirtualDOM {
             },
             {
                 class: 'd-flex align-items-center justify-content-around',
+                style: {
+                    fontWeight: 'bolder',
+                },
                 children: [
                     {
                         class:

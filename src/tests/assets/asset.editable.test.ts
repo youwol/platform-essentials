@@ -5,39 +5,36 @@ import '../mock-requests'
 import { render } from '@youwol/flux-view'
 import { Subject } from 'rxjs'
 import { take } from 'rxjs/operators'
-import {
-    AssetActionsView,
-    AssetCardView,
-    AssetOverview,
-    AssetPermissionsView,
-} from '../../lib/assets'
+import { AssetOverview, AssetPermissionsView } from '../../lib/assets'
 import { AssetCardTabs } from '../../lib/assets/asset-card/asset-card.view'
 import {
     GroupsPermissionsView,
     UserPermissionsView,
 } from '../../lib/assets/asset-card/permissions/permissions.view'
 
-import { AssetsGateway } from '@youwol/http-clients'
+import { AssetsBackend, AssetsGateway } from '@youwol/http-clients'
 import { createStory, getFromDocument, resetPyYouwolDbs$ } from '../common'
 
-let asset: AssetsGateway.Asset
+let asset: AssetsBackend.GetAssetResponse
 
 beforeAll((done) => {
     resetPyYouwolDbs$()
         .pipe(createStory('test'))
         .subscribe((a) => {
-            asset = a
+            asset = a as any
             done()
         })
 })
 
+class AssetCardView {
+    static ClassSelector
+    constructor(p) {}
+}
+
 test('create asset card view', (done) => {
     const assetOutput$ = new Subject<AssetsGateway.Asset>()
     const view = new AssetCardView({
-        asset,
-        actionsFactory: (asset) => {
-            return new AssetActionsView({ asset })
-        },
+        asset: asset as any,
         assetOutput$,
         forceReadonly: false,
         withTabs: {

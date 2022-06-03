@@ -6,6 +6,7 @@ import { Subject } from 'rxjs'
 import { v4 as uuidv4 } from 'uuid'
 
 import { AssetOverview } from './overview/overview.view'
+import { AssetWithPermissions } from './models'
 
 class AssetTab extends Tabs.TabData {
     public readonly view: VirtualDOM
@@ -24,17 +25,15 @@ export class AssetCardView implements VirtualDOM {
         height: '75vh',
     }
     public readonly children: VirtualDOM[]
-    public readonly asset: AssetsGateway.Asset
-    public readonly actionsFactory: (asset: AssetsGateway.Asset) => VirtualDOM
+    public readonly asset: AssetWithPermissions
 
     public readonly withTabs: { [key: string]: VirtualDOM } = {}
     public readonly forceReadonly: boolean = false
 
-    public readonly assetOutput$: Subject<AssetsGateway.Asset>
+    public readonly assetOutput$: Subject<AssetWithPermissions>
 
     constructor(params: {
         asset: AssetsGateway.Asset
-        actionsFactory: (asset: AssetsGateway.Asset) => VirtualDOM
         assetOutput$: Subject<AssetsGateway.Asset>
         withTabs?: { [key: string]: VirtualDOM }
         forceReadonly?: boolean
@@ -45,14 +44,12 @@ export class AssetCardView implements VirtualDOM {
             Object.keys(this.withTabs).length > 0
                 ? new AssetCardTabs({
                       asset: this.asset,
-                      actionsFactory: this.actionsFactory,
                       assetOutput$: this.assetOutput$,
                       forceReadonly: this.forceReadonly,
                       withTabs: this.withTabs,
                   })
                 : new AssetOverview({
                       asset: this.asset,
-                      actionsFactory: this.actionsFactory,
                       assetOutput$: this.assetOutput$,
                       forceReadonly: this.forceReadonly,
                       class: 'overflow-auto h-100 p-3',
@@ -66,18 +63,15 @@ export class AssetCardTabs extends Tabs.View {
     public readonly asset: AssetsGateway.Asset
 
     constructor(params: {
-        asset: AssetsGateway.Asset
-        actionsFactory
+        asset: AssetWithPermissions
         assetOutput$
         forceReadonly
         withTabs
     }) {
-        const { asset, actionsFactory, assetOutput$, forceReadonly, withTabs } =
-            params
+        const { asset, assetOutput$, forceReadonly, withTabs } = params
 
         const mainView = new AssetOverview({
             asset,
-            actionsFactory: actionsFactory,
             assetOutput$: assetOutput$,
             forceReadonly: forceReadonly,
             class: `${AssetOverview.ClassSelector} overflow-auto h-100 p-3`,

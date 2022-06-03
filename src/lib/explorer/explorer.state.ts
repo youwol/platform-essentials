@@ -10,25 +10,19 @@ import {
     Subscription,
 } from 'rxjs'
 import {
-    distinctUntilChanged,
     filter,
     map,
     mergeMap,
     share,
     shareReplay,
     take,
+    tap,
 } from 'rxjs/operators'
 import { v4 as uuidv4 } from 'uuid'
-import { DisplayMode } from '.'
-import { ChildApplicationAPI, PlatformSettingsStore } from '../core'
+import { FutureFolderNode, FutureItemNode, ItemKind } from '.'
+import { ChildApplicationAPI, RequestsExecutor } from '../core'
 import { FileAddedEvent, PlatformEvent } from '../core/platform.events'
-import { YouwolBannerState } from '../top-banner'
-import {
-    Action,
-    GENERIC_ACTIONS,
-    getActions$,
-    openWithActionFromExe,
-} from './actions.factory'
+
 import {
     AnyFolderNode,
     AnyItemNode,
@@ -36,19 +30,16 @@ import {
     DownloadNode,
     DriveNode,
     FolderNode,
-    FutureNode,
     GroupNode,
     HomeNode,
     instanceOfTrashFolder,
     ItemNode,
     RegularFolderNode,
-    serialize,
     TrashNode,
 } from './nodes'
-import { RequestsExecutor } from './requests-executor'
+
 import { DataState } from './specific-assets/data/data.state'
-import { FluxState } from './specific-assets/flux/flux.state'
-import { StoryState } from './specific-assets/story/story.state'
+
 import {
     createTreeGroup,
     processBorrowItem,
@@ -56,27 +47,20 @@ import {
     processMoveItem,
 } from './utils'
 
-/**
- * Ideally this concept should not exist.
- * A direct selection is: the user has clicked on an item in the view
- * The indirect selection is actually the current folder opened.
- * At any time there is at least on 'indirect' selection (the current folder opened),
- * in addition to which there may be on direct selection (e.g. if the user click on a file).
- */
-export type SelectedItem = {
-    node: BrowserNode
-    selection: 'direct' | 'indirect'
-}
-
 export class TreeGroup extends ImmutableTree.State<BrowserNode> {
+    public readonly explorerState: ExplorerState
     public readonly homeFolderId: string
     public readonly trashFolderId: string
+    public readonly groupId: string
     public readonly drivesId: string
+    public readonly defaultDriveId: string
     public readonly downloadFolderId?: string
 
     constructor(
         rootNode: GroupNode,
         params: {
+            explorerState: ExplorerState
+            groupId: string
             homeFolderId: string
             trashFolderId: string
             defaultDriveId: string
@@ -98,6 +82,9 @@ export class TreeGroup extends ImmutableTree.State<BrowserNode> {
     getTrashNode(): TrashNode {
         return this.getNode(this.trashFolderId)
     }
+    getDefaultDriveNode(): DriveNode {
+        return this.getNode(this.defaultDriveId)
+    }
 }
 
 export type OpenFolder = {
@@ -106,67 +93,15 @@ export type OpenFolder = {
 }
 
 export class ExplorerState {
-    public flux: FluxState
-    public story: StoryState
     public data: DataState
-
-    public readonly topBannerState = new YouwolBannerState()
 
     public readonly selectedItem$ = new BehaviorSubject<BrowserNode>(undefined)
 
     public readonly openFolder$ = new ReplaySubject<OpenFolder>(1)
 
-    public readonly currentFolder$ = this.openFolder$.pipe(
-        mergeMap(({ tree, folder }) => {
-            // this next line is the one that actually 'trigger' the request to fetch the children
-            tree.getChildren(folder)
-            return tree.getChildren$(folder).pipe(map(() => ({ tree, folder })))
-        }),
-        distinctUntilChanged((a, b) => {
-            return serialize(a.folder) == serialize(b.folder)
-        }),
-        shareReplay(1),
-    ) as Observable<{ tree: TreeGroup; folder: AnyFolderNode }>
-
-    actions$ = combineLatest([this.selectedItem$, this.currentFolder$]).pipe(
-        mergeMap(([item, { folder }]) => {
-            const a0$ = getActions$(
-                this,
-                { node: folder, selection: 'indirect' },
-                Object.values(GENERIC_ACTIONS),
-            )
-            const a1$ = item
-                ? getActions$(
-                      this,
-                      { node: item, selection: 'direct' },
-                      Object.values(GENERIC_ACTIONS),
-                  )
-                : of([])
-            const a2$ = item
-                ? PlatformSettingsStore.getOpeningApps$(item).pipe(
-                      map((apps) =>
-                          apps.map((app) => openWithActionFromExe(app)),
-                      ),
-                  )
-                : of([])
-
-            return combineLatest([a0$, a1$, a2$]).pipe(
-                map(([a0, a1, a2]) => {
-                    return {
-                        item: item,
-                        folder: folder,
-                        actions: [...a0, ...a1, ...a2] as Action[],
-                    }
-                }),
-            )
-        }),
-    )
-
-    public readonly displayMode$ = new BehaviorSubject<DisplayMode>('details')
-
     public readonly userInfo$ = RequestsExecutor.getUserInfo().pipe(
-        share(),
         raiseHTTPErrors(),
+        shareReplay({ bufferSize: 1, refCount: true }),
     )
 
     public readonly defaultUserDrive$ = this.userInfo$.pipe(
@@ -200,26 +135,21 @@ export class ExplorerState {
             combineLatest([this.userDrives$, this.defaultUserDrive$]).subscribe(
                 ([respUserDrives, respDefaultDrive]) => {
                     const tree = createTreeGroup(
+                        this,
                         'You',
                         respUserDrives,
                         respDefaultDrive,
                     )
                     this.groupsTree[respDefaultDrive.groupId] = tree
-                    this.flux = new FluxState(tree)
-                    this.story = new StoryState(tree)
-                    this.data = new DataState(tree)
+                    this.data = new DataState(this)
                     this.openFolder(tree.getHomeNode())
-                    tree.directUpdates$.subscribe((updates) => {
-                        updates.forEach((update) =>
-                            RequestsExecutor.execute(update),
-                        )
-                    })
                 },
             ),
             this.openFolder$.subscribe(() => {
                 this.selectedItem$.next(undefined)
             }),
         )
+
         const os = ChildApplicationAPI.getOsInstance()
         if (os) {
             this.subscriptions.push(
@@ -237,7 +167,7 @@ export class ExplorerState {
 
                         const node = new ItemNode({
                             ...response,
-                            kind: 'flux-project',
+                            kind: response.kind,
                         })
                         try {
                             tree.addChild(response.folderId, node)
@@ -258,6 +188,39 @@ export class ExplorerState {
 
     openFolder(folder: AnyFolderNode | DriveNode) {
         this.openFolder$.next({ tree: this.groupsTree[folder.groupId], folder })
+        const treeGroup = this.groupsTree[folder.groupId]
+        treeGroup && treeGroup.selectedNode$.next(treeGroup.getNode(folder.id))
+    }
+
+    navigateTo$(folderId: string) {
+        return RequestsExecutor.getFolder(folderId).pipe(
+            mergeMap((folder) => this.selectGroup$(folder.groupId)),
+            mergeMap((treeGroupState) => {
+                return RequestsExecutor.getPath(folderId).pipe(
+                    map((path) => ({ path, treeGroupState })),
+                )
+            }),
+            mergeMap(({ path, treeGroupState }) => {
+                return treeGroupState
+                    .resolvePath(path.folders.map((f) => f.folderId))
+                    .pipe(
+                        map((nodes) => {
+                            return { nodes, treeGroupState }
+                        }),
+                    )
+            }),
+            tap(({ nodes, treeGroupState }) => {
+                const nodeIds = nodes.map((n) => n.id)
+                const expanded = [
+                    ...treeGroupState.expandedNodes$
+                        .getValue()
+                        .filter((expandedId) => !nodeIds.includes(expandedId)),
+                    ...nodeIds,
+                ]
+                treeGroupState.expandedNodes$.next(expanded)
+                this.openFolder(nodes.slice(-1)[0] as AnyFolderNode)
+            }),
+        )
     }
 
     selectItem(item: BrowserNode) {
@@ -266,27 +229,35 @@ export class ExplorerState {
         }
     }
 
-    selectGroup(group) {
-        combineLatest([
-            RequestsExecutor.getDefaultDrive(group.id),
-            RequestsExecutor.getDrivesChildren(group.id),
-        ]).subscribe(([defaultDrive, drives]) => {
-            const tree = createTreeGroup(
-                group.elements.slice(-1)[0],
-                drives,
-                defaultDrive,
-            )
-            this.groupsTree[defaultDrive.groupId] = tree
-            this.openFolder(tree.getHomeNode())
-            tree.directUpdates$.subscribe((updates) => {
-                updates.forEach((update) => RequestsExecutor.execute(update))
-            })
-        })
+    selectGroup$(groupId: string): Observable<TreeGroup> {
+        if (this.groupsTree[groupId]) {
+            return of(this.groupsTree[groupId])
+        }
+        return combineLatest([
+            RequestsExecutor.getDefaultDrive(groupId),
+            RequestsExecutor.getDrivesChildren(groupId),
+            this.userInfo$,
+        ]).pipe(
+            map(([defaultDrive, drives, userInfo]) =>
+                createTreeGroup(
+                    this,
+                    userInfo.groups
+                        .find((g) => g.id == groupId)
+                        .path.split('/')
+                        .slice(-1)[0],
+                    drives,
+                    defaultDrive,
+                ),
+            ),
+            tap((tree) => {
+                this.groupsTree[tree.groupId] = tree
+            }),
+        )
     }
 
     newFolder(parentNode: DriveNode | AnyFolderNode) {
         const tree = this.groupsTree[parentNode.groupId]
-        const childFolder = new FutureNode({
+        const childFolder = new FutureFolderNode({
             icon: 'fas fa-folder',
             name: 'new folder',
             onResponse: (resp) => {
@@ -297,6 +268,8 @@ export class ExplorerState {
                     name: 'new folder',
                     folderId: resp.folderId,
                     parentFolderId: parentNode.id,
+                    type: resp.type,
+                    metadata: resp.metadata,
                     children: [],
                 })
                 tree.replaceNode(childFolder.id, folderNode)
@@ -307,6 +280,42 @@ export class ExplorerState {
             }),
         })
         tree.addChild(parentNode.id, childFolder)
+    }
+
+    newAsset<T>({
+        parentNode,
+        request,
+        pendingName,
+        kind,
+    }: {
+        parentNode: AnyFolderNode
+        request: Observable<T>
+        pendingName: string
+        kind: ItemKind
+    }) {
+        const uid = uuidv4()
+        const groupTree = this.groupsTree[parentNode.groupId]
+        parentNode.addStatus({ type: 'request-pending', id: uid })
+        const node = new FutureItemNode({
+            name: pendingName,
+            icon: 'fas fa-spinner fa-spin',
+            request: request,
+            onResponse: (resp, targetNode) => {
+                const projectNode = new ItemNode({
+                    kind,
+                    treeId: resp.treeId,
+                    groupId: parentNode.groupId,
+                    driveId: parentNode.driveId,
+                    name: resp.name,
+                    assetId: resp.assetId,
+                    rawId: resp.rawId,
+                    borrowed: false,
+                    origin: resp.origin,
+                })
+                groupTree.replaceNode(targetNode, projectNode)
+            },
+        })
+        groupTree.addChild(parentNode.id, node)
     }
 
     rename(
@@ -322,13 +331,27 @@ export class ExplorerState {
             () => ({}),
             { toBeSaved: save },
         )
+        if (node instanceof ItemNode)
+            this.selectedItem$.next(
+                this.groupsTree[node.groupId].getNode(node.id),
+            )
+        this.openFolder$.pipe(take(1)).subscribe((f) => {
+            if (f.folder.id == node.id) {
+                this.openFolder(this.groupsTree[node.groupId].getNode(node.id))
+            }
+        })
     }
 
     deleteItemOrFolder(node: RegularFolderNode | AnyItemNode) {
-        this.groupsTree[node.groupId].removeNode(node)
+        this.groupsTree[node.groupId].removeNode(node.id)
         const trashNode = this.groupsTree[node.groupId].getTrashNode()
         if (trashNode) {
             this.refresh(trashNode, false)
+        }
+        if (node instanceof FolderNode) {
+            this.openFolder(
+                this.groupsTree[node.groupId].getNode(node.parentFolderId),
+            )
         }
     }
 
@@ -443,5 +466,22 @@ export class ExplorerState {
                     this.refresh(folder)
                 }
             })
+    }
+
+    launchApplication({
+        cdnPackage,
+        parameters,
+    }: {
+        cdnPackage: string
+        parameters: { [_k: string]: string }
+    }) {
+        return ChildApplicationAPI.getOsInstance()
+            .createInstance$({
+                cdnPackage,
+                parameters,
+                focus: true,
+                version: 'latest',
+            })
+            .subscribe()
     }
 }

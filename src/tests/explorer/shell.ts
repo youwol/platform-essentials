@@ -10,16 +10,13 @@ import {
     take,
     tap,
 } from 'rxjs/operators'
-import { AssetCardView } from '../../lib/assets'
+
+import { OpenFolder } from '../../lib/explorer/explorer.state'
 import {
     ExplorerState,
     FolderContentView,
     MainPanelView,
-    SideBarView,
-} from '../../lib/explorer'
-import { Action } from '../../lib/explorer/actions.factory'
-import { OpenFolder } from '../../lib/explorer/explorer.state'
-import {
+    Action,
     AnyFolderNode,
     AnyItemNode,
     BrowserNode,
@@ -28,30 +25,27 @@ import {
     FutureNode,
     GroupNode,
     RegularFolderNode,
-} from '../../lib/explorer/nodes'
-import {
-    ActionBtnView,
-    ActionsView,
-    DisplayedActions,
-} from '../../lib/explorer/views/main-panel/actions.view'
+} from '../../lib/explorer'
+
 import { RowView } from '../../lib/explorer/views/main-panel/folder-content/details.view'
+import { ItemView } from '../../lib/explorer/views/main-panel/folder-content/item.view'
 import {
-    InfoBtnView,
-    ItemView,
-} from '../../lib/explorer/views/main-panel/folder-content/item.view'
-import {
-    ActionsMenuView,
     HeaderPathView,
     PathElementView,
 } from '../../lib/explorer/views/main-panel/header-path.view'
-import {
-    GroupsView,
-    GroupView,
-} from '../../lib/explorer/views/sidebar/sidebar.view'
+
 import { expectAttributes, getFromDocument, queryFromDocument } from '../common'
 import { raiseHTTPErrors } from '@youwol/http-clients'
 
 export class NoContext {}
+
+export class AssetCardView {
+    asset: any
+    withTabs: any
+
+    static ClassSelector
+    constructor(p) {}
+}
 
 export class Shell<T = NoContext> {
     folder: AnyFolderNode | DriveNode | GroupNode
@@ -73,13 +67,47 @@ export class Shell<T = NoContext> {
     }
 }
 
-export function getDisplayedActions() {
-    const actionsContainer = getFromDocument<ActionsView>(
-        `.${ActionsView.ClassSelector}`,
-    )
-    return actionsContainer.displayedActions$
+export class ActionsMenuView {
+    static ClassSelector: string
 }
 
+export class ActionsView {
+    static ClassSelector: string
+    displayedActions$: Observable<{ folder; actions; item }>
+    actions: any[]
+}
+export class ActionBtnView {
+    static ClassSelector: string
+    action: any
+}
+
+export class DisplayedActions {
+    folder
+    actions
+}
+
+export class GroupsView {
+    static ClassSelector: string
+    groupsExpanded$
+}
+function getDisplayedActions(): Observable<{ folder; actions; item }> {
+    return undefined
+}
+export class GroupView {
+    static ClassSelector: string
+    group: { name }
+    onclick
+}
+export class SideBarView {
+    static ClassSelector: string
+    extended$
+}
+
+export class InfoBtnView {
+    static ClassSelector: string
+    popupDisplayed$: Observable<boolean>
+    node
+}
 export function shell$<T>() {
     const state = new ExplorerState()
     document.body.innerHTML = ''
@@ -107,7 +135,7 @@ export function shell$<T>() {
                 'desktopFolderName',
             ])
         }),
-        mergeMap(() => state.currentFolder$),
+        mergeMap(() => state.openFolder$),
         take(1),
         tap(({ folder }) => {
             expect(folder.name).toEqual('Home')
@@ -449,7 +477,7 @@ export function navigateStepBack<T>() {
                     .slice(-2)[0]
                     .dispatchEvent(new MouseEvent('click', { bubbles: true }))
 
-                return shell.explorerState.currentFolder$.pipe(
+                return shell.explorerState.openFolder$.pipe(
                     take(1),
                     map(({ folder }) => {
                         const pathElements = queryFromDocument<PathElementView>(
@@ -517,7 +545,7 @@ export function cd<T>(folderName: string) {
                 )
 
                 // Wait for actions menu view to be updated
-                return shell.explorerState.currentFolder$.pipe(
+                return shell.explorerState.openFolder$.pipe(
                     skipWhile(({ folder }) => {
                         return !isTargetFolder(folder)
                     }),
@@ -772,7 +800,7 @@ export function uploadAsset<T>(itemName: string) {
                     }),
                     // Wait for refresh to finish
                     mergeMap(() => {
-                        return shell.explorerState.currentFolder$.pipe(
+                        return shell.explorerState.openFolder$.pipe(
                             skip(1),
                             take(1),
                         )
@@ -800,7 +828,7 @@ export function refresh<T>() {
                 actionRefresh.dispatchEvent(
                     new MouseEvent('click', { bubbles: true }),
                 )
-                return shell.explorerState.currentFolder$.pipe(
+                return shell.explorerState.openFolder$.pipe(
                     skip(1),
                     take(1),
                     map(() => {

@@ -2,7 +2,7 @@
 /* eslint-disable jest/no-done-callback -- eslint-comment It is required because */
 
 import '../mock-requests'
-import { FluxProjectNode } from '../../lib/explorer/nodes'
+import { ItemNode } from '../../lib/explorer'
 import { resetPyYouwolDbs$ } from '../common'
 import {
     expectSnapshot,
@@ -12,6 +12,8 @@ import {
     selectItem,
     shell$,
 } from './shell'
+
+export class FluxProjectNode extends ItemNode<any> {}
 
 beforeEach((done) => {
     resetPyYouwolDbs$().subscribe(() => {

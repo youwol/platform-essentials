@@ -12,26 +12,7 @@ export interface Appearance {
     desktopStyle: { [_key: string]: string }
 }
 
-export interface Parametrization {
-    match: { [_key: string]: string }
-    parameters: { [_key: string]: string }
-}
-
-export interface Execution {
-    standalone: boolean
-    parametrized?: Parametrization[]
-}
-
-export interface BrowserApplication {
-    package: string
-    icon: VirtualDOM
-    version: string
-    displayName: string
-    execution: Execution
-}
-
 export interface PlatformSettings {
     you: You
     appearance: Appearance
-    browserApplications: BrowserApplication[]
 }

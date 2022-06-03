@@ -1,9 +1,13 @@
 import { ImmutableTree } from '@youwol/fv-tree'
 import { BehaviorSubject, Observable, Subject } from 'rxjs'
 import { delay, tap } from 'rxjs/operators'
-import { AssetsGateway, RequestEvent } from '@youwol/http-clients'
+import {
+    AssetsGateway,
+    RequestEvent,
+    TreedbBackend,
+} from '@youwol/http-clients'
 import { v4 as uuidv4 } from 'uuid'
-import { debugDelay } from './requests-executor'
+import { debugDelay } from '../core/requests-executot'
 
 type NodeEventType = 'item-added'
 
@@ -109,6 +113,13 @@ export class DriveNode extends BrowserNode {
 
 type FolderKind = 'regular' | 'home' | 'download' | 'trash' | 'system'
 
+export function isInstanceOfFolderNode(node: unknown): node is AnyFolderNode {
+    return (
+        (node as AnyFolderNode).parentFolderId != undefined &&
+        (node as AnyFolderNode).folderId != undefined
+    )
+}
+
 export class FolderNode<T extends FolderKind> extends BrowserNode {
     static iconsFactory: Record<FolderKind, string> = {
         regular: 'fas fa-folder',
@@ -122,6 +133,8 @@ export class FolderNode<T extends FolderKind> extends BrowserNode {
     groupId: string
     driveId: string
     parentFolderId: string
+    type: string
+    metadata: string
     kind: T
 
     constructor(params: {
@@ -130,6 +143,8 @@ export class FolderNode<T extends FolderKind> extends BrowserNode {
         groupId: string
         parentFolderId: string
         name: string
+        type: string
+        metadata: string
         children?: Array<BrowserNode> | Observable<Array<BrowserNode>>
         kind: T
         origin?: AssetsGateway.Origin
@@ -151,25 +166,31 @@ export type SystemNode = FolderNode<'system'>
 export type AnyFolderNode = FolderNode<FolderKind>
 
 export function instanceOfTrashFolder(folder: BrowserNode) {
-    return folder instanceof FolderNode && folder.kind == 'trash'
+    return isInstanceOfFolderNode(folder) && folder.kind == 'trash'
 }
 
 export function instanceOfStandardFolder(folder: BrowserNode) {
     return (
-        folder instanceof FolderNode &&
+        isInstanceOfFolderNode(folder) &&
         (folder.kind == 'regular' ||
             folder.kind == 'home' ||
             folder.kind == 'download')
     )
 }
 
-export type ItemKind = 'data' | 'story' | 'flux-project' | 'package'
+export type ItemKind = string
+
+export function isInstanceOfItemNode(node: unknown): node is AnyItemNode {
+    return (
+        (node as AnyItemNode).assetId != undefined &&
+        (node as AnyItemNode).rawId != undefined &&
+        (node as AnyItemNode).treeId != undefined
+    )
+}
 
 export class ItemNode<T extends ItemKind> extends BrowserNode {
     static iconsFactory: Record<ItemKind, string> = {
         data: 'fas fa-database',
-        story: 'fas fa-book',
-        'flux-project': 'fas fa-play',
         package: 'fas fa-box',
     }
     id: string
@@ -199,11 +220,20 @@ export class ItemNode<T extends ItemKind> extends BrowserNode {
         Object.assign(this, params)
         this.icon = ItemNode.iconsFactory[this.kind]
     }
+
+    static fromTreedbResponse(response: TreedbBackend.GetItemResponse) {
+        return new ItemNode({
+            ...response,
+            assetId: JSON.parse(response.metadata).assetId,
+            borrowed: JSON.parse(response.metadata).borrowed,
+            rawId: JSON.parse(response.metadata).relatedId,
+            treeId: response.itemId,
+            kind: response.type,
+        })
+    }
 }
 
 export type DataNode = ItemNode<'data'>
-export type FluxProjectNode = ItemNode<'flux-project'>
-export type StoryNode = ItemNode<'story'>
 export type AnyItemNode = ItemNode<ItemKind>
 
 export class FutureNode extends BrowserNode {
@@ -220,6 +250,9 @@ export class FutureNode extends BrowserNode {
         Object.assign(this, params)
     }
 }
+
+export class FutureItemNode extends FutureNode {}
+export class FutureFolderNode extends FutureNode {}
 
 export class DeletedNode extends BrowserNode {
     name: string

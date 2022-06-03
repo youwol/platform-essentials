@@ -21,17 +21,17 @@ import {
     uploadAsset,
 } from './shell'
 import { forkJoin } from 'rxjs'
-import { RequestsExecutor } from '../../lib/explorer/requests-executor'
+import { RequestsExecutor } from '../../lib/core'
 
 jest.setTimeout(20 * 1000)
 
 beforeEach((done) => {
-    const youwolClient = new PyYouwol.PyYouwolClient()
+    const youwolClient = new PyYouwol.Client()
     resetPyYouwolDbs$()
         .pipe(
             mergeMap((defaultDrive) => {
                 return youwolClient.admin.customCommands
-                    .doDelete$('purge-downloads')
+                    .doDelete$({ name: 'purge-downloads' })
                     .pipe(mapTo(defaultDrive))
             }),
             mergeMap((defaultDrive) => {

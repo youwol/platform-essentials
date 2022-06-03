@@ -1,43 +1,12 @@
-import { attr$, child$, children$, VirtualDOM } from '@youwol/flux-view'
-import { BehaviorSubject, merge, Observable, Subject } from 'rxjs'
+import { child$, children$, VirtualDOM } from '@youwol/flux-view'
+import { merge, Observable } from 'rxjs'
 import { ywSpinnerView } from '../../..'
 import { ExplorerState, TreeGroup } from '../../explorer.state'
 import { AnyFolderNode, BrowserNode } from '../../nodes'
-import { ActionsView } from './actions.view'
-import { DisplayMode } from './main-panel.view'
-
-class DisplayModesView implements VirtualDOM {
-    public readonly class = 'd-flex py-1 border-bottom justify-content-around'
-    public readonly children: VirtualDOM[]
-
-    public readonly displayMode$: Subject<DisplayMode>
-
-    constructor(params: { displayMode$: Subject<DisplayMode> }) {
-        Object.assign(this, params)
-
-        this.children = [this.itemView('details')]
-    }
-
-    itemView(mode: DisplayMode) {
-        const icons: Record<DisplayMode, string> = {
-            //'cards': "fa-th-large",
-            //'miniatures': "fa-th",
-            details: 'fa-th-list',
-        }
-        const baseClass = `fv-pointer fv-hover-text-secondary fas ${icons[mode]} mx-2 p-1`
-        const selectionClass = 'fv-text-focus'
-        return {
-            class: attr$(this.displayMode$, (m) =>
-                m == mode ? `${baseClass} ${selectionClass}` : `${baseClass}`,
-            ),
-            onclick: () => this.displayMode$.next(mode),
-        }
-    }
-}
 
 export class HeaderPathView implements VirtualDOM {
     static ClassSelector = 'header-path-view'
-    public readonly class = `${HeaderPathView.ClassSelector} w-100 d-flex p-2 fv-bg-background-alt`
+    public readonly class = `${HeaderPathView.ClassSelector} w-100 d-flex justify-content-center p-2 fv-bg-background-alt`
     style = {
         height: '50px',
     }
@@ -45,19 +14,19 @@ export class HeaderPathView implements VirtualDOM {
 
     public readonly state: ExplorerState
 
-    constructor(params: { state: ExplorerState }) {
+    constructor(params: { state: ExplorerState; [k: string]: unknown }) {
         Object.assign(this, params)
 
         this.children = [
             {
-                class: 'd-flex flex-grow-1 overflow-auto mr-1',
+                class: 'd-flex flex-grow-1 justify-content-center overflow-auto mr-1',
                 style: {
                     'white-space': 'nowrap',
                     'overflow-x': 'auto',
                     'overflow-y': 'hidden',
                 },
                 children: children$(
-                    this.state.currentFolder$,
+                    this.state.openFolder$,
                     ({
                         tree,
                         folder,
@@ -89,8 +58,6 @@ export class HeaderPathView implements VirtualDOM {
                     },
                 ),
             },
-            new ActionsMenuView({ state: this.state }),
-            new DisplayModesView({ displayMode$: this.state.displayMode$ }),
         ]
     }
 }
@@ -123,42 +90,9 @@ export class LoadingSpinnerView implements VirtualDOM {
     }
 }
 
-export class ActionsMenuView implements VirtualDOM {
-    static ClassSelector = 'actions-menu-view'
-    public readonly class = `${ActionsMenuView.ClassSelector} d-flex align-items-center mr-5 fv-border-primary position-relative fv-pointer rounded fv-bg-secondary-alt px-2 fv-hover-bg-secondary`
-    public readonly expanded$ = new BehaviorSubject(false)
-
-    public readonly children: VirtualDOM[]
-    public readonly onclick = () =>
-        this.expanded$.next(!this.expanded$.getValue())
-    public readonly onmouseleave = () => this.expanded$.next(false)
-
-    public readonly state: ExplorerState
-
-    constructor(params: { state: ExplorerState }) {
-        Object.assign(this, params)
-
-        this.children = [
-            {
-                innerText: 'Actions',
-            },
-            {
-                class: 'fas fa-caret-down mx-1',
-            },
-            {
-                class: attr$(this.expanded$, (expanded) =>
-                    expanded ? 'position-absolute' : 'd-none',
-                ),
-                style: { top: '100%', right: '0%', zIndex: 100 },
-                children: [new ActionsView({ state: this.state })],
-            },
-        ]
-    }
-}
-
 export class PathElementView implements VirtualDOM {
     static ClassSelector = 'path-elem-view'
-    public readonly baseClass = `${PathElementView.ClassSelector} p-1 rounded d-flex align-items-center fv-pointer fv-bg-background`
+    public readonly baseClass = `${PathElementView.ClassSelector} rounded px-1 d-flex align-items-center fv-pointer fv-bg-background fv-hover-bg-background-alt`
 
     public readonly class: string
     public readonly children: VirtualDOM[]
@@ -180,15 +114,15 @@ export class PathElementView implements VirtualDOM {
 
         this.class =
             this.node.id == this.selectedNode.id
-                ? `${this.baseClass} fv-border-focus fv-text-focus fv-hover-text-primary fv-hover-bg-secondary`
-                : `${this.baseClass} fv-border-primary fv-hover-text-primary fv-hover-bg-secondary`
+                ? `${this.baseClass} fv-text-focus`
+                : `${this.baseClass}`
 
         this.children = [
             {
                 class: this.node.icon,
             },
             {
-                class: 'px-2',
+                class: 'px-1',
                 innerText: this.node.name,
             },
         ]
