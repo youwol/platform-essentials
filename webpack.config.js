@@ -3,6 +3,8 @@ const pkg = require('./package.json')
 const ROOT = path.resolve(__dirname, 'src')
 const DESTINATION = path.resolve(__dirname, 'dist')
 const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer')
+
+const packageJson = require('./package.json')
 module.exports = {
     context: ROOT,
     entry: {
@@ -16,6 +18,7 @@ module.exports = {
         }),
     ],
     output: {
+        publicPath: `/api/assets-gateway/raw/package/QHlvdXdvbC9wbGF0Zm9ybS1lc3NlbnRpYWxz/${packageJson.version}/dist/`,
         path: DESTINATION,
         libraryTarget: 'umd',
         umdNamedDefine: true,
@@ -50,6 +53,8 @@ module.exports = {
             'js-beautify': 'js_beautify',
             lodash: '_',
             uuid: 'uuid',
+            codemirror: 'CodeMirror',
+            typescript: 'ts',
         },
     ],
     module: {

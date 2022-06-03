@@ -358,4 +358,35 @@ export class RequestsExecutor {
             jsSrc: string
         }>
     }
+
+    static savePreferencesScript({
+        tsSrc,
+        jsSrc,
+    }: {
+        tsSrc: string
+        jsSrc: string
+    }) {
+        return new CdnSessionsStorage.Client()
+            .postData$({
+                packageName: '@youwol/platform-essentials',
+                dataName: 'preferences',
+                body: { tsSrc, jsSrc },
+            })
+            .pipe(dispatchHTTPErrors(this.error$))
+    }
+
+    static getPreferencesScript(): Observable<{
+        tsSrc: string
+        jsSrc: string
+    }> {
+        return new CdnSessionsStorage.Client()
+            .getData$({
+                packageName: '@youwol/platform-essentials',
+                dataName: 'preferences',
+            })
+            .pipe(dispatchHTTPErrors(this.error$)) as Observable<{
+            tsSrc: string
+            jsSrc: string
+        }>
+    }
 }

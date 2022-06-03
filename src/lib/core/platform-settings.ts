@@ -5,7 +5,7 @@ import { AUTO_GENERATED } from '../../auto_generated'
 import { CdnSessionsStorage, raiseHTTPErrors } from '@youwol/http-clients'
 
 import { PlatformSettings } from './platform-settings.models'
-import { ApplicationInfo } from './installer'
+import { ApplicationInfo } from './environment'
 
 export interface Executable {
     cdnPackage: string

@@ -369,6 +369,17 @@ export const GENERIC_ACTIONS: { [k: string]: ActionConstructor } = {
             navigator.clipboard.writeText(node.rawId).then()
         },
     }),
+    copyExplorerId: (state: ExplorerState, node: DataNode) => ({
+        sourceEventNode: node,
+        icon: 'fas fa-clipboard',
+        name: "copy explorer's id",
+        section: 'Info',
+        authorized: true,
+        applicable: () => node instanceof ItemNode && node.kind == 'data',
+        exe: () => {
+            navigator.clipboard.writeText(node.treeId).then()
+        },
+    }),
     copyFileUrl: (state: ExplorerState, node: DataNode) => ({
         sourceEventNode: node,
         icon: 'fas fa-clipboard',
@@ -432,7 +443,7 @@ export const GENERIC_ACTIONS: { [k: string]: ActionConstructor } = {
             )
         },
         exe: () => {
-            getFavoritesSingleton().toggleFavoriteItem(node.id)
+            getFavoritesSingleton().toggleFavoriteDesktopItem(node.id)
         },
     }),
     unFavoriteDesktopItem: (state: ExplorerState, node: BrowserNode) => ({
@@ -449,7 +460,7 @@ export const GENERIC_ACTIONS: { [k: string]: ActionConstructor } = {
             )
         },
         exe: () => {
-            getFavoritesSingleton().toggleFavoriteItem(node.id)
+            getFavoritesSingleton().toggleFavoriteDesktopItem(node.id)
         },
     }),
 }

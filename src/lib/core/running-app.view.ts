@@ -4,7 +4,7 @@ import { v4 as uuidv4 } from 'uuid'
 import { AssetsGateway, raiseHTTPErrors } from '@youwol/http-clients'
 import { PlatformState } from './platform.state'
 import { Executable } from './platform-settings'
-import { ApplicationInfo } from './installer'
+import { ApplicationInfo } from './environment'
 
 class IframeAppView implements VirtualDOM {
     tag = 'iframe'

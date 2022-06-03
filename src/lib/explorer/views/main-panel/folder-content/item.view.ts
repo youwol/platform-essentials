@@ -13,12 +13,11 @@ import {
     RegularFolderNode,
 } from '../../../nodes'
 import { installContextMenu } from '../../../context-menu/context-menu'
+import { defaultOpeningApp$, tryOpenWithDefault$ } from '../../../../core'
 import {
     ApplicationInfo,
     OpenWithParametrization,
-    defaultOpeningApp$,
-    tryOpenWithDefault$,
-} from '../../../../core'
+} from '../../../../core/environment'
 
 export class ProgressItemView {
     static ClassSelector = 'progress-item-view'

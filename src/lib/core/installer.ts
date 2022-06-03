@@ -1,6 +1,5 @@
-import { ExplorerState, AnyFolderNode, AnyItemNode } from '../explorer'
-import { AssetsBackend, AssetsGateway } from '@youwol/http-clients'
-import { VirtualDOM } from '@youwol/flux-view'
+import { AnyItemNode } from '../explorer'
+import { AssetsGateway } from '@youwol/http-clients'
 import { install } from '@youwol/cdn-client'
 import * as cdnClient from '@youwol/cdn-client'
 import { forkJoin, from, Observable, of, ReplaySubject } from 'rxjs'
@@ -8,103 +7,13 @@ import { RequestsExecutor } from './requests-executot'
 import { map, mergeMap, shareReplay, take } from 'rxjs/operators'
 import { ChildApplicationAPI } from './platform.state'
 
-type Json = any
-
-export interface CdnClient {
-    install: unknown
-}
-
-export interface FluxView {
-    child$
-    children$
-    attr$
-}
-
-export interface ContextMenuAction {
-    icon: string
-    name: string
-    authorized: boolean
-    exe: () => void | Promise<void>
-    applicable: () => boolean | Promise<boolean>
-}
-
-export interface AssetPreview {
-    icon: string
-    name: string
-    exe: () => VirtualDOM | Promise<VirtualDOM>
-    applicable: () => boolean | Promise<boolean>
-}
-
-export interface OpeningApplication {
-    cdnPackage: string
-    parameters: { [k: string]: string }
-    applicable: () => boolean | Promise<boolean>
-}
-
-export interface Application {
-    cdnPackage: string
-    version: string
-    name: string
-    standalone: boolean
-    disabled?: boolean
-    graphics?: {
-        background?: VirtualDOM
-        iconFile?: VirtualDOM
-        iconApp?: VirtualDOM
-    }
-}
-
-type ApplicationDataValue = { [k: string]: Json[] }
-
-export interface Manifest {
-    id: string | string[]
-
-    contextMenuActions?: (params: {
-        node: AnyItemNode | AnyFolderNode
-        explorer: ExplorerState
-        cdnClient: CdnClient
-        assetsGtwClient: AssetsGateway.AssetsGatewayClient
-    }) => ContextMenuAction[]
-
-    assetPreviews?: (params: {
-        asset: AssetsBackend.GetAssetResponse
-        cdnClient: CdnClient
-        assetsGtwClient: AssetsGateway.AssetsGatewayClient
-        fluxView: FluxView
-    }) => AssetPreview[]
-
-    openWithApps?: (params: {
-        node: AnyItemNode | AnyFolderNode
-    }) => OpeningApplication[]
-
-    applications?: string[]
-
-    applicationsData?: {
-        [k: string]: ApplicationDataValue
-    }
-}
-
-export interface OpenWithParametrization {
-    name?: string
-    match: { [k: string]: string } | string
-    parameters: { [k: string]: string } | string
-}
-
-export interface AppExecutionInfo {
-    standalone: boolean
-    parametrized: OpenWithParametrization[]
-}
-
-export interface ApplicationInfo {
-    cdnPackage: string
-    displayName: string
-    graphics?: {
-        background?: VirtualDOM
-        fileIcon?: VirtualDOM
-        appIcon?: VirtualDOM
-    }
-    execution: AppExecutionInfo
-}
+import {
+    ApplicationDataValue,
+    ApplicationInfo,
+    getEnvironmentSingleton,
+    Manifest,
+    OpenWithParametrization,
+} from './environment'
 
 type TInstaller = (installer: Installer) => Promise<Installer>
 
@@ -132,22 +41,6 @@ export function evaluateParameters(
     }, {})
 }
 
-export function getEnvironmentSingleton(): IEnvironment {
-    return parent['@youwol/platform-essentials'].Core.Environment != Environment
-        ? parent['@youwol/platform-essentials'].Core.getEnvironmentSingleton()
-        : Environment
-}
-
-export class IEnvironment {
-    installManifest$: ReplaySubject<Manifest>
-    applicationsInfo$: ReplaySubject<ApplicationInfo[]>
-}
-
-export class Environment {
-    static installManifest$: ReplaySubject<Manifest>
-    static applicationsInfo$: ReplaySubject<ApplicationInfo[]>
-}
-
 export class Installer {
     public readonly libraryManifests = new Set<string>()
     public readonly generatorManifests = new Set<TInstaller>()
@@ -157,7 +50,17 @@ export class Installer {
     static defaultInstallJsScript = `
 async function install(installer){
     return installer.with({
-        fromLibraries:["@youwol/installer-youwol-dev"]
+        fromLibraries:["@youwol/installers-youwol.youwolDev"]
+    })
+}
+return install
+`
+    static defaultInstallTsScript = `
+import {Installer} from './installer'
+
+async function install(installer: Installer): Promise<Installer> {
+    return installer.with({
+        fromLibraries:["@youwol/installers-youwol.youwolDev"]
     })
 }
 return install
@@ -175,6 +78,19 @@ return install
             .then((manifest: Manifest) => {
                 Installer.getInstallManifest$().next(manifest)
             })
+    }
+
+    static getInstallerScript$() {
+        return RequestsExecutor.getInstallerScript().pipe(
+            map(({ jsSrc, tsSrc }) =>
+                jsSrc
+                    ? { jsSrc, tsSrc }
+                    : {
+                          jsSrc: Installer.defaultInstallJsScript,
+                          tsSrc: Installer.defaultInstallTsScript,
+                      },
+            ),
+        )
     }
 
     static getInstallManifest$() {

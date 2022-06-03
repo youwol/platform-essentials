@@ -10,10 +10,5 @@
  * @module lib/top-banner
  */
 export * from './top-banner.view'
-export * from './menu.view'
-export * from './user-menu.view'
-export * from './youwol-menu.view'
-export * from './settings-menu.view'
 export * from './actions.view'
 export * from './badges'
-export * from './launch-pad.view'

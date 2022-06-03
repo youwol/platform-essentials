@@ -113,6 +113,13 @@ export class DriveNode extends BrowserNode {
 
 type FolderKind = 'regular' | 'home' | 'download' | 'trash' | 'system'
 
+export function isInstanceOfFolderNode(node: unknown): node is AnyFolderNode {
+    return (
+        (node as AnyFolderNode).parentFolderId != undefined &&
+        (node as AnyFolderNode).folderId != undefined
+    )
+}
+
 export class FolderNode<T extends FolderKind> extends BrowserNode {
     static iconsFactory: Record<FolderKind, string> = {
         regular: 'fas fa-folder',
@@ -159,12 +166,12 @@ export type SystemNode = FolderNode<'system'>
 export type AnyFolderNode = FolderNode<FolderKind>
 
 export function instanceOfTrashFolder(folder: BrowserNode) {
-    return folder instanceof FolderNode && folder.kind == 'trash'
+    return isInstanceOfFolderNode(folder) && folder.kind == 'trash'
 }
 
 export function instanceOfStandardFolder(folder: BrowserNode) {
     return (
-        folder instanceof FolderNode &&
+        isInstanceOfFolderNode(folder) &&
         (folder.kind == 'regular' ||
             folder.kind == 'home' ||
             folder.kind == 'download')
@@ -172,6 +179,14 @@ export function instanceOfStandardFolder(folder: BrowserNode) {
 }
 
 export type ItemKind = string
+
+export function isInstanceOfItemNode(node: unknown): node is AnyItemNode {
+    return (
+        (node as AnyItemNode).assetId != undefined &&
+        (node as AnyItemNode).rawId != undefined &&
+        (node as AnyItemNode).treeId != undefined
+    )
+}
 
 export class ItemNode<T extends ItemKind> extends BrowserNode {
     static iconsFactory: Record<ItemKind, string> = {

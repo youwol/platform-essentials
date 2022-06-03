@@ -1,31 +1,5 @@
-import { child$, VirtualDOM } from '@youwol/flux-view'
-import { Button } from '@youwol/fv-button'
-import { map, shareReplay } from 'rxjs/operators'
-import { AssetsGateway, HTTPError } from '@youwol/http-clients'
-import { ChildApplicationAPI, isPlatformInstance } from '../core/platform.state'
-import { UserMenuView } from './user-menu.view'
-import { YouwolMenuView } from './youwol-menu.view'
-import { PlatformSettingsStore } from '../core/platform-settings'
-
-export class YouwolBannerState {
-    static signedIn$ = new AssetsGateway.Client().getHealthz$().pipe(
-        map(
-            (resp) =>
-                !(resp instanceof HTTPError) &&
-                resp.status == 'assets-gateway ok',
-        ),
-        shareReplay(1),
-    )
-
-    constructor(params = {}) {
-        Object.assign(this, params)
-    }
-
-    setSettings(settingsTxt: string) {
-        const settings = JSON.parse(settingsTxt)
-        PlatformSettingsStore.save(settings)
-    }
-}
+import { VirtualDOM } from '@youwol/flux-view'
+import { Core } from '..'
 
 /**
  * The YouWol top banner
@@ -36,22 +10,16 @@ export class YouwolBannerState {
  * *    a burger menu with common actions ([[BurgerMenu]])
  *
  */
-export class YouwolBannerView implements VirtualDOM {
-    static ClassSelector = 'youwol-banner-view'
-
-    public readonly class = `w-100 position-relative fv-text-primary justify-content-between align-self-center  border-bottom ${YouwolBannerView.ClassSelector}`
+export class TopBannerView implements VirtualDOM {
+    static ClassSelector = 'top-banner-view'
+    static baseClass = `w-100 position-relative fv-bg-background d-flex fv-text-primary justify-content-between align-self-center  border-bottom ${TopBannerView.ClassSelector}`
+    public readonly class: string
     public readonly style = {
         minHeight: '50px',
         display: 'd-flex',
     }
     public readonly children: Array<VirtualDOM>
-
-    public readonly badgesView?: VirtualDOM
-    public readonly customActionsView: VirtualDOM = {}
-    public readonly userMenuView?: VirtualDOM
-    public readonly youwolMenuView?: VirtualDOM
-
-    public readonly state: YouwolBannerState
+    public readonly innerView: VirtualDOM = {}
 
     /**
      * @params params Parameters
@@ -60,67 +28,21 @@ export class YouwolBannerView implements VirtualDOM {
      * @param params.userMenuView definition of the user's menu
      * @param params.youwolMenuView definition of the youwol’s menu
      */
-    constructor(params: {
-        state: YouwolBannerState
-        badgesView?: VirtualDOM
-        customActionsView?: VirtualDOM
-        userMenuView?: VirtualDOM
-        youwolMenuView?: VirtualDOM
-    }) {
+    constructor(params: { innerView?: VirtualDOM }) {
         Object.assign(this, params)
-        const instanceId = ChildApplicationAPI.getAppInstanceId()
-        const youwolOS = ChildApplicationAPI.getOsInstance()
+        const instanceId = Core.ChildApplicationAPI.getAppInstanceId()
+        const youwolOS = Core.ChildApplicationAPI.getOsInstance()
 
-        if (instanceId && isPlatformInstance(youwolOS)) {
+        if (instanceId && Core.isPlatformInstance(youwolOS)) {
             youwolOS.setTopBannerViews(instanceId, {
-                actionsView: this.customActionsView,
-                youwolMenuView: this.youwolMenuView,
-                userMenuView: this.userMenuView,
+                actionsView: this.innerView,
+                youwolMenuView: {},
+                userMenuView: {},
             })
-            this.class += ' d-none'
+            this.class = 'd-none'
             return
         }
-        this.class += ' d-flex'
-        this.children = [
-            this.youwolMenuView
-                ? new YouwolMenuView({
-                      badgesView: this.badgesView,
-                      youwolMenuView: this.youwolMenuView,
-                  })
-                : {},
-            this.customActionsView,
-            this.userMenuView
-                ? child$(YouwolBannerState.signedIn$, (result) => {
-                      return result
-                          ? new UserMenuView({
-                                state: this.state,
-                                contentView: this.userMenuView,
-                            })
-                          : new LoginView()
-                  })
-                : {},
-        ]
-    }
-}
-
-export class LoginView implements VirtualDOM {
-    static ClassSelector = 'login-view'
-    class = `${LoginView.ClassSelector}`
-    children = [
-        new ButtonView('login', 'mx-2 fv-text-primary'),
-        new ButtonView('register', 'mx-2 fv-text-primary'),
-    ]
-    style = { maxWidth: '250px' }
-}
-
-export class ButtonView extends Button.View {
-    class = 'fv-btn fv-bg-secondary-alt fv-hover-bg-secondary'
-
-    constructor(name: string, withClass = '') {
-        super({
-            state: new Button.State(),
-            contentView: () => ({ innerText: name }),
-        })
-        this.class = `${this.class} ${withClass}`
+        this.class = TopBannerView.baseClass
+        this.children = [params.innerView]
     }
 }

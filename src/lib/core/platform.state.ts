@@ -1,7 +1,6 @@
 import { VirtualDOM } from '@youwol/flux-view'
 import { BehaviorSubject, Observable, of, Subject } from 'rxjs'
 import { filter, map, take, tap } from 'rxjs/operators'
-import { YouwolBannerState } from '../top-banner'
 import { getExeUrl, PlatformSettingsStore } from './platform-settings'
 import { PlatformEvent } from './platform.events'
 import { RunningApp } from './running-app.view'
@@ -92,8 +91,6 @@ export function isPlatformInstance(p: IPlatformHandler): p is PlatformState {
 
 export class PlatformState implements IPlatformHandler {
     public readonly type = 'PlatformState'
-
-    public readonly topBannerState = new YouwolBannerState()
 
     public readonly runningApplication$ = new BehaviorSubject<RunningApp>(
         undefined,
